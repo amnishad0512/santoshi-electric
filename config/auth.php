@@ -15,6 +15,7 @@ return [
 
     'defaults' => [
         'guard' => 'web',
+        'driver' => 'passport',
         'passwords' => 'users',
     ],
 
