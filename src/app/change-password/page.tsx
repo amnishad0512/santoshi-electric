@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,10 +32,10 @@ const changePasswordSchema = z.object({
 type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
 
 const ChangePasswordPage = () => {
-  const searchParams = useSearchParams();
-  const type = searchParams.get('type');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const searchParams = useSearchParams();
+  const [type, setType] = useState('');
   const router = useRouter();
   const {
     register,
@@ -56,6 +56,15 @@ const ChangePasswordPage = () => {
       toast.error(error.response?.data?.message || 'Password reset request failed. Please try again.');
     }
   };
+
+
+
+  useEffect(() => {
+    const typeParam = searchParams.get('type');
+    if (typeParam) {
+      setType(typeParam);
+    }
+  }, [searchParams]);
 
   return (
     <Suspense fallback={<div>Loading...</div>}>

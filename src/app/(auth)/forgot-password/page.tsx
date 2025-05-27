@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
     try {
-      // await authService.forgotPassword(data);
+      await authService.forgotPassword(data);
       toast.success('Password reset link has been sent to your phone number.');
       router.push(`/change-password?type=forget`);
     } catch (error: any) {
