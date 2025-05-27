@@ -120,6 +120,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'phone_number' => 'nullable|digits:10',
         ]);
+
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
@@ -127,10 +128,10 @@ class AuthController extends Controller
                 'data' => [],
             ], 422);
         }
-        try {
 
+        try {
             if ($request->phone_number) {
-                $user = User::select('email')->where('phone_number', $request->phone_number)->first();
+                $user = User::where('phone_number', $request->phone_number)->first();
             }
 
             if (!$user) {
@@ -142,18 +143,12 @@ class AuthController extends Controller
             }
 
             $otp = rand(100000, 999999);
+            $otpExpiry = now()->addMinutes(10);
 
-            // Store OTP in cache (valid 10 minutes)
-            if ($request->phone_number) {
-                $cacheKeyPhone = 'otp_' . $request->phone_number;
-                Cache::put($cacheKeyPhone, $otp, now()->addMinutes(10));
-            }
-
-            // Store for email (if provided)
-            if ($user->email) {
-                $cacheKeyEmail = 'otp_' . $user->email;
-                Cache::put($cacheKeyEmail, $otp, now()->addMinutes(10));
-            }
+            // Save OTP and expiry in user table
+            $user->otp = $otp;
+            $user->otp_expires_at = $otpExpiry;
+            $user->save();
 
             // Send SMS (if phone exists and you have SMS service)
             if ($request->phone_number) {
@@ -163,8 +158,7 @@ class AuthController extends Controller
 
             // Send email if email provided
             if ($user->email) {
-                Mail::to($request->email)->send(new SendOtpMail($otp));
-
+                Mail::to($user->email)->send(new SendOtpMail($otp));
             }
 
             return response()->json([
@@ -180,4 +174,49 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    public function verifyOtpAndResetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'otp' => 'required|digits:6',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first(),
+                'data' => [],
+            ], 422);
+        }
+
+        // Find user by OTP and check expiry
+        $user = User::where('otp', $request->otp)
+            ->where('otp_expires_at', '>', now())
+            ->first();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid or expired OTP',
+                'data' => [],
+            ], 400);
+        }
+
+        // Update password
+        $user->password = Hash::make($request->password);
+
+        // Clear OTP after use
+        $user->otp = null;
+        $user->otp_expires_at = null;
+
+        $user->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Password has been reset successfully',
+            'data' => [],
+        ], 200);
+    }
+
 }
