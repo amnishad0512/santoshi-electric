@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SendOtpMail;
 
 class AuthController extends Controller
 {
@@ -62,7 +65,7 @@ class AuthController extends Controller
             ], 401);
         }
     }
-    
+
 
     public function Login(Request $request)
     {
@@ -98,7 +101,8 @@ class AuthController extends Controller
                 'status' => 'success',
                 'message' => 'Login successful',
                 'data' => [
-                    'token' => $token
+                    'token' => $token,
+                    'user' => $user,
                 ]
             ], 200);
         } catch (\Exception $e) {
@@ -108,6 +112,72 @@ class AuthController extends Controller
                 'message' => $e->getMessage(),
                 'data' => [],
             ], 401);
+        }
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'phone_number' => 'nullable|digits:10',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first(),
+                'data' => [],
+            ], 422);
+        }
+        try {
+
+            if ($request->phone_number) {
+                $user = User::select('email')->where('phone_number', $request->phone_number)->first();
+            }
+
+            if (!$user) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No user found with the provided details',
+                    'data' => [],
+                ], 404);
+            }
+
+            $otp = rand(100000, 999999);
+
+            // Store OTP in cache (valid 10 minutes)
+            if ($request->phone_number) {
+                $cacheKeyPhone = 'otp_' . $request->phone_number;
+                Cache::put($cacheKeyPhone, $otp, now()->addMinutes(10));
+            }
+
+            // Store for email (if provided)
+            if ($user->email) {
+                $cacheKeyEmail = 'otp_' . $user->email;
+                Cache::put($cacheKeyEmail, $otp, now()->addMinutes(10));
+            }
+
+            // Send SMS (if phone exists and you have SMS service)
+            if ($request->phone_number) {
+                // $this->sendSmsOtp($request->phone_number, $otp);
+                \Log::info("OTP for {$request->phone_number} is {$otp}");
+            }
+
+            // Send email if email provided
+            if ($user->email) {
+                Mail::to($request->email)->send(new SendOtpMail($otp));
+
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'OTP sent successfully',
+                'data' => [],
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+                'data' => [],
+            ], 500);
         }
     }
 }
