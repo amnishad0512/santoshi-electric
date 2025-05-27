@@ -1,4 +1,6 @@
 import api from '@/lib/axios';
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
 
 export interface LoginData {
   phone_number: string;
@@ -14,11 +16,18 @@ export interface SignupData {
   status: number;
 }
 
-export interface ForgotPasswordData {
-  phone_number: string;
-}
+  export interface ForgotPasswordData {
+    phone_number: string;
+  }
+
+  export interface ChangePasswordData {
+    password: string;
+    confirm_password: string;
+    otp?: string;
+  }
 
 export interface AuthResponse {
+  data: any;
   token: string;
   refresh_token: string;
   user: {
@@ -31,7 +40,7 @@ export interface AuthResponse {
 
 class AuthService {
   async login(data: LoginData) {
-    const response = await api.post<AuthResponse>('/auth/login', data);
+    const response = await api.post<AuthResponse>('/login', data);
     const {token, refresh_token, user} = response.data;
     if (token) {
       localStorage.setItem('auth_token', token);
@@ -42,32 +51,33 @@ class AuthService {
   }
 
   async signup(data: SignupData) {
-    const response = await api.post<AuthResponse>('/auth/signup', data);
+    const response = await api.post<AuthResponse>('/register', data);
     return response.data;
   }
 
   async forgotPassword(data: ForgotPasswordData) {
-    const response = await api.post('/auth/forgot-password', data);
+    const response = await api.post('/forgot-password', data);
     return response.data;
   }
 
-  async resetPassword(token: string, password: string) {
-    const response = await api.post('/auth/reset-password', {
-      token,
-      password,
-    });
+  async changePassword(data: ChangePasswordData) {
+    const response = await api.post('/change-password', data);
     return response.data;
   }
 
   async logout() {
     try {
       await api.post('/auth/logout');
-    } finally {
+      Cookies.remove('token');
       localStorage.removeItem('auth_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout failed:', error);
     }
   }
+
 
   getCurrentUser() {
     const userStr = localStorage.getItem('user');
@@ -78,7 +88,7 @@ class AuthService {
   }
 
   isAuthenticated() {
-    return !!localStorage.getItem('auth_token');
+    return !!Cookies.get('token');
   }
 }
 

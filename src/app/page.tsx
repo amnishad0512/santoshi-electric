@@ -1,103 +1,141 @@
+'use client';
+
 import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
+      {/* Hero Section */}
+      <section className="py-20">
+        <div className="container mx-auto text-center">
+          <h1 className="text-5xl font-bold mb-4">Welcome to Santoshi Electric</h1>
+          <p className="text-xl mb-8">Discover amazing deals and new collections on electronics</p>
+          <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full transition duration-300">
+            Shop Now
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </section>
+
+      {/* Discounts and Deals */}
+      <section className="py-16">
+        <div className="container mx-auto">
+          <h2 className="text-4xl font-bold text-center mb-12">Discounts & Deals</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+              <Image src="https://source.unsplash.com/300x200/?electronics" alt="Deal 1" width={300} height={200} className="rounded-lg" />
+              <h3 className="text-2xl font-semibold mt-4">50% Off on Electronics</h3>
+              <p className="mt-2 text-gray-300">Grab the best deals on top electronics like TVs, laptops, and more.</p>
+            </div>
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+              <Image src="https://source.unsplash.com/300x200/?gadgets" alt="Deal 2" width={300} height={200} className="rounded-lg" />
+              <h3 className="text-2xl font-semibold mt-4">Buy 1 Get 1 Free</h3>
+              <p className="mt-2 text-gray-300">Exclusive offer on select mobile phones and accessories.</p>
+            </div>
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+              <Image src="https://source.unsplash.com/300x200/?appliances" alt="Deal 3" width={300} height={200} className="rounded-lg" />
+              <h3 className="text-2xl font-semibold mt-4">Up to 30% Off on Home Appliances</h3>
+              <p className="mt-2 text-gray-300">Upgrade your home with the latest appliances at discounted prices.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* New Collections */}
+      <section className="py-16 bg-gray-900">
+        <div className="container mx-auto">
+          <h2 className="text-4xl font-bold text-center mb-12">New Collections</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+              <Image src="https://source.unsplash.com/300x200/?summer,collection" alt="Collection 1" width={300} height={200} className="rounded-lg" />
+              <h3 className="text-2xl font-semibold mt-4">Summer Collection</h3>
+              <p className="mt-2 text-gray-300">Explore our latest summer collection of cool gadgets and devices.</p>
+            </div>
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+              <Image src="https://source.unsplash.com/300x200/?smart,home" alt="Collection 2" width={300} height={200} className="rounded-lg" />
+              <h3 className="text-2xl font-semibold mt-4">Smart Home Devices</h3>
+              <p className="mt-2 text-gray-300">Make your home smarter with our new range of smart home devices.</p>
+            </div>
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+              <Image src="https://source.unsplash.com/300x200/?gaming,gear" alt="Collection 3" width={300} height={200} className="rounded-lg" />
+              <h3 className="text-2xl font-semibold mt-4">Gaming Gear</h3>
+              <p className="mt-2 text-gray-300">Level up your gaming experience with our latest gaming gear collection.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Electronics Categories */}
+      <section className="py-16">
+        <div className="container mx-auto">
+          <h2 className="text-4xl font-bold text-center mb-12">Explore Our Electronics</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+              <Image src="https://source.unsplash.com/300x200/?tv" alt="TV" width={300} height={200} className="rounded-lg" />
+              <h3 className="text-2xl font-semibold mt-4">TV</h3>
+              <p className="mt-2 text-gray-300">Discover our range of smart and LED TVs with stunning visuals.</p>
+            </div>
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+              <Image src="https://source.unsplash.com/300x200/?cooler" alt="Cooler" width={300} height={200} className="rounded-lg" />
+              <h3 className="text-2xl font-semibold mt-4">Cooler</h3>
+              <p className="mt-2 text-gray-300">Stay cool with our efficient coolers.</p>
+            </div>
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+              <Image src="https://source.unsplash.com/300x200/?fridge" alt="Fridge" width={300} height={200} className="rounded-lg" />
+              <h3 className="text-2xl font-semibold mt-4">Fridge</h3>
+              <p className="mt-2 text-gray-300">Keep your food fresh with our energy-efficient refrigerators.</p>
+            </div>
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+              <Image src="https://source.unsplash.com/300x200/?washing-machine" alt="Washing Machine" width={300} height={200} className="rounded-lg" />
+              <h3 className="text-2xl font-semibold mt-4">Washing Machine</h3>
+              <p className="mt-2 text-gray-300">Discover our range of washing machines for effortless laundry.</p>
+            </div>
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+              <Image src="https://source.unsplash.com/300x200/?lights" alt="Lights" width={300} height={200} className="rounded-lg" />
+              <h3 className="text-2xl font-semibold mt-4">Lights (LED, Tube)</h3>
+              <p className="mt-2 text-gray-300">Brighten your home with our LED and tube lights.</p>
+            </div>
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+              <Image src="https://source.unsplash.com/300x200/?ceiling-fan" alt="Ceiling Fan" width={300} height={200} className="rounded-lg" />
+              <h3 className="text-2xl font-semibold mt-4">Ceiling Fan</h3>
+              <p className="mt-2 text-gray-300">Cool your space with our stylish ceiling fans.</p>
+            </div>
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+              <Image src="https://source.unsplash.com/300x200/?home-theatre" alt="Home Theatre" width={300} height={200} className="rounded-lg" />
+              <h3 className="text-2xl font-semibold mt-4">Home Theatre</h3>
+              <p className="mt-2 text-gray-300">Experience cinema-quality sound with our home theatres.</p>
+            </div>
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+              <Image src="https://source.unsplash.com/300x200/?speaker" alt="Speaker" width={300} height={200} className="rounded-lg" />
+              <h3 className="text-2xl font-semibold mt-4">Speaker</h3>
+              <p className="mt-2 text-gray-300">Enjoy high-quality sound with our speakers.</p>
+            </div>
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+              <Image src="https://source.unsplash.com/300x200/?induction" alt="Induction" width={300} height={200} className="rounded-lg" />
+              <h3 className="text-2xl font-semibold mt-4">Induction</h3>
+              <p className="mt-2 text-gray-300">Cook efficiently with our induction cooktops.</p>
+            </div>
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+              <Image src="https://source.unsplash.com/300x200/?exhaust-fan" alt="Exhaust Fan" width={300} height={200} className="rounded-lg" />
+              <h3 className="text-2xl font-semibold mt-4">Exhaust Fan</h3>
+              <p className="mt-2 text-gray-300">Ventilate your space with our exhaust fans.</p>
+            </div>
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+              <Image src="https://source.unsplash.com/300x200/?wire" alt="Wire" width={300} height={200} className="rounded-lg" />
+              <h3 className="text-2xl font-semibold mt-4">Wire</h3>
+              <p className="mt-2 text-gray-300">Find durable wires for all your electrical needs.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Enhanced Visuals */}
+      <style jsx>{`
+        .hero-section {
+          background-image: url('https://source.unsplash.com/1600x900/?electronics');
+          background-size: cover;
+          background-position: center;
+        }
+      `}</style>
     </div>
   );
 }

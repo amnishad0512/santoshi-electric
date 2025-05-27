@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import authService from '@/services/auth.service';
 import { toast } from 'react-hot-toast';
+import Cookies from 'js-cookie';
 
 const loginSchema = z.object({
   phone_number: z
@@ -33,6 +34,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
 
   const {
     register,
@@ -52,9 +55,27 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await authService.login(data);
+      const response = await authService.login(data);
+      console.log(response);
       toast.success('Login successful!');
       router.push('/');
+
+      // Save the token as a cookie
+      Cookies.set('token', response.data.token, { path: '/', secure: true, sameSite: 'Strict' });
+
+      // Save the user data in local storage
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+
+      // Update state
+      setIsAuthenticated(true);
+      setUser(response.data.user);
+
+      // Redirect based on role
+      if (response.data.user.role === 1) {
+        router.push('/dashboard/admin');
+      } else if (response.data.user.role === 2) {
+        router.push('/dashboard/user');
+      }
     } catch (error: any) {
       console.error('Login failed:', error);
       toast.error(error.response?.data?.message || 'Login failed. Please try again.');

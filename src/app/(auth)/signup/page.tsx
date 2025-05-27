@@ -44,12 +44,12 @@ const signupSchema = z.object({
     .regex(/[0-9]/, 'Password must contain at least one number')
     .regex(/[^A-Za-z0-9\s]/, 'Password must contain at least one special character')
     .regex(/^[^\s]+$/, 'Password must not contain any spaces'),
-  confirm_password: z
+  password_confirmation: z
     .string()
     .min(1, 'Please confirm your password'),
-}).refine((data) => data.password === data.confirm_password, {
+}).refine((data) => data.password === data.password_confirmation, {
   message: "Passwords don't match",
-  path: ["confirm_password"],
+  path: ["password_confirmation"],
 });
 
 type SignupFormData = z.infer<typeof signupSchema>;
@@ -75,11 +75,11 @@ export default function SignupPage() {
     dirtyFields.email &&
     dirtyFields.phone_number &&
     dirtyFields.password &&
-    dirtyFields.confirm_password;
+    dirtyFields.password_confirmation;
 
   const onSubmit = async (data: SignupFormData) => {
-    const { name, email, phone_number, password, confirm_password } = data;
-    const payload = { name, email, phone_number, password, role: 2, status: 1 }
+    const { name, email, phone_number, password, password_confirmation } = data;
+    const payload = { name, email, phone_number, password, password_confirmation, role: 2, status: 1 }
     try {
       await authService.signup(payload);
       toast.success('Account created successfully!');
@@ -244,16 +244,16 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label htmlFor="confirm_password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700">
                 Confirm Password <span className="text-red-500">*</span>
               </label>
               <div className="mt-1 relative">
                 <input
-                  id="confirm_password"
+                  id="password_confirmation"
                   type={showConfirmPassword ? "text" : "password"}
-                  {...register('confirm_password')}
-                  className={`appearance-none rounded-md relative block w-full px-3 py-2 pr-10 border ${errors.confirm_password ? 'border-red-500' : dirtyFields.confirm_password && !errors.confirm_password ? 'border-green-500' : 'border-gray-300'
-                    } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 ${errors.confirm_password ? 'focus:ring-red-200' : 'focus:ring-blue-500'
+                  {...register('password_confirmation')}
+                  className={`appearance-none rounded-md relative block w-full px-3 py-2 pr-10 border ${errors.password_confirmation ? 'border-red-500' : dirtyFields.password_confirmation && !errors.password_confirmation ? 'border-green-500' : 'border-gray-300'
+                    } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 ${errors.password_confirmation ? 'focus:ring-red-200' : 'focus:ring-blue-500'
                     } focus:border-blue-500 sm:text-sm`}
                   placeholder="Confirm your password"
                 />
@@ -275,8 +275,8 @@ export default function SignupPage() {
                   )}
                 </button>
               </div>
-              {errors.confirm_password && (
-                <p className="mt-1 text-sm text-red-500">{errors.confirm_password.message}</p>
+              {errors.password_confirmation && (
+                <p className="mt-1 text-sm text-red-500">{errors.password_confirmation.message}</p>
               )}
             </div>
           </div>

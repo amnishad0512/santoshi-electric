@@ -1,5 +1,4 @@
 import React from 'react';
-
 const ProductsPage = () => {
   return (
     <div style={{ padding: '20px' }}>

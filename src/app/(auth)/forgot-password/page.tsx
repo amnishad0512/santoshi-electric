@@ -45,9 +45,9 @@ export default function ForgotPasswordPage() {
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
     try {
-      await authService.forgotPassword(data);
+      // await authService.forgotPassword(data);
       toast.success('Password reset link has been sent to your phone number.');
-      router.push('/login?reset=requested');
+      router.push(`/change-password?type=forget`);
     } catch (error: any) {
       console.error('Password reset request failed:', error);
       toast.error(error.response?.data?.message || 'Password reset request failed. Please try again.');
@@ -99,7 +99,7 @@ export default function ForgotPasswordPage() {
               disabled={isSubmitting || !isFormValid}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Sending...' : 'Send Reset Link'}
+              {isSubmitting ? 'Sending...' : 'Send Request'}
             </button>
           </div>
 
