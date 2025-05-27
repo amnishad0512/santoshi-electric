@@ -16,15 +16,15 @@ export interface SignupData {
   status: number;
 }
 
-  export interface ForgotPasswordData {
-    phone_number: string;
-  }
+export interface ForgotPasswordData {
+  phone_number: string;
+}
 
-  export interface ChangePasswordData {
-    password: string;
-    confirm_password: string;
-    otp?: string;
-  }
+export interface ChangePasswordData {
+  password: string;
+  password_confirmation: string;
+  otp?: string;
+}
 
 export interface AuthResponse {
   data: any;
@@ -41,7 +41,7 @@ export interface AuthResponse {
 class AuthService {
   async login(data: LoginData) {
     const response = await api.post<AuthResponse>('/login', data);
-    const {token, refresh_token, user} = response.data;
+    const { token, refresh_token, user } = response.data;
     if (token) {
       localStorage.setItem('auth_token', token);
       localStorage.setItem('refresh_token', refresh_token);
