@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance
 const api = axios.create({
-  baseURL: 'https://api.santoshielectric.in/api',
+  baseURL: 'https://santoshielectric.in/api/api',
   headers: {
     'Content-Type': 'application/json',
   },
