@@ -61,7 +61,7 @@ class AuthService {
   }
 
   async changePassword(data: ChangePasswordData) {
-    const response = await api.post('/change-password', data);
+    const response = await api.post('/verify-otp', data);
     return response.data;
   }
 
