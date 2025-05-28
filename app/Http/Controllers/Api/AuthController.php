@@ -69,16 +69,16 @@ class AuthController extends Controller
 
     public function Login(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'phone_number' => 'required|digits:10',
+         $validator = Validator::make($request->all(), [
+            'phone_number' => 'required|string:10',
             'password' => 'required|string',
         ]);
 
         if ($validator->fails()) {
-
             return response()->json([
                 'status' => 'error',
                 'message' => $validator->errors()->first(),
+                'data' => [], // keeping consistent structure if your API always returns 'data'
             ], 422);
         }
 
@@ -114,6 +114,7 @@ class AuthController extends Controller
             ], 401);
         }
     }
+
 
     public function forgotPassword(Request $request)
     {
@@ -218,5 +219,4 @@ class AuthController extends Controller
             'data' => [],
         ], 200);
     }
-
 }
