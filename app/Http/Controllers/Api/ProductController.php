@@ -29,6 +29,7 @@ class ProductController extends Controller
             'price'             => 'required|numeric',
             'discount'          => 'required|numeric',
             'seller_id'         => 'required|exists:users,id',
+            'stock_id'         => 'required',
             'is_available'      => 'boolean',
             'rating'            => 'required|numeric|min:0|max:5',
         ]);
@@ -79,6 +80,7 @@ class ProductController extends Controller
             'price'             => 'sometimes|numeric',
             'discount'          => 'nullable|numeric',
             'seller_id'         => 'sometimes|exists:users,id',
+            'stock_id'         => 'required',
             'is_available'      => 'boolean',
             'rating'            => 'nullable|numeric|min:0|max:5',
         ]);
