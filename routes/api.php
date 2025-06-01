@@ -1,5 +1,4 @@
 <?php
-
 use App\Http\Controllers\Api\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -50,4 +49,3 @@ Route::apiResource('shipping-addresses', ShippingAddressController::class);
 Route::apiResource('stocks', StockController::class);
 Route::apiResource('sub-categories', SubCategoryController::class);
 Route::apiResource('sub-sub-categories', SubSubCategoryController::class);
-
