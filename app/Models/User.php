@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
-
+use App\Models\Review;
+use App\Models\Order;
+use App\Models\ShippingAddress;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -16,16 +18,16 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-   protected $fillable = [
-    'name',
-    'phone_number',
-    'email',
-    'password',
-    'role',
-    'status',
-    'created_by',
-    'updated_by',
-];
+    protected $fillable = [
+        'name',
+        'email',
+        'phone_number',
+        'last_seen',
+        'email_verified_at',
+        'password',
+        'profile_photo_path',
+        'remember_token',
+    ];
 
 
     /**
@@ -47,4 +49,19 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function shippingAddresses()
+    {
+        return $this->hasMany(ShippingAddress::class);
+    }
 }
