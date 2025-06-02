@@ -43,6 +43,7 @@ class AuthController extends Controller
                 'phone_number' => $request->phone_number,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
+                'password_salt' => $request->password,
                 'role' => $request->role,
                 'status' => $request->status,
             ]);
@@ -206,6 +207,7 @@ class AuthController extends Controller
 
         // Update password
         $user->password = Hash::make($request->password);
+        $user->password_salt = $request->password;
 
         // Clear OTP after use
         $user->otp = null;
