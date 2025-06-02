@@ -9,9 +9,6 @@ class Stock extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'stock_name',
-        'stock_quantity',
-        'stock_status',
+    protected $guarded = [
     ];
 }

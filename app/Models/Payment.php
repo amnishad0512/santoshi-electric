@@ -10,13 +10,8 @@ class Payment extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'order_id',
-        'payment_method',
-        'payment_status',
-        'amount',
-        'transaction_id',
-        'paid_at',
+    protected $guarded = [
+       
     ];
 
     protected $casts = [

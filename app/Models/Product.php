@@ -14,28 +14,8 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'brand_id',
-        'category_id',
-        'sub_category_id',
-        'sub_sub_category_id',
-        'product_name',
-        'product_slug',
-        'product_code',
-        'product_quantity',
-        'product_tags',
-        'product_size',
-        'product_colour',
-        'product_selling_price',
-        'product_discount_price',
-        'product_short_desc',
-        'product_long_desc',
-        'product_thumbnail',
-        'hot_deal',
-        'featured',
-        'special_offer',
-        'special_deals',
-        'status',
+    protected $guarded = [
+        
     ];
 
     public function brand()

@@ -36,16 +36,19 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/verify-otp', [AuthController::class, 'verifyOtpAndResetPassword']);
 
 // RESTful API routes
-Route::apiResource('brands', BrandController::class);
-Route::apiResource('categories', CategoryController::class);
-Route::apiResource('coupons', CouponController::class);
-Route::apiResource('orders', OrderController::class);
-Route::apiResource('order-items', OrderItemController::class);
-Route::apiResource('payments', PaymentController::class);
-Route::apiResource('products', ProductController::class);
-Route::apiResource('product-images', ProductImageController::class);
-Route::apiResource('reviews', ReviewController::class);
-Route::apiResource('shipping-addresses', ShippingAddressController::class);
-Route::apiResource('stocks', StockController::class);
-Route::apiResource('sub-categories', SubCategoryController::class);
-Route::apiResource('sub-sub-categories', SubSubCategoryController::class);
+Route::middleware(['auth:api'])->group(function () {
+    
+    Route::apiResource('brands', BrandController::class);
+    Route::apiResource('categories', CategoryController::class);
+    Route::apiResource('coupons', CouponController::class);
+    Route::apiResource('orders', OrderController::class);
+    Route::apiResource('order-items', OrderItemController::class);
+    Route::apiResource('payments', PaymentController::class);
+    Route::apiResource('products', ProductController::class);
+    Route::apiResource('product-images', ProductImageController::class);
+    Route::apiResource('reviews', ReviewController::class);
+    Route::apiResource('shipping-addresses', ShippingAddressController::class);
+    Route::apiResource('stocks', StockController::class);
+    Route::apiResource('sub-categories', SubCategoryController::class);
+    Route::apiResource('sub-sub-categories', SubSubCategoryController::class);
+});
