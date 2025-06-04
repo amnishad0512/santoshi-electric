@@ -37,7 +37,9 @@ Route::post('/verify-otp', [AuthController::class, 'verifyOtpAndResetPassword'])
 
 // RESTful API routes
 Route::middleware(['auth:api'])->group(function () {
-    
+
+});
+
     Route::apiResource('brands', BrandController::class);
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('coupons', CouponController::class);
@@ -51,4 +53,3 @@ Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('stocks', StockController::class);
     Route::apiResource('sub-categories', SubCategoryController::class);
     Route::apiResource('sub-sub-categories', SubSubCategoryController::class);
-});
