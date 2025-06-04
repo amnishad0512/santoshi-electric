@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -10,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import authService from '@/services/auth.service';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
+import ProtectedPage from '@/components/ProtectedPage';
 
 const changePasswordSchema = z.object({
   password: z
@@ -58,6 +58,7 @@ const ChangePasswordPage = () => {
     }
   };
   return (
+    <ProtectedPage allowedRoles={['user']}>
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div>
@@ -183,6 +184,7 @@ const ChangePasswordPage = () => {
           </form>
         </div>
       </div>
+    </ProtectedPage>
   );
 };
 

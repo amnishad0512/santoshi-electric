@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import authService from '@/services/auth.service';
 import { toast } from 'react-hot-toast';
 import Cookies from 'js-cookie';
+import ProtectedPage from '@/components/ProtectedPage';
 
 const loginSchema = z.object({
   phone_number: z
@@ -20,13 +21,6 @@ const loginSchema = z.object({
   password: z
     .string()
     .min(1, 'Password is required')
-    .min(8, 'Password must be at least 8 characters')
-    .max(15, 'Password must not exceed 15 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number')
-    .regex(/[^A-Za-z0-9\s]/, 'Password must contain at least one special character')
-    .regex(/^[^\s]+$/, 'Password must not contain any spaces'),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -58,23 +52,32 @@ export default function LoginPage() {
       const response = await authService.login(data);
       console.log(response);
       toast.success('Login successful!');
-      router.push('/');
 
       // Save the token as a cookie
-      Cookies.set('token', response.data.token, { path: '/', secure: true, sameSite: 'Strict' });
+      Cookies.set('token', response.data.token, { 
+        path: '/', 
+        secure: true, 
+        sameSite: 'Strict' 
+      });
 
-      // Save the user data in local storage
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      // Save the user data in both localStorage and cookies
+      const userData = response.data.user;
+      localStorage.setItem('user', JSON.stringify(userData));
+      Cookies.set('user', JSON.stringify(userData), { 
+        path: '/', 
+        secure: true, 
+        sameSite: 'Strict' 
+      });
 
       // Update state
       setIsAuthenticated(true);
-      setUser(response.data.user);
+      setUser(userData);
 
       // Redirect based on role
-      if (response.data.user.role === 1) {
-        router.push('/dashboard/admin');
-      } else if (response.data.user.role === 2) {
-        router.push('/dashboard/user');
+      if (userData.role === 1) {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/');
       }
     } catch (error: any) {
       console.error('Login failed:', error);
@@ -92,6 +95,7 @@ export default function LoginPage() {
   };
 
   return (
+    <ProtectedPage allowedRoles={['guest']}>
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
@@ -198,5 +202,6 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+    </ProtectedPage>
   );
 } 

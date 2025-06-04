@@ -39,6 +39,34 @@ export interface AuthResponse {
 }
 
 class AuthService {
+  private static instance: AuthService;
+  private authState: boolean | null = null;
+  private userData: any = null;
+
+  private constructor() {}
+
+  static getInstance() {
+    if (!AuthService.instance) {
+      AuthService.instance = new AuthService();
+    }
+    return AuthService.instance;
+  }
+
+  isAuthenticated() {
+    if (this.authState === null) {
+      this.authState = !!Cookies.get('token');
+    }
+    return this.authState;
+  }
+
+  getCurrentUser() {
+    if (this.userData === null) {
+      const userStr = localStorage.getItem('user');
+      this.userData = userStr ? JSON.parse(userStr) : null;
+    }
+    return this.userData;
+  }
+
   async login(data: LoginData) {
     const response = await api.post<AuthResponse>('/login', data);
     const { token, refresh_token, user } = response.data;
@@ -46,8 +74,30 @@ class AuthService {
       localStorage.setItem('auth_token', token);
       localStorage.setItem('refresh_token', refresh_token);
       localStorage.setItem('user', JSON.stringify(user));
+      
+      Cookies.set('token', token, { path: '/', secure: true, sameSite: 'Strict' });
+      Cookies.set('user', JSON.stringify(user), { path: '/', secure: true, sameSite: 'Strict' });
+      
+      this.authState = true;
+      this.userData = user;
     }
     return response.data;
+  }
+
+  async logout() {
+    try {
+      await api.post('/auth/logout');
+      Cookies.remove('token');
+      Cookies.remove('user');
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user');
+      this.authState = false;
+      this.userData = null;
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   }
 
   async signup(data: SignupData) {
@@ -64,32 +114,6 @@ class AuthService {
     const response = await api.post('/verify-otp', data);
     return response.data;
   }
-
-  async logout() {
-    try {
-      await api.post('/auth/logout');
-      Cookies.remove('token');
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user');
-      window.location.href = '/';
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  }
-
-
-  getCurrentUser() {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      return JSON.parse(userStr);
-    }
-    return null;
-  }
-
-  isAuthenticated() {
-    return !!Cookies.get('token');
-  }
 }
 
-export default new AuthService(); 
+export default AuthService.getInstance(); 
