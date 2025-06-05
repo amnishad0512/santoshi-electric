@@ -55,4 +55,4 @@ Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('sub-sub-categories', SubSubCategoryController::class);
 
 // Check status of various entities
-Route::get('/statuses', [App\Http\Controllers\Api\StatusController::class, 'index']);
+Route::get('/status', [App\Http\Controllers\Api\StatusController::class, 'index']);
