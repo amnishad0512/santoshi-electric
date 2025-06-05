@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -12,13 +13,13 @@ class BrandController extends Controller
 {
     public function index()
     {
-        $brand = Brand::select('id', 'brand_name', 'brand_image', 'created_at')
+        $brand = Brand::select('id', 'brand_name', 'brand_image','status', 'created_at')
             ->withCount('products')
             ->get();
-        
+
         return response()->json([
-        'status' => 'success',
-        'data' => $brand
+            'status' => 'success',
+            'data' => $brand
         ], 201);
     }
 
@@ -50,7 +51,94 @@ class BrandController extends Controller
 
     public function show($id)
     {
-        $brand = Brand::with('products')->findOrFail($id);
+        $brand = Brand::withCount('products')->findOrFail($id);
+        if (!$brand) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Brand not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $brand
+        ], 201);
+    }
+
+    // public function BrandIdWithProduct($id)
+    // {
+    //     $products = Product::with(['category' => function ($query) {
+    //         $query->select('id', 'category_name');
+    //     }])->select([
+    //         'id',
+    //         'category_id',
+    //         'product_thumbnail',
+    //         'product_name',
+    //         'product_short_desc',
+    //         'product_selling_price',
+    //         'product_quantity',
+    //         'status',
+    //     ])->where('brand_id', $id)->get();
+
+
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'data' => $products
+    //     ], 200);
+    // }
+
+    public function BrandProducts(Request $request, $id)
+    {
+        // Get skip and limit from query params, set defaults
+        $skip = $request->query('skip', 0);
+        $limit = $request->query('limit', 5);
+
+        // Fetch products for brand_id with pagination (offset + limit)
+        $products = Product::with(['category' => function ($query) {
+            $query->select('id', 'category_name');
+        }])
+        ->select([
+            'id',
+            'category_id',
+            'product_thumbnail',
+            'product_name',
+            'product_short_desc',
+            'product_selling_price',
+            'product_quantity',
+            'status',
+            'brand_id'
+        ])
+        ->where('brand_id', $id)
+        ->skip($skip)
+        ->take($limit)
+        ->get();
+
+        // Map to include category name
+        $data = $products->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'category_name' => $product->category->category_name ?? null,
+                'product_thumbnail' => $product->product_thumbnail,
+                'product_name' => $product->product_name,
+                'product_short_desc' => $product->product_short_desc,
+                'product_selling_price' => $product->product_selling_price,
+                'product_quantity' => $product->product_quantity,
+                'status' => $product->status,
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $data
+        ], 200);
+    }
+
+
+
+
+    public function BrandIdss($id)
+    {
+        $brand = Brand::findOrFail($id);
 
         if (!$brand) {
             return response()->json([
@@ -60,11 +148,13 @@ class BrandController extends Controller
         }
 
         return response()->json([
-        'status' => 'success',
-        'data' => $brand
+            'status' => 'success',
+            'data' => $brand
         ], 201);
-
     }
+
+
+
 
     public function update(Request $request, $id)
     {

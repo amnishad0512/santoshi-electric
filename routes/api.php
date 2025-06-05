@@ -40,7 +40,13 @@ Route::middleware(['auth:api'])->group(function () {
 
 });
 
+    // Route::get('brands',[BrandController::class,'BrandId']);
     Route::apiResource('brands', BrandController::class);
+    // Route::get('brand/{id}/products', [BrandController::class, 'BrandIdWithProduct']);
+    Route::get('brands/{id}/products', [BrandController::class, 'BrandProducts']);
+
+
+
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('coupons', CouponController::class);
     Route::apiResource('orders', OrderController::class);

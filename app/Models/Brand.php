@@ -16,4 +16,23 @@ class Brand extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    public function productCount()
+    {
+        return $this->hasMany(Product::class)->count('id');
+    }
+
+    // public function productDetails()
+    // {
+    //     return $this->hasMany(Product::class)->select([
+    //     'id',
+    //     'brand_id',
+    //     'category_id',
+    //     'product_name',
+    //     'product_short_desc',
+    //     'product_selling_price',
+    //     'product_quantity',
+    //     'status',
+    // ]);
+    // }
 }

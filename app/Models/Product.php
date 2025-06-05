@@ -47,4 +47,18 @@ class Product extends Model
     {
         return $this->hasMany(Review::class);
     }
+
+    public function productDetails()
+    {
+        return $this->hasMany(self::class)->select([
+        'id',
+        'brand_id',
+        'category_id',
+        'product_name',
+        'product_short_desc',
+        'product_selling_price',
+        'product_quantity',
+        'status',
+    ]);
+}
 }
