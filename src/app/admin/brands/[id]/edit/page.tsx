@@ -1,16 +1,18 @@
+import { Metadata } from 'next';
 import BrandEdit from './BrandEdit';
 
-// Remove dynamic configuration since we're using static export
-export const dynamic = 'error';
-export const dynamicParams = false;
+export const metadata: Metadata = {
+  title: 'Edit Brand',
+  description: 'Edit brand details',
+};
 
-export function generateStaticParams() {
-  // Generate a larger range of IDs to cover more possibilities
-  return Array.from({ length: 100 }, (_, i) => ({
-    id: (i + 1).toString(),
-  }));
-}
+// Enable dynamic rendering for this route
+export const dynamic = 'force-dynamic';
 
-export default function Page({ params }: { params: { id: string } }) {
+export default function Page({
+  params,
+}: {
+  params: { id: string };
+}) {
   return <BrandEdit id={params.id} />;
 } 
