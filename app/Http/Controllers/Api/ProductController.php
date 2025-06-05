@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -21,7 +23,6 @@ class ProductController extends Controller
             'sub_category_id' => 'required|exists:sub_categories,id',
             'sub_sub_category_id' => 'required|exists:sub_sub_categories,id',
             'product_name' => 'required|string|max:255',
-            'product_slug' => 'required|string|max:255|unique:products,product_slug,' . ($productId ?? 'NULL') . ',id',
             'product_code' => 'required|string|max:255',
             'product_quantity' => 'required|integer|min:0',
             'product_tags' => 'required|string|max:255',
@@ -31,7 +32,7 @@ class ProductController extends Controller
             'product_discount_price' => 'required|numeric|min:0',
             'product_short_desc' => 'required|string',
             'product_long_desc' => 'required|string',
-            'product_thumbnail' => 'required|string|max:255',
+            'product_thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'hot_deal' => 'required|boolean',
             'featured' => 'required|boolean',
             'special_offer' => 'required|boolean',
@@ -39,7 +40,35 @@ class ProductController extends Controller
             'status' => 'required|boolean',
         ]);
 
-        $product = Product::create($request->all());
+        $save_url = null;
+        if ($request->hasFile('product_thumbnail')) {
+            $imagePath = $request->file('product_thumbnail')->store('products', 'public');
+            $save_url = 'storage/' . $imagePath;
+        }
+
+        $product = Product::create([
+            'brand_id' => $request->brand_id,
+            'category_id' => $request->category_id,
+            'sub_category_id' => $request->sub_category_id,
+            'sub_sub_category_id' => $request->sub_sub_category_id,
+            'product_name' => $request->product_name,
+            'product_slug' => Str::slug($request->product_name),
+            'product_code' => $request->product_code,
+            'product_quantity' => $request->product_quantity,
+            'product_tags' => $request->product_tags,
+            'product_size' => $request->product_size,
+            'product_colour' => $request->product_colour,
+            'product_selling_price' => $request->product_selling_price,
+            'product_discount_price' => $request->product_discount_price,
+            'product_short_desc' => $request->product_short_desc,
+            'product_long_desc' => $request->product_long_desc,
+            'product_thumbnail' => $save_url,
+            'hot_deal' => $request->hot_deal,
+            'featured' => $request->featured,
+            'special_offer' => $request->special_offer,
+            'special_deals' => $request->special_deals,
+            'status' => $request->status,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -72,7 +101,6 @@ class ProductController extends Controller
             'sub_category_id' => 'required|exists:sub_categories,id',
             'sub_sub_category_id' => 'required|exists:sub_sub_categories,id',
             'product_name' => 'required|string|max:255',
-            'product_slug' => 'required|string|max:255|unique:products,product_slug,' . ($productId ?? 'NULL') . ',id',
             'product_code' => 'required|string|max:255',
             'product_quantity' => 'required|integer|min:0',
             'product_tags' => 'required|string|max:255',
@@ -82,7 +110,7 @@ class ProductController extends Controller
             'product_discount_price' => 'required|numeric|min:0',
             'product_short_desc' => 'required|string',
             'product_long_desc' => 'required|string',
-            'product_thumbnail' => 'required|string|max:255',
+            'product_thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'hot_deal' => 'required|boolean',
             'featured' => 'required|boolean',
             'special_offer' => 'required|boolean',
@@ -90,7 +118,42 @@ class ProductController extends Controller
             'status' => 'required|boolean',
         ]);
 
-        $product->update($request->all());
+        $save_url = $product->product_thumbnail;
+        if ($request->hasFile('product_thumbnail')) {
+            if ($product->product_thumbnail) {
+                $oldImagePath = str_replace('storage/', '', $product->product_thumbnail);
+                if (Storage::disk('public')->exists($oldImagePath)) {
+                    Storage::disk('public')->delete($oldImagePath);
+                }
+            }
+
+            $imagePath = $request->file('product_thumbnail')->store('products', 'public');
+            $save_url = 'storage/' . $imagePath;
+        }
+
+        $product->update([
+            'brand_id' => $request->brand_id,
+            'category_id' => $request->category_id,
+            'sub_category_id' => $request->sub_category_id,
+            'sub_sub_category_id' => $request->sub_sub_category_id,
+            'product_name' => $request->product_name,
+            'product_slug' => Str::slug($request->product_name),
+            'product_code' => $request->product_code,
+            'product_quantity' => $request->product_quantity,
+            'product_tags' => $request->product_tags,
+            'product_size' => $request->product_size,
+            'product_colour' => $request->product_colour,
+            'product_selling_price' => $request->product_selling_price,
+            'product_discount_price' => $request->product_discount_price,
+            'product_short_desc' => $request->product_short_desc,
+            'product_long_desc' => $request->product_long_desc,
+            'product_thumbnail' => $save_url,
+            'hot_deal' => $request->hot_deal,
+            'featured' => $request->featured,
+            'special_offer' => $request->special_offer,
+            'special_deals' => $request->special_deals,
+            'status' => $request->status,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -108,6 +171,13 @@ class ProductController extends Controller
                 'success' => false,
                 'message' => 'Product not found'
             ], 404);
+        }
+
+        if ($product->product_thumbnail) {
+            $oldImagePath = str_replace('storage/', '', $product->product_thumbnail);
+            if (Storage::disk('public')->exists($oldImagePath)) {
+                Storage::disk('public')->delete($oldImagePath);
+            }
         }
 
         $product->delete();

@@ -17,8 +17,8 @@ class OrderController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'order_status' => 'nullable|string',
-            'order_total' => 'nullable|numeric|min:0',
+            'order_status' => 'required|string',
+            'order_total' => 'required|numeric|min:0',
         ]);
 
         $order = Order::create([
@@ -61,8 +61,8 @@ class OrderController extends Controller
 
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'order_status' => 'nullable|string',
-            'order_total' => 'nullable|numeric|min:0',
+            'order_status' => 'required|string',
+            'order_total' => 'required|numeric|min:0',
         ]);
 
         $order->update($request->only(['user_id', 'order_status', 'order_total']));

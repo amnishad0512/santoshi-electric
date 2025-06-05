@@ -18,11 +18,13 @@ class CategoryController extends Controller
     {
          $request->validate([
             'category_name' => 'required|string|max:255',
-            'category_slug' => 'required|string|max:255|unique:categories,category_slug',
-            'category_icon' => 'nullable|string|max:255',
         ]);
 
-        $category = Category::create($request->all());
+        $category = Category::create([
+            'category_name' => $request->category_name,
+            'category_slug' => Str::slug($request->category_name),
+            'category_icon' => $request->category_icon,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -58,11 +60,13 @@ class CategoryController extends Controller
 
          $request->validate([
             'category_name' => 'required|string|max:255',
-            'category_slug' => 'required|string|max:255|unique:categories,category_slug',
-            'category_icon' => 'nullable|string|max:255',
         ]);
 
-        $category->update($request->all());
+        $category->update([
+            'category_name' => $request->category_name,
+            'category_slug' => Str::slug($request->category_name),
+            'category_icon' => $request->category_icon,
+        ]);
 
         return response()->json([
             'success' => true,

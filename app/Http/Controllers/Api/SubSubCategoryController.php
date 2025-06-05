@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\SubSubCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class SubSubCategoryController extends Controller
 {
@@ -19,10 +20,14 @@ class SubSubCategoryController extends Controller
             'category_id'            => 'required|exists:categories,id',
             'sub_category_id'        => 'required|exists:sub_categories,id',
             'sub_sub_category_name'  => 'required|string|max:255',
-            'sub_sub_category_slug'  => 'required|string|max:255|unique:sub_sub_categories,sub_sub_category_slug',
         ]);
 
-        $subSubCategory = SubSubCategory::create($request->all());
+        $subSubCategory = SubSubCategory::create([
+            'category_id' => $request->category_id,
+            'sub_category_id' => $request->sub_category_id,
+            'sub_sub_category_name' => $request->sub_sub_category_name,
+            'sub_sub_category_slug' => Str::slug($request->sub_sub_category_name),
+        ]);
 
         return response()->json([
             'success' => true,
@@ -53,13 +58,14 @@ class SubSubCategoryController extends Controller
             'category_id'            => 'required|exists:categories,id',
             'sub_category_id'        => 'required|exists:sub_categories,id',
             'sub_sub_category_name'  => 'required|string|max:255',
-            'sub_sub_category_slug'  => 'required|string|max:255|unique:sub_sub_categories,sub_sub_category_slug,' . $subSubCategory->id,
         ]);
 
-        $subSubCategory->update($request->only([
-            'sub_sub_category_name',
-            'sub_sub_category_slug',
-        ]));
+        $subSubCategory->update([
+            'category_id' => $request->category_id,
+            'sub_category_id' => $request->sub_category_id,
+            'sub_sub_category_name' => $request->sub_sub_category_name,
+            'sub_sub_category_slug' => Str::slug($request->sub_sub_category_name),
+        ]);
 
         return response()->json([
             'success' => true,

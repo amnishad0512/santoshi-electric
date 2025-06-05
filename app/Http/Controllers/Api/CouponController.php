@@ -18,7 +18,7 @@ class CouponController extends Controller
         $request->validate([
             'coupon_name' => 'required|string|max:255',
             'coupon_discount' => 'required|numeric|min:0|max:100',
-            'coupon_validity' => 'nullable|date',
+            'coupon_validity' => 'required|date',
             'coupon_status' => 'boolean',
         ]);
 
@@ -59,7 +59,7 @@ class CouponController extends Controller
         $request->validate([
             'coupon_name' => 'sometimes|required|string|max:255',
             'coupon_discount' => 'sometimes|required|numeric|min:0|max:100',
-            'coupon_validity' => 'nullable|date',
+            'coupon_validity' => 'required|date',
             'coupon_status' => 'boolean',
         ]);
 

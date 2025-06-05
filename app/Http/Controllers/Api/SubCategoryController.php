@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\SubCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class SubCategoryController extends Controller
 {
@@ -18,10 +19,13 @@ class SubCategoryController extends Controller
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'subcategory_name' => 'required|string|max:255',
-            'subcategory_slug' => 'required|string|max:255|unique:sub_categories,subcategory_slug',
         ]);
 
-        $subCategory = SubCategory::create($request->all());
+        $subCategory = SubCategory::create([
+            'category_id' => $request->category_id,
+            'subcategory_name' => $request->subcategory_name,
+            'subcategory_slug' => Str::slug($request->subcategory_name),
+        ]);
 
         return response()->json([
             'success' => true,
@@ -51,11 +55,14 @@ class SubCategoryController extends Controller
         $request->validate([
             'category_id'       => 'required|exists:categories,id',
             'subcategory_name'  => 'required|string|max:255',
-            'subcategory_slug'  => 'required|string|max:255|unique:sub_categories,subcategory_slug,' . $subCategory->id,
         ]);
 
-        $subCategory->update($request->only(['subcategory_name', 'subcategory_slug']));
-
+        $subCategory->update([
+            'category_id' => $request->category_id,
+            'subcategory_name' => $request->subcategory_name,
+            'subcategory_slug' => Str::slug($request->subcategory_name),
+        ]);
+        
         return response()->json([
             'success' => true,
             'message' => 'Sub Category updated successfully',

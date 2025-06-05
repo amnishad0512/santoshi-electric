@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use Illuminate\Http\Request;
@@ -11,18 +12,34 @@ class BrandController extends Controller
 {
     public function index()
     {
-        return response()->json(Brand::with('products')->get());
+        $brand = Brand::select('id', 'brand_name', 'brand_image', 'created_at')
+            ->withCount('products')
+            ->get();
+        
+        return response()->json([
+        'status' => 'success',
+        'data' => $brand
+        ], 201);
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'brand_name' => 'required|string|max:255',
-            'brand_slug' => 'required|string|max:255|unique:brands,brand_slug',
-            'brand_image' => 'nullable|string|max:255',
+            'brand_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $brand = Brand::create($request->all());
+        $save_url = null;
+        if ($request->hasFile('brand_image')) {
+            $imagePath = $request->file('brand_image')->store('brands', 'public');
+            $save_url = 'storage/' . $imagePath;
+        }
+
+        $brand = Brand::create([
+            'brand_name' => $request->brand_name,
+            'brand_slug' => Str::slug($request->brand_name),
+            'brand_image' => $save_url,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -42,7 +59,11 @@ class BrandController extends Controller
             ], 404);
         }
 
-        return response()->json(Brand::findOrFail($id));
+        return response()->json([
+        'status' => 'success',
+        'data' => $brand
+        ], 201);
+
     }
 
     public function update(Request $request, $id)
@@ -58,11 +79,30 @@ class BrandController extends Controller
 
         $request->validate([
             'brand_name' => 'required|string|max:255',
-            'brand_slug' => 'required|string|max:255|unique:brands,brand_slug,' . $brand->id,
-            'brand_image' => 'nullable|string|max:255',
+            'brand_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $brand->update($request->all());
+        $save_url = $brand->brand_image;
+        if ($request->hasFile('brand_image')) {
+
+            // Delete old image if it exists
+            if ($brand->brand_image) {
+                $oldImagePath = str_replace('storage/', '', $brand->brand_image);
+                if (Storage::disk('public')->exists($oldImagePath)) {
+                    Storage::disk('public')->delete($oldImagePath);
+                }
+            }
+
+            // Store new image
+            $imagePath = $request->file('brand_image')->store('brands', 'public');
+            $save_url = 'storage/' . $imagePath;
+        }
+
+        $brand->update([
+            'brand_name' => $request->brand_name,
+            'brand_slug' => Str::slug($request->brand_name),
+            'brand_image' => $save_url,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -80,6 +120,13 @@ class BrandController extends Controller
                 'success' => false,
                 'message' => 'Brand not found'
             ], 404);
+        }
+
+        if ($brand->brand_image) {
+            $image = str_replace('storage/', '', $brand->brand_image);
+            if (Storage::disk('public')->exists($image)) {
+                Storage::disk('public')->delete($image);
+            }
         }
 
         $brand->delete();
