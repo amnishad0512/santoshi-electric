@@ -11,6 +11,9 @@ const nextConfig = {
   },
   // Handle dynamic routes in static export
   trailingSlash: true,
+  // Add base path and asset prefix if needed
+  basePath: '',
+  assetPrefix: '',
 }
 
 module.exports = nextConfig 
