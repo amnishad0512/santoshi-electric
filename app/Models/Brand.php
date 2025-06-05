@@ -38,6 +38,6 @@ class Brand extends Model
 
     public function getBrandImageAttribute($value)
     {
-        return asset('storage/brand/' . $value); // Or use Storage::url() if stored via Laravel storage
+        return asset($value); // Or use Storage::url() if stored via Laravel storage
     }
 }
