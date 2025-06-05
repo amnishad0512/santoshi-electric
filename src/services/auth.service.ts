@@ -1,6 +1,5 @@
 import api from '@/lib/axios';
 import Cookies from 'js-cookie';
-import { useRouter } from 'next/navigation';
 
 export interface LoginData {
   phone_number: string;
@@ -27,7 +26,6 @@ export interface ChangePasswordData {
 }
 
 export interface AuthResponse {
-  data: any;
   token: string;
   refresh_token: string;
   user: {
@@ -35,13 +33,12 @@ export interface AuthResponse {
     name: string;
     email: string;
     phone_number: string;
+    role: number;
   };
 }
 
 class AuthService {
   private static instance: AuthService;
-  private authState: boolean | null = null;
-  private userData: any = null;
 
   private constructor() {}
 
@@ -53,50 +50,76 @@ class AuthService {
   }
 
   isAuthenticated() {
-    if (this.authState === null) {
-      this.authState = !!Cookies.get('token');
-    }
-    return this.authState;
+    const token = Cookies.get('token');
+    return !!token;
   }
 
   getCurrentUser() {
-    if (this.userData === null) {
-      const userStr = localStorage.getItem('user');
-      this.userData = userStr ? JSON.parse(userStr) : null;
-    }
-    return this.userData;
+    const userStr = Cookies.get('user');
+    return userStr ? JSON.parse(userStr) : null;
   }
 
   async login(data: LoginData) {
-    const response = await api.post<AuthResponse>('/login', data);
-    const { token, refresh_token, user } = response.data;
-    if (token) {
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('refresh_token', refresh_token);
-      localStorage.setItem('user', JSON.stringify(user));
+    try {
+      const response = await api.post<AuthResponse>('/login', data);
+      const { token, user } = response.data;
+      // Validate response data
+      if (!token) {
+        throw new Error('Token is missing from response');
+      }
+      if (!user || !user.id || !user.role) {
+        throw new Error('Invalid user data in response');
+      }
+
+      // Store in cookies with proper configuration
+      Cookies.set('token', token, { 
+        path: '/',
+        secure: true,
+        sameSite: 'Lax',
+        expires: 1 // Set cookie to expire in 7 days
+      });
       
-      Cookies.set('token', token, { path: '/', secure: true, sameSite: 'Strict' });
-      Cookies.set('user', JSON.stringify(user), { path: '/', secure: true, sameSite: 'Strict' });
+      Cookies.set('user', JSON.stringify(user), { 
+        path: '/',
+        secure: true,
+        sameSite: 'Lax',
+        expires: 1
+      });
+      return { token, user };
+    } catch (error: any) {
+      console.error('Login error:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
       
-      this.authState = true;
-      this.userData = user;
+      // Clear any existing auth cookies on error
+      Cookies.remove('token', { path: '/' });
+      Cookies.remove('user', { path: '/' });
+
+      // Throw a more informative error
+      if (error.response?.status === 401) {
+        throw new Error('Invalid credentials');
+      } else if (error.response?.status === 422) {
+        throw new Error('Invalid input data');
+      } else if (!error.response) {
+        throw new Error('Network error - please check your connection');
+      } else {
+        throw new Error(error.response?.data?.message || 'Login failed');
+      }
     }
-    return response.data;
   }
 
   async logout() {
     try {
-      await api.post('/auth/logout');
-      Cookies.remove('token');
-      Cookies.remove('user');
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user');
-      this.authState = false;
-      this.userData = null;
-      window.location.href = '/';
+      await api.post('/logout');
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('Logout API call failed:', error);
+    } finally {
+      // Always clear cookies regardless of API call success
+      Cookies.remove('token', { path: '/' });
+      Cookies.remove('refresh_token', { path: '/' });
+      Cookies.remove('user', { path: '/' });
     }
   }
 
@@ -113,6 +136,11 @@ class AuthService {
   async changePassword(data: ChangePasswordData) {
     const response = await api.post('/verify-otp', data);
     return response.data;
+  }
+
+  getUserRole() {
+    const user = this.getCurrentUser();
+    return user?.role || null;
   }
 }
 

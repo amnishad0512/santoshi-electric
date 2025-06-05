@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -12,15 +13,27 @@ import {
   FileText,
   Percent,
   UserCircle,
-  LogOut
+  LogOut,
+  Award,
+  ChevronDown,
+  ChevronRight,
+  Layers,
+  Grid,
+  MessageSquare
 } from 'lucide-react';
-import authService from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
+
+interface SubMenuItem {
+  title: string;
+  path: string;
+}
 
 interface MenuItem {
   title: string;
-  path: string;
+  path?: string;
   icon: any;
+  subMenu?: SubMenuItem[];
 }
 
 const menuItems: MenuItem[] = [
@@ -34,11 +47,7 @@ const menuItems: MenuItem[] = [
     path: '/admin/users',
     icon: Users
   },
-  {
-    title: 'Orders',
-    path: '/admin/orders',
-    icon: ShoppingBag
-  },
+ 
   {
     title: 'Products',
     path: '/admin/products',
@@ -46,8 +55,36 @@ const menuItems: MenuItem[] = [
   },
   {
     title: 'Categories',
-    path: '/admin/categories',
-    icon: Tag
+    icon: Tag,
+    subMenu: [
+      {
+        title: 'Categories',
+        path: '/admin/categories'
+      },
+      {
+        title: 'Sub Categories',
+        path: '/admin/subcategories'
+      },
+      {
+        title: 'Sub Sub Categories',
+        path: '/admin/sub-subcategories'
+      }
+    ]
+  },
+  {
+    title: 'Brands',
+    path: '/admin/brands',
+    icon: Award
+  },
+   {
+    title: 'Orders',
+    path: '/admin/orders',
+    icon: ShoppingBag
+  },
+  {
+    title: 'Reviews',
+    path: '/admin/reviews',
+    icon: MessageSquare
   },
   {
     title: 'Coupons',
@@ -74,14 +111,29 @@ const menuItems: MenuItem[] = [
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [expandedMenus, setExpandedMenus] = useState<{ [key: string]: boolean }>({
+    Categories: true // Categories menu expanded by default
+  });
 
   const handleLogout = async () => {
-    try {
-      await authService.logout();
-      router.push('/login');
-    } catch (error) {
-      console.error('Logout failed:', error);
+    Cookies.remove('token');
+    localStorage.clear();
+    router.push('/');
+  };
+
+  const toggleMenu = (menuTitle: string) => {
+    setExpandedMenus(prev => ({
+      ...prev,
+      [menuTitle]: !prev[menuTitle]
+    }));
+  };
+
+  const isPathActive = (path: string) => pathname === path;
+  const isMenuActive = (item: MenuItem) => {
+    if (item.path) {
+      return isPathActive(item.path);
     }
+    return item.subMenu?.some(subItem => isPathActive(subItem.path));
   };
 
   return (
@@ -95,20 +147,66 @@ export default function AdminSidebar() {
       <div className="flex-1 overflow-y-auto min-h-0">
         <div className="px-4 py-4 space-y-2">
           {menuItems.map((item) => {
-            const isActive = pathname === item.path;
+            const isActive = isMenuActive(item);
+            const hasSubMenu = item.subMenu && item.subMenu.length > 0;
+
             return (
-              <Link
-                key={item.path}
-                href={item.path}
-                className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                  isActive
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                }`}
-              >
-                <item.icon className={`h-5 w-5 mr-3 ${isActive ? 'text-blue-600' : 'text-gray-400'}`} />
-                {item.title}
-              </Link>
+              <div key={item.title}>
+                {hasSubMenu ? (
+                  <div>
+                    <button
+                      onClick={() => toggleMenu(item.title)}
+                      className={`flex items-center justify-between w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                        isActive
+                          ? 'bg-blue-50 text-blue-600'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <item.icon className={`h-5 w-5 mr-3 ${isActive ? 'text-blue-600' : 'text-gray-400'}`} />
+                        {item.title}
+                      </div>
+                      {expandedMenus[item.title] ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </button>
+                    {expandedMenus[item.title] && item.subMenu && (
+                      <div className="ml-9 mt-2 space-y-1">
+                        {item.subMenu.map((subItem) => {
+                          const isSubItemActive = isPathActive(subItem.path);
+                          return (
+                            <Link
+                              key={subItem.path}
+                              href={subItem.path}
+                              className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                                isSubItemActive
+                                  ? 'bg-blue-50 text-blue-600'
+                                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                              }`}
+                            >
+                              {subItem.title}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    href={item.path!}
+                    className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                      isActive
+                        ? 'bg-blue-50 text-blue-600'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                  >
+                    <item.icon className={`h-5 w-5 mr-3 ${isActive ? 'text-blue-600' : 'text-gray-400'}`} />
+                    {item.title}
+                  </Link>
+                )}
+              </div>
             );
           })}
         </div>

@@ -1,43 +1,80 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import authService from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
+import { ShoppingCart } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
-const Header = () => {
-  const [cartCount, setCartCount] = useState(0);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<any>(null);
+export default function Header() {
   const router = useRouter();
+  const { user, isAuthenticated, logout, checkAuthStatus } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
 
+  // Load cart count on mount and when auth state changes
   useEffect(() => {
-    const checkAuth = () => {
-      setIsAuthenticated(authService.isAuthenticated());
-      setUser(authService.getCurrentUser());
-    };
-    checkAuth();
-    window.addEventListener('storage', checkAuth);
-    return () => window.removeEventListener('storage', checkAuth);
-  }, []);
+    if (isAuthenticated) {
+      // TODO: Implement cart count loading
+      setCartCount(0);
+    } else {
+      setCartCount(0);
+    }
+  }, [isAuthenticated]);
 
-  const handleLogout = async () => {
-    Cookies.remove('token');
-    localStorage.clear();
-    setIsAuthenticated(false);
-    setUser(null);
-    router.push('/');
+  // Check auth status when component mounts
+  useEffect(() => {
+    checkAuthStatus();
+  }, [checkAuthStatus]);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleCartClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    router.push('/cart');
+  };
+
+  const handleProfileClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    if (user?.role === 1) {
+      router.push('/admin/dashboard');
+    } else {
+      router.push('/profile');
+    }
+  };
+
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    await logout();
+    checkAuthStatus(); // Re-check auth status after logout
   };
 
   return (
     <header className="bg-white backdrop-blur-md bg-opacity-90 shadow-lg w-full fixed top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-500 hover:to-purple-500 transition-all">
-              SantoshiElectric
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/logo.png"
+                alt="SantoshiElectric Logo"
+                width={100}
+                height={40}
+                className="object-contain"
+                priority
+              />
             </Link>
           </div>
 
@@ -60,30 +97,46 @@ const Header = () => {
           {/* Cart and Profile */}
           <div className="flex items-center space-x-8">
             {/* Cart */}
-            <Link href="/cart" className="relative flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
+            <a 
+              href="/cart" 
+              onClick={handleCartClick}
+              className="relative flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors"
+            >
+              <ShoppingCart className="h-6 w-6" />
               <span className="text-sm font-medium">Cart</span>
               {cartCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium">
                   {cartCount}
                 </span>
               )}
-            </Link>
+            </a>
 
             {/* Profile */}
             {isAuthenticated ? (
               <div className="relative group">
-                <button className="flex items-center space-x-2 focus:outline-none">
+                <button 
+                  onClick={handleProfileClick}
+                  className="flex items-center space-x-2 focus:outline-none"
+                >
                   <div className="w-9 h-9 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-medium text-sm">
                     {user?.name?.charAt(0).toUpperCase()}
                   </div>
                   <span className="text-sm font-medium text-gray-700">Profile</span>
                 </button>
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 invisible group-hover:visible transition-all opacity-0 group-hover:opacity-100">
-                  <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</Link>
-                  <Link href="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Orders</Link>
+                  <a 
+                    href="/profile" 
+                    onClick={handleProfileClick}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Profile
+                  </a>
+                  <a 
+                    href="/orders" 
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Orders
+                  </a>
                   <button 
                     onClick={handleLogout}
                     className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
@@ -108,6 +161,4 @@ const Header = () => {
       </div>
     </header>
   );
-};
-
-export default Header; 
+} 

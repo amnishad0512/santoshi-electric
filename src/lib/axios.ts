@@ -18,6 +18,12 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // If the request contains FormData, remove the Content-Type header
+    // to let the browser set it automatically with the boundary
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
     
     return config;
   },
@@ -29,7 +35,7 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   (response) => {
-    return response;
+    return response.data;
   },
   async (error) => {
     const originalRequest = error.config;

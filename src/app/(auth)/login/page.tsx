@@ -5,11 +5,10 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import authService from '@/services/auth.service';
 import { toast } from 'react-hot-toast';
-import Cookies from 'js-cookie';
-import ProtectedPage from '@/components/ProtectedPage';
+import { useAuth } from '@/contexts/AuthContext';
 
 const loginSchema = z.object({
   phone_number: z
@@ -27,58 +26,29 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting, dirtyFields, isValid },
-    trigger,
+    formState: { errors, isSubmitting, isValid },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     mode: 'onChange',
     delayError: 300,
+    defaultValues: {
+      phone_number: '8888888888',
+      password: '12345678'
+    }
   });
 
-  // Check if all required fields have been touched and are valid
-  const isFormValid = isValid && 
-    dirtyFields.phone_number && 
-    dirtyFields.password;
+  // Remove the dirtyFields check since we have default values
+  const isFormValid = isValid;
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      const response = await authService.login(data);
-      console.log(response);
-      toast.success('Login successful!');
-
-      // Save the token as a cookie
-      Cookies.set('token', response.data.token, { 
-        path: '/', 
-        secure: true, 
-        sameSite: 'Strict' 
-      });
-
-      // Save the user data in both localStorage and cookies
-      const userData = response.data.user;
-      localStorage.setItem('user', JSON.stringify(userData));
-      Cookies.set('user', JSON.stringify(userData), { 
-        path: '/', 
-        secure: true, 
-        sameSite: 'Strict' 
-      });
-
-      // Update state
-      setIsAuthenticated(true);
-      setUser(userData);
-
-      // Redirect based on role
-      if (userData.role === 1) {
-        router.push('/admin/dashboard');
-      } else {
-        router.push('/');
-      }
+      login(data)
     } catch (error: any) {
       console.error('Login failed:', error);
       toast.error(error.response?.data?.message || 'Login failed. Please try again.');
@@ -95,7 +65,6 @@ export default function LoginPage() {
   };
 
   return (
-    <ProtectedPage allowedRoles={['guest']}>
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
@@ -120,7 +89,7 @@ export default function LoginPage() {
                     register('phone_number').onChange(e);
                   }}
                   className={`appearance-none rounded-md relative block w-full px-12 py-2 border ${
-                    errors.phone_number ? 'border-red-500' : dirtyFields.phone_number && !errors.phone_number ? 'border-green-500' : 'border-gray-300'
+                    errors.phone_number ? 'border-red-500' : 'border-gray-300'
                   } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 ${
                     errors.phone_number ? 'focus:ring-red-200' : 'focus:ring-blue-500'
                   } focus:border-blue-500 sm:text-sm`}
@@ -142,7 +111,7 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   {...register('password')}
                   className={`appearance-none rounded-md relative block w-full px-3 py-2 pr-10 border ${
-                    errors.password ? 'border-red-500' : dirtyFields.password && !errors.password ? 'border-green-500' : 'border-gray-300'
+                    errors.password ? 'border-red-500' : 'border-gray-300'
                   } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 ${
                     errors.password ? 'focus:ring-red-200' : 'focus:ring-blue-500'
                   } focus:border-blue-500 sm:text-sm`}
@@ -202,6 +171,5 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
-    </ProtectedPage>
   );
 } 
