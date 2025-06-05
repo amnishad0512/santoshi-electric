@@ -1,18 +1,12 @@
-import { Metadata } from 'next';
+// File: app/admin/brands/[id]/edit/page.tsx
+
+import { Suspense } from 'react';
 import BrandEdit from './BrandEdit';
 
-export const metadata: Metadata = {
-  title: 'Edit Brand',
-  description: 'Edit brand details',
-};
-
-// Enable dynamic rendering for this route
-export const dynamic = 'force-dynamic';
-
-export default function Page({
-  params,
-}: {
-  params: { id: string };
-}) {
-  return <BrandEdit id={params.id} />;
-} 
+export default function Page({ params }: { params: { id: string } }) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <BrandEdit id={params.id} />
+    </Suspense>
+  );
+}

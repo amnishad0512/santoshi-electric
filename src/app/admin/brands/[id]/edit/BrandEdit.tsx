@@ -8,7 +8,7 @@ import brandService, { Brand } from '@/services/brand.service';
 import { useCommonData } from '@/contexts/CommonDataContext';
 import api from '@/lib/axios';
 
-const BrandEdit = ({ id }: { id: string }) => {
+export default function BrandEdit({ id }: { id: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [loadingBrand, setLoadingBrand] = useState(true);
@@ -194,6 +194,4 @@ const BrandEdit = ({ id }: { id: string }) => {
       </form>
     </div>
   );
-};
-
-export default BrandEdit; 
+} 

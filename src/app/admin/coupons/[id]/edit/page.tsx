@@ -1,18 +1,23 @@
-import { Metadata } from 'next';
+'use client';
+
+import { Suspense } from 'react';
 import EditCouponForm from './EditCouponForm';
 
-export const metadata: Metadata = {
-  title: 'Edit Coupon',
-  description: 'Edit coupon details',
-};
-
-// Enable dynamic rendering for this route
-export const dynamic = 'force-dynamic';
-
-export default function Page({
-  params,
-}: {
+interface Props {
   params: { id: string };
-}) {
-  return <EditCouponForm id={params.id} />;
+}
+
+async function getData(id: string) {
+  // You can add actual data fetching here if needed
+  return { id };
+}
+
+export default async function Page({ params }: Props) {
+  await getData(params.id); // Ensure we have async operation
+
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <EditCouponForm id={params.id} />
+    </Suspense>
+  );
 } 
