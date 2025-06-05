@@ -40,6 +40,7 @@ class BrandController extends Controller
             'brand_name' => $request->brand_name,
             'brand_slug' => Str::slug($request->brand_name),
             'brand_image' => $save_url,
+            'status' => $request->status,
         ]);
 
         return response()->json([
@@ -133,29 +134,6 @@ class BrandController extends Controller
         ], 200);
     }
 
-
-
-
-    public function BrandIdss($id)
-    {
-        $brand = Brand::findOrFail($id);
-
-        if (!$brand) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Brand not found'
-            ], 404);
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $brand
-        ], 201);
-    }
-
-
-
-
     public function update(Request $request, $id)
     {
         $brand = Brand::find($id);
@@ -192,6 +170,8 @@ class BrandController extends Controller
             'brand_name' => $request->brand_name,
             'brand_slug' => Str::slug($request->brand_name),
             'brand_image' => $save_url,
+            'status' => $request->status,
+
         ]);
 
         return response()->json([
