@@ -20,7 +20,7 @@ class BrandController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => $brand
-        ], 201);
+        ], 200);
     }
 
     public function store(Request $request)
@@ -63,30 +63,9 @@ class BrandController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => $brand
-        ], 201);
+        ], 200);
     }
 
-    // public function BrandIdWithProduct($id)
-    // {
-    //     $products = Product::with(['category' => function ($query) {
-    //         $query->select('id', 'category_name');
-    //     }])->select([
-    //         'id',
-    //         'category_id',
-    //         'product_thumbnail',
-    //         'product_name',
-    //         'product_short_desc',
-    //         'product_selling_price',
-    //         'product_quantity',
-    //         'status',
-    //     ])->where('brand_id', $id)->get();
-
-
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'data' => $products
-    //     ], 200);
-    // }
 
     public function BrandProducts(Request $request, $id)
     {
@@ -178,7 +157,7 @@ class BrandController extends Controller
             'success' => true,
             'message' => 'Brand updated successfully',
             'data' => $brand
-        ]);
+        ],200);
     }
 
     public function destroy($id)
@@ -204,6 +183,6 @@ class BrandController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Brand deleted successfully'
-        ]);
+        ],200);
     }
 }
