@@ -27,7 +27,7 @@ class BrandController extends Controller
     {
         $request->validate([
             'brand_name' => 'required|string|max:255',
-            'brand_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'brand_image' => 'required',
         ]);
 
         $save_url = null;
@@ -147,7 +147,7 @@ class BrandController extends Controller
 
         $request->validate([
             'brand_name' => 'required|string|max:255',
-            'brand_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'brand_image' => 'required',
         ]);
 
         $save_url = $brand->brand_image;
