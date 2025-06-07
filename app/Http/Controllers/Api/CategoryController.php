@@ -11,7 +11,7 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::select('id', 'category_name', 'category_icon')
+        $categories = Category::select('id', 'category_name', 'category_icon', 'created_at')
             ->with([
                 'subCategories:id,category_id,subcategory_name',
                 'subCategories.subSubCategories:id,sub_category_id,sub_sub_category_name',
