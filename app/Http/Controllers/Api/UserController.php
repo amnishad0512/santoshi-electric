@@ -30,7 +30,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'phone_number' => 'required|string|max:15|unique:users,phone_number',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email',
             'role' => 'required',
         ]);
 
@@ -87,7 +87,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required',
             'phone_number' => 'required|string|max:15|unique:users,phone_number,' . $id,
-            'email' => 'required|email|unique:users,email,' . $id,
+            'email' => 'required|email',
             'role' => 'required',
         ]);
 
