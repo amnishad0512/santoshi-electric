@@ -12,7 +12,13 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::select('id', 'category_name', 'category_icon', 'created_at')
-            ->withCount('products', 'subCategories')
+            // ->withCount('products', 'subCategories')
+            // ->get();
+            ->with([
+                'subCategories:id,category_id,subcategory_name',
+                'subCategories.subSubCategories:id,sub_category_id,sub_sub_category_name',
+                'products:id,category_id,product_name'
+            ])->withCount('products', 'subCategories')
             ->get();
 
         return response()->json([
