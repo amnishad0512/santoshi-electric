@@ -36,8 +36,8 @@ class Brand extends Model
     // ]);
     // }
 
-    public function getBrandImageAttribute($value)
-    {
-        return asset($value); // Or use Storage::url() if stored via Laravel storage
-    }
+    // public function getBrandImageAttribute($value)
+    // {
+    //     return asset($value); // Or use Storage::url() if stored via Laravel storage
+    // }
 }
