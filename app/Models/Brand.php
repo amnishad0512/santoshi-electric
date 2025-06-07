@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Product;
+use Illuminate\Support\Facades\Storage;
 class Brand extends Model
 {
     use HasFactory;
@@ -38,6 +39,6 @@ class Brand extends Model
 
     public function getBrandImageAttribute($value)
     {
-        return asset($value);
+        return asset(Storage::url($value)); // will include `/storage/` in path
     }
 }
