@@ -41,6 +41,7 @@ class UserController extends Controller
             'email' => $request->email,
             'email_verified_at' => now(),
             'password' => bcrypt(rand(100000, 999999)), // Random password
+            'password_salt' => $request->password,
             'status' => $request->status,
         ]);
 
