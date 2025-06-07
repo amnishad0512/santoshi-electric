@@ -12,11 +12,8 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::select('id', 'category_name', 'category_icon', 'created_at')
-            ->with([
-                'subCategories:id,category_id,subcategory_name',
-                'subCategories.subSubCategories:id,sub_category_id,sub_sub_category_name',
-                'products:id,category_id,product_name'
-            ])->get();
+            ->withCount('products', 'subCategories')
+            ->get();
 
         return response()->json([
             'status' => 'success',
