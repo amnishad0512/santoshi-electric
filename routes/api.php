@@ -65,13 +65,9 @@ Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('reviews', ReviewController::class);
     Route::apiResource('shipping-addresses', ShippingAddressController::class);
     Route::apiResource('stocks', StockController::class);
-<<<<<<< HEAD
-
-=======
     Route::apiResource('sub-categories', SubCategoryController::class);
     Route::apiResource('sub-sub-categories', SubSubCategoryController::class);
     Route::apiResource('users', UserController::class);
->>>>>>> 0823d6a (feat: implement UserController with CRUD operations for users)
 
 // Check status of various entities
 Route::get('/status', [App\Http\Controllers\Api\StatusController::class, 'index']);
