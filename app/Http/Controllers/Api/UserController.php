@@ -31,8 +31,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'phone_number' => 'required|string|max:15|unique:users,phone_number',
             'email' => 'required|email|unique:users,email',
-            'role' => 'required|string|in:admin,user',
-            'status' => 'required|boolean',
+            'role' => 'required',
         ]);
 
         $user = User::create([
@@ -86,11 +85,10 @@ class UserController extends Controller
         }
 
         $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'phone_number' => 'sometimes|required|string|max:15|unique:users,phone_number,' . $id,
-            'email' => 'sometimes|required|email|unique:users,email,' . $id,
-            'role' => 'sometimes|required|string|in:admin,user',
-            'status' => 'sometimes|required|boolean',
+            'name' => 'required',
+            'phone_number' => 'required|string|max:15|unique:users,phone_number,' . $id,
+            'email' => 'required|email|unique:users,email,' . $id,
+            'role' => 'required',
         ]);
 
         $user->update($request->all());
