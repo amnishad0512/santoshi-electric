@@ -11,15 +11,9 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::select('id', 'category_name', 'category_icon', 'created_at', 'updated_at')
+        $categories = Category::select('id', 'category_name', 'category_icon', 'created_at')
             ->withCount('products', 'subCategories', 'subSubCategories')
             ->get();
-            // ->with([
-            //     'subCategories:id,category_id,subcategory_name',
-            //     'subCategories.subSubCategories:id,sub_category_id,sub_sub_category_name',
-            //     'products:id,category_id,product_name'
-            // ])->withCount('products', 'subCategories')
-            // ->get();
 
         return response()->json([
             'status' => 'success',
@@ -48,8 +42,8 @@ class CategoryController extends Controller
 
     public function show($id)
     {
-        $category = Category::select('id', 'category_name', 'category_icon', 'created_at', 'updated_at')->withCount('products', 'subCategories', 'subSubCategories')
-            ->find($id);
+        $category = Category::select('id', 'category_name', 'category_icon', 'created_at', 'updated_at')
+        ->withCount('products', 'subCategories', 'subSubCategories')->find($id);
 
         if (!$category) {
             return response()->json([
