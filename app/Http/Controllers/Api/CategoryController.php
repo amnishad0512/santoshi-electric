@@ -110,4 +110,30 @@ class CategoryController extends Controller
             'message' => 'Category deleted successfully'
         ]);
     }
+// category dropdown for brand - craeted by Yogi (date: 08jun25)
+// This method returns a dropdown list of categories based on the brand ID provided.
+// If no ID is provided, it returns all categories.
+    public function categoryDropdown($id='')
+    {
+        if ($id) {
+            $categories = Category::where('brand_id', $id)
+                ->select('id as value', 'category_name as label')
+                ->get();
+        } else {
+            $categories = Category::select('id as value', 'category_name as label')->get();
+        }
+        if (!$categories) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Category not found'
+            ], 404);
+        }else{
+            return response()->json([
+            'success' => true,
+            'data' => $categories
+            ]);
+        }
+    }
+
+
 }

@@ -44,10 +44,12 @@ Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('brands', BrandController::class);
     // Route::get('brand/{id}/products', [BrandController::class, 'BrandIdWithProduct']);
     Route::get('brands/{id}/products', [BrandController::class, 'BrandProducts']);
-
+    Route::get('category-dropdown', [BrandController::class, 'brandDropdown']); 
 
 
     Route::apiResource('categories', CategoryController::class);
+    Route::get('category-dropdown/{id}', [CategoryController::class, 'CategoryDropdown']); // id= brand id
+
     Route::apiResource('coupons', CouponController::class);
     Route::apiResource('orders', OrderController::class);
     Route::apiResource('order-items', OrderItemController::class);

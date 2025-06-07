@@ -185,4 +185,22 @@ class BrandController extends Controller
             'message' => 'Brand deleted successfully'
         ],200);
     }
+    //brand dropdown for select options - created by Yogi (date: 08jun25)
+    // this function returns a JSON response with all brands
+    public function brandDropdown()
+    {
+        $brands = Brand::select('id as value', 'brand_name as label')->get();
+
+        if ($brands->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No brands found'
+            ], 404);
+        } else {
+            return response()->json([
+                'success' => true,
+                'data' => $brands
+            ]);
+        }
+    }
 }
