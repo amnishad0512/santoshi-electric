@@ -34,14 +34,16 @@ class UserController extends Controller
             'role' => 'required',
         ]);
 
+        $pass = rand(100000, 999999);
+
         $user = User::create([
             'name' => $request->name,
             'phone_number' => $request->phone_number,
             'role' => $request->role,
             'email' => $request->email,
             'email_verified_at' => now(),
-            'password' => bcrypt(rand(100000, 999999)), // Random password
-            'password_salt' => $request->password,
+            'password' => bcrypt($pass), // Random password
+            'password_salt' => $pass,
             'status' => $request->status,
         ]);
 
