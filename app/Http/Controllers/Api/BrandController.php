@@ -33,7 +33,7 @@ class BrandController extends Controller
         $save_url = null;
         if ($request->hasFile('brand_image')) {
             $imagePath = $request->file('brand_image')->store('brands', 'public');
-            $save_url = 'storage/' . $imagePath;
+            $save_url = $imagePath;
         }
 
         $brand = Brand::create([
