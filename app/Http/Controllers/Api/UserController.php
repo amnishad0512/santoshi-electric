@@ -38,6 +38,7 @@ class UserController extends Controller
             'name' => $request->name,
             'phone_number' => $request->phone_number,
             'role' => $request->role,
+            'email' => $request->email,
             'status' => $request->status,
         ]);
 
