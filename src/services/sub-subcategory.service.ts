@@ -42,7 +42,7 @@ class SubSubCategoryService {
   }
 
   async getAllSubSubCategories() {
-    const response = await api.get<SubSubCategory[]>('/sub-subcategories');
+    const response = await api.get<SubSubCategory[]>('/sub-sub-categories');
     return response.data;
   }
 

@@ -126,10 +126,10 @@ export default function AdminDashboard() {
       try {
         // Simulated API response with analytics data
         const response = {
-          totalUsers: 1250,
-          totalOrders: 856,
-          totalProducts: 324,
-          totalRevenue: 45678.90,
+          totalUsers: 50,
+          totalOrders: 26,
+          totalProducts: 97,
+          totalRevenue: 23000,
           recentOrders: [
             { id: 1, customer: 'John Doe', amount: 299.99, status: 'Delivered' },
             { id: 2, customer: 'Jane Smith', amount: 199.99, status: 'Processing' },
@@ -228,18 +228,6 @@ export default function AdminDashboard() {
           <p className="text-2xl font-semibold text-gray-900">
             <AnimatedCounter value={value} prefix={prefix} suffix={suffix} />
           </p>
-          {change && (
-            <div className="flex items-center mt-2">
-              {change.isPositive ? (
-                <ArrowUp className="h-4 w-4 text-green-500" />
-              ) : (
-                <ArrowDown className="h-4 w-4 text-red-500" />
-              )}
-              <span className={`text-sm ${change.isPositive ? 'text-green-500' : 'text-red-500'}`}>
-                {change.value}% from last month
-              </span>
-            </div>
-          )}
         </div>
         <div className="p-3 bg-blue-50 rounded-full">
           <Icon className="h-6 w-6 text-blue-600" />
@@ -283,7 +271,7 @@ export default function AdminDashboard() {
                 title="Total Revenue" 
                 value={stats.totalRevenue} 
                 icon={DollarSign}
-                prefix="$"
+                prefix="₹"
                 change={{ value: 15, isPositive: true }}
               />
             </div>

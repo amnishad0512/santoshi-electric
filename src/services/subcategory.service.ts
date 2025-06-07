@@ -1,65 +1,117 @@
 import api from '@/lib/axios';
-import { Category } from './category.service';
 
-export interface Subcategory {
+export interface SubCategory {
   id: string;
-  category_id: string;
   subcategory_name: string;
-  createdAt?: string;
-  category?: Category;
+  category_id: string;
+  status: number;
+  created_at: string;
+  updated_at: string;
+  products_count?: number;
 }
 
-export interface CreateSubcategoryData {
-  category_id: string;
+export interface CreateSubCategoryData {
   subcategory_name: string;
+  category_id: string;
+  status: number;
 }
 
-export interface UpdateSubcategoryData {
-  category_id?: string;
+export interface UpdateSubCategoryData {
   subcategory_name?: string;
+  category_id?: string;
+  status?: number;
 }
 
-class SubcategoryService {
-  private static instance: SubcategoryService;
+class SubCategoryService {
+  private static instance: SubCategoryService;
 
   private constructor() {}
 
   static getInstance() {
-    if (!SubcategoryService.instance) {
-      SubcategoryService.instance = new SubcategoryService();
+    if (!SubCategoryService.instance) {
+      SubCategoryService.instance = new SubCategoryService();
     }
-    return SubcategoryService.instance;
+    return SubCategoryService.instance;
   }
 
-  async getAllSubcategories() {
-    const response = await api.get<Subcategory[]>('/subcategories');
-    return response.data;
+  async getAllSubCategories() {
+    try {
+      const response = await api.get('/sub-categories');
+      console.log('All SubCategories Response:', response);
+      return response;
+    } catch (error) {
+      console.error('Error fetching subcategories:', error);
+      throw error;
+    }
   }
 
-  async getSubcategoryById(id: string) {
-    const response = await api.get<Subcategory>(`/subcategories/${id}`);
-    return response.data;
+  // async getSubcategoriesByCategory(categoryId: string) {
+  //   if (!categoryId) {
+  //     throw new Error('Category ID is required');
+  //   }
+
+  //   try {
+  //     console.log('Fetching subcategories for category:', categoryId);
+  //     const response = await api.get(`/sub-categories/by-category/${categoryId}`);
+  //     console.log('Subcategories by category response:', response);
+  //     return response;
+  //   } catch (error) {
+  //     console.error(`Error fetching subcategories for category ${categoryId}:`, error);
+  //     throw error;
+  //   }
+  // }
+
+  async getSubCategoryById(id: string) {
+    if (!id) {
+      throw new Error('SubCategory ID is required');
+    }
+
+    try {
+      const response = await api.get(`/sub-categories/${id}`);
+      return response;
+    } catch (error) {
+      console.error(`Error fetching subcategory ${id}:`, error);
+      throw error;
+    }
   }
 
-  async getSubcategoriesByCategory(categoryId: string) {
-    const response = await api.get<Subcategory[]>(`/subcategories/category/${categoryId}`);
-    return response.data;
+  async createSubCategory(data: CreateSubCategoryData) {
+    try {
+      const response = await api.post('/sub-categories', data);
+      return response;
+    } catch (error) {
+      console.error('Error creating subcategory:', error);
+      throw error;
+    }
   }
 
-  async createSubcategory(data: CreateSubcategoryData) {
-    const response = await api.post<Subcategory>('/subcategories', data);
-    return response.data;
+  async updateSubCategory(id: string, data: UpdateSubCategoryData) {
+    if (!id) {
+      throw new Error('SubCategory ID is required');
+    }
+
+    try {
+      const response = await api.put(`/sub-categories/${id}`, data);
+      return response;
+    } catch (error) {
+      console.error(`Error updating subcategory ${id}:`, error);
+      throw error;
+    }
   }
 
-  async updateSubcategory(id: string, data: UpdateSubcategoryData) {
-    const response = await api.put<Subcategory>(`/subcategories/${id}`, data);
-    return response.data;
-  }
+  async deleteSubCategory(id: string) {
+    if (!id) {
+      throw new Error('SubCategory ID is required');
+    }
 
-  async deleteSubcategory(id: string) {
-    const response = await api.delete(`/subcategories/${id}`);
-    return response.data;
+    try {
+      const response = await api.delete(`/sub-categories/${id}`);
+      return response;
+    } catch (error) {
+      console.error(`Error deleting subcategory ${id}:`, error);
+      throw error;
+    }
   }
 }
 
-export default SubcategoryService.getInstance(); 
+export default SubCategoryService.getInstance(); 

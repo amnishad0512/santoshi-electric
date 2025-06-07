@@ -4,24 +4,24 @@ export interface Category {
   id: string;
   category_name: string;
   category_icon: string;
-  brand_id: string;
   status: number;
-  createdAt?: string;
-  updatedAt?: string;
+  created_at: string;
+  updated_at: string;
+  products_count?: number;
+  sub_categories_count?: number;
+  sub_sub_categories_count?: number;
 }
 
 export interface CreateCategoryData {
   category_name: string;
-  category_icon: string | File;
-  brand_id: string;
-  status: boolean;
+  category_icon?: File;
+  status: number;
 }
 
 export interface UpdateCategoryData {
   category_name?: string;
-  category_icon?: string | File;
-  brand_id?: string;
-  status?: boolean;
+  category_icon?: File;
+  status?: number;
 }
 
 class CategoryService {
@@ -38,11 +38,12 @@ class CategoryService {
 
   async getAllCategories() {
     try {
+      console.log('Fetching categories from API...');
       const response = await api.get('/categories');
-      console.log('All Categories Response:', response); // Debug log
-      return response.data || [];
+      console.log('Categories API raw response:', response);
+      return response;
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error('Error in getAllCategories:', error);
       throw error;
     }
   }
@@ -53,14 +54,7 @@ class CategoryService {
     }
 
     try {
-      console.log('Making API call to:', `/categories/${id}`); // Debug log
       const response = await api.get(`/categories/${id}`);
-      console.log('Get Category By ID Response:', response); // Debug log
-      
-      if (!response || !response.data) {
-        throw new Error('No data received from API');
-      }
-      
       return response;
     } catch (error) {
       console.error(`Error fetching category ${id}:`, error);
@@ -69,20 +63,16 @@ class CategoryService {
   }
 
   async createCategory(data: CreateCategoryData) {
-    const formData = new FormData();
-    formData.append('category_name', data.category_name);
-    formData.append('status', String(data.status));
-    formData.append('brand_id', data.brand_id);
-    
-    if (data.category_icon instanceof File) {
-      formData.append('category_icon', data.category_icon);
-    } else {
-      formData.append('category_icon', data.category_icon);
-    }
-
     try {
+      const formData = new FormData();
+      formData.append('category_name', data.category_name);
+      formData.append('status', data.status.toString());
+      if (data.category_icon) {
+        formData.append('category_icon', data.category_icon);
+      }
+
       const response = await api.post('/categories', formData);
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Error creating category:', error);
       throw error;
@@ -94,31 +84,21 @@ class CategoryService {
       throw new Error('Category ID is required');
     }
 
-    const formData = new FormData();
-    
-    if (data.category_name) {
-      formData.append('category_name', data.category_name);
-    }
-    
-    if (typeof data.status !== 'undefined') {
-      formData.append('status', String(data.status));
-    }
-
-    if (data.brand_id) {
-      formData.append('brand_id', data.brand_id);
-    }
-    
-    if (data.category_icon) {
-      if (data.category_icon instanceof File) {
-        formData.append('category_icon', data.category_icon);
-      } else {
+    try {
+      const formData = new FormData();
+      if (data.category_name !== undefined) {
+        formData.append('category_name', data.category_name);
+      }
+      if (data.status !== undefined) {
+        formData.append('status', data.status.toString());
+      }
+      if (data.category_icon) {
         formData.append('category_icon', data.category_icon);
       }
-    }
+      formData.append('_method', 'PUT');
 
-    try {
-      const response = await api.put(`/categories/${id}`, formData);
-      return response.data;
+      const response = await api.post(`/categories/${id}`, formData);
+      return response;
     } catch (error) {
       console.error(`Error updating category ${id}:`, error);
       throw error;
@@ -132,7 +112,7 @@ class CategoryService {
 
     try {
       const response = await api.delete(`/categories/${id}`);
-      return response.data;
+      return response;
     } catch (error) {
       console.error(`Error deleting category ${id}:`, error);
       throw error;

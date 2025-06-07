@@ -18,11 +18,24 @@ const CategoriesPage = () => {
 
   const fetchCategories = async () => {
     try {
-      const data = await categoryService.getAllCategories();
-      setCategories(data);
+      const response = await categoryService.getAllCategories();
+      console.log('Categories response:', response);
+      
+      // Handle different possible response structures
+      let categoriesData: Category[] = [];
+      if (response?.data?.categories) {
+        categoriesData = response.data.categories;
+      } else if (Array.isArray(response?.data)) {
+        categoriesData = response.data;
+      } else if (response?.data) {
+        categoriesData = [response.data];
+      }
+      
+      console.log('Processed categories data:', categoriesData);
+      setCategories(categoriesData);
     } catch (error) {
       toast.error('Failed to fetch categories');
-      console.error(error);
+      console.error('Error fetching categories:', error);
     } finally {
       setLoading(false);
     }
@@ -73,16 +86,18 @@ const CategoriesPage = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {categories.map((category) => (
+            {Array.isArray(categories) && categories.map((category) => (
               <tr key={category.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <Image
-                    src={category.category_icon}
-                    alt={category.category_name}
-                    width={48}
-                    height={48}
-                    className="rounded-lg object-contain"
-                  />
+                  {category.category_icon && (
+                    <Image
+                      src={category.category_icon}
+                      alt={category.category_name}
+                      width={48}
+                      height={48}
+                      className="rounded-lg object-contain"
+                    />
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">{category.category_name}</div>
@@ -123,6 +138,13 @@ const CategoriesPage = () => {
                 </td>
               </tr>
             ))}
+            {(!Array.isArray(categories) || categories.length === 0) && (
+              <tr>
+                <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                  No categories found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

@@ -2,23 +2,25 @@ import api from '@/lib/axios';
 
 export interface Brand {
   id: string;
-  brand_name: string;
-  brand_image: string;
-  products_count: number;
+  name: string;
+  phone_number: string;
+  role: number;
+  status: number;
   created_at: string;
   updated_at: string;
-  status: number;
 }
 
 export interface CreateBrandData {
-  brand_name: string;
-  brand_image: File;
+  name: string;
+  phone_number: string;
+  role: number;
   status: number;
 }
 
 export interface UpdateBrandData {
-  brand_name?: string;
-  brand_image?: File;
+  name?: string;
+  phone_number?: string;
+  role?: number;
   status?: number;
 }
 
@@ -44,18 +46,23 @@ class BrandService {
     return response;
   }
 
-  async createBrand(data: FormData) {
+  async createBrand(data: CreateBrandData) {
     const response = await api.post<Brand>('/brands', data);
     return response;
   }
 
-  async updateBrand(id: string, data: FormData) {
-    const response = await api.post<Brand>(`/brands/${id}`, data);
+  async updateBrand(id: string, data: UpdateBrandData) {
+    const response = await api.put<Brand>(`/brands/${id}`, data);
     return response;
   }
 
   async deleteBrand(id: string) {
     const response = await api.delete(`/brands/${id}`);
+    return response;
+  }
+
+  async updateBrandStatus(id: string, status: number) {
+    const response = await api.patch<Brand>(`/brands/${id}/status`, { status });
     return response;
   }
 }
