@@ -39,6 +39,8 @@ class UserController extends Controller
             'phone_number' => $request->phone_number,
             'role' => $request->role,
             'email' => $request->email,
+            'email_verified_at' => now(),
+            'password' => bcrypt(rand(100000, 999999)), // Random password
             'status' => $request->status,
         ]);
 
@@ -92,7 +94,13 @@ class UserController extends Controller
             'role' => 'required',
         ]);
 
-        $user->update($request->all());
+        $user->update([
+            'name' => $request->name,
+            'phone_number' => $request->phone_number,
+            'email' => $request->email,
+            'role' => $request->role,
+            'status' => $request->status,
+        ]);
 
         return response()->json([
             'success' => true,
