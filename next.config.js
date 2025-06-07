@@ -7,6 +7,10 @@ const nextConfig = {
   },
   // Handle dynamic routes in static export
   trailingSlash: true,
+  // Disable dynamic routes that aren't pre-rendered
+  experimental: {
+    missingSuspenseWithCSRError: false,
+  },
 }
 
 module.exports = nextConfig 

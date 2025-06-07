@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+const isServer = typeof window === 'undefined';
+
 // Create axios instance
 const api = axios.create({
   baseURL: 'https://santoshielectric.in/api/api',
@@ -11,7 +13,12 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Get token from localStorage
+    // Skip token handling during static generation
+    if (isServer) {
+      return config;
+    }
+
+    // Get token from localStorage (only in browser)
     const token = localStorage.getItem('auth_token');
     
     // If token exists, add it to request headers
@@ -38,6 +45,11 @@ api.interceptors.response.use(
     return response.data;
   },
   async (error) => {
+    // Skip token refresh during static generation
+    if (isServer) {
+      return Promise.reject(error);
+    }
+
     const originalRequest = error.config;
 
     // If error is 401 and we haven't retried yet
