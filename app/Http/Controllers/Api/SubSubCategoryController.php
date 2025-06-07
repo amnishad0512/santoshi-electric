@@ -99,4 +99,28 @@ class SubSubCategoryController extends Controller
             'message' => 'Sub Sub Category deleted successfully'
         ]);
     }
+    // sub sub category dropdown list api craeted by Yogi (date: 08jun25)
+    // This method returns a dropdown list of sub sub categories based on the provided sub category ID
+    // If no ID is provided, it returns all sub sub categories.
+    public function SubSubCategoryDropdown($id='')
+    {
+        if ($id) {
+            $subSubCategories = SubSubCategory::where('sub_category_id', $id)
+                ->select('id as value', 'sub_sub_category_name as label')
+                ->get();
+        } else {
+            $subSubCategories = SubSubCategory::select('id as value', 'sub_sub_category_name as label')->get();
+        }
+        if (!$subSubCategories) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sub Sub Category not found'
+            ], 404);
+        }else{
+            return response()->json([
+            'success' => true,
+            'data' => $subSubCategories
+            ]);
+        }
+    }
 }

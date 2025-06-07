@@ -44,11 +44,16 @@ Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('brands', BrandController::class);
     // Route::get('brand/{id}/products', [BrandController::class, 'BrandIdWithProduct']);
     Route::get('brands/{id}/products', [BrandController::class, 'BrandProducts']);
-    Route::get('category-dropdown', [BrandController::class, 'brandDropdown']); 
-
+    Route::get('brand-dropdown', [BrandController::class, 'brandDropdown']); 
 
     Route::apiResource('categories', CategoryController::class);
-    Route::get('category-dropdown/{id}', [CategoryController::class, 'CategoryDropdown']); // id= brand id
+    Route::get('category-dropdown/{id?}', [CategoryController::class, 'CategoryDropdown']); // id= brand id
+    
+    Route::apiResource('sub-categories', SubCategoryController::class);
+    Route::get('sub-category-dropdown/{id?}', [SubCategoryController::class, 'SubCategoryDropdown']); // id= category id
+
+    Route::apiResource('sub-sub-categories', SubSubCategoryController::class);
+    Route::get('sub-sub-category-dropdown/{id?}', [SubSubCategoryController::class, 'SubSubCategoryDropdown']); // id= sub category id
 
     Route::apiResource('coupons', CouponController::class);
     Route::apiResource('orders', OrderController::class);
@@ -59,8 +64,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('reviews', ReviewController::class);
     Route::apiResource('shipping-addresses', ShippingAddressController::class);
     Route::apiResource('stocks', StockController::class);
-    Route::apiResource('sub-categories', SubCategoryController::class);
-    Route::apiResource('sub-sub-categories', SubSubCategoryController::class);
+
 
 // Check status of various entities
 Route::get('/status', [App\Http\Controllers\Api\StatusController::class, 'index']);

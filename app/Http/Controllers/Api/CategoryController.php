@@ -110,7 +110,7 @@ class CategoryController extends Controller
             'message' => 'Category deleted successfully'
         ]);
     }
-// category dropdown for brand - craeted by Yogi (date: 08jun25)
+// category dropdown list api - craeted by Yogi (date: 08jun25)
 // This method returns a dropdown list of categories based on the brand ID provided.
 // If no ID is provided, it returns all categories.
     public function categoryDropdown($id='')
