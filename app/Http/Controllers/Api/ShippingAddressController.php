@@ -10,7 +10,14 @@ class ShippingAddressController extends Controller
 {
     public function index()
     {
-        return response()->json(ShippingAddress::with(['user', 'order'])->get());
+        $shippingAddresses = ShippingAddress::with(['user', 'order'])
+            ->select('id', 'user_id', 'order_id', 'address_line_1', 'address_line_2', 'city', 'state', 'postal_code', 'country')
+            ->get();
+
+        return response()->json([   
+            'status' => 'success',
+            'data' => $shippingAddresses
+        ], 200);
     }
 
     public function store(Request $request)

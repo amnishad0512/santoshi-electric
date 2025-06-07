@@ -11,7 +11,17 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        return response()->json(Category::with(['subCategories.subSubCategories', 'products'])->get());
+        $categories = Category::select('id', 'category_name', 'category_icon')
+            ->with([
+                'subCategories:id,category_id,subcategory_name',
+                'subCategories.subSubCategories:id,sub_category_id,sub_sub_category_name',
+                'products:id,category_id,product_name'
+            ])->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $categories
+        ], 200);
     }
 
     public function store(Request $request)

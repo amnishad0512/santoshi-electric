@@ -10,7 +10,14 @@ class OrderItemController extends Controller
 {
     public function index()
     {
-        return response()->json(OrderItem::with(['order', 'product'])->get());
+        $orderItems = OrderItem::with(['order:id,order_number', 'product:id,product_name'])
+            ->select('id', 'order_id', 'product_id', 'item_quantity', 'item_price')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $orderItems
+        ], 200);
     }
 
     public function store(Request $request)

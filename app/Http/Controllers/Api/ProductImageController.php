@@ -10,7 +10,14 @@ class ProductImageController extends Controller
 {
     public function index()
     {
-        return response()->json(ProductImage::with('product')->get());
+        $productImages = ProductImage::with('product:id,product_name')
+            ->select('id', 'product_id', 'path_name')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $productImages
+        ], 200);
     }
 
     public function store(Request $request)

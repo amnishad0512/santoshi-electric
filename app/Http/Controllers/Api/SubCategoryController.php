@@ -10,8 +10,15 @@ use Illuminate\Support\Str;
 class SubCategoryController extends Controller
 {
     public function index()
-    {
-        return response()->json(SubCategory::with(['category', 'subSubCategories'])->get());
+    {   
+        $subcategories = SubCategory::select('id', 'subcategory_name')
+            ->with(['category:id,category_name', 'subSubCategories:id,sub_category_id,sub_sub_category_name'])
+            ->get();
+        
+        return response()->json([
+            'status' => 'success',
+            'data' => $subcategories
+        ], 200);
     }
 
     public function store(Request $request)

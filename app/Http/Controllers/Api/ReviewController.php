@@ -10,7 +10,14 @@ class ReviewController extends Controller
 {
     public function index()
     {
-        return response()->json(Review::with(['user', 'product'])->get());
+        $reviews = Review::with(['user:id,name', 'product:id,product_name'])
+            ->select('id', 'user_id', 'product_id', 'rating', 'comment')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $reviews
+        ], 200);
     }
 
     public function store(Request $request)

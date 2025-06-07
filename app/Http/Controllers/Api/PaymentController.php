@@ -10,7 +10,12 @@ class PaymentController extends Controller
 {
     public function index()
     {
-        return response()->json(Payment::with('order')->get());
+        $payments = Payment::with('order:id,order_number')->get(['id', 'order_id', 'payment_method', 'payment_status', 'amount', 'transaction_id', 'paid_at']);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $payments
+        ], 200);
     }
 
     public function store(Request $request)

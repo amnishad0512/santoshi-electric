@@ -10,7 +10,14 @@ class OrderController extends Controller
 {
     public function index()
     {
-        return response()->json(Order::with(['user', 'orderItems.product', 'payment', 'shippingAddress'])->get());
+        $orders = Order::with(['user', 'orderItems.product', 'payment', 'shippingAddress'])
+            ->select('id', 'user_id', 'order_status', 'order_total')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $orders
+        ], 200);
     }
 
     public function store(Request $request)

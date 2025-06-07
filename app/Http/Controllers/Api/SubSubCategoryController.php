@@ -11,7 +11,14 @@ class SubSubCategoryController extends Controller
 {
     public function index()
     {
-        return response()->json(SubSubCategory::with(['category', 'subCategory'])->get());
+        $subsubcategories = SubSubCategory::select('id', 'sub_sub_category_name')
+            ->with(['category:id,category_name', 'subCategory:id,subcategory_name'])
+            ->get();
+        
+        return response()->json([
+            'status' => 'success',
+            'data' => $subsubcategories
+        ], 200);
     }
 
     public function store(Request $request)
