@@ -28,20 +28,21 @@ use App\Http\Controllers\Api\SubSubCategoryController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-Route::get('/', function () {
-    return "Hello Dev i am live !";
-});
+    Route::get('/', function () {
+        return "Hello Dev i am live !";
+    });
 
-Route::post('/register', [AuthController::class, 'Register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-Route::post('/verify-otp', [AuthController::class, 'verifyOtpAndResetPassword']);
+    Route::post('/register', [AuthController::class, 'Register']);
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/verify-otp', [AuthController::class, 'verifyOtpAndResetPassword']);
 
-// RESTful API routes
-Route::middleware(['auth:api'])->group(function () {
-    Route::match(['get', 'post'], '/profile', [UserController::class, 'profile']);
-    Route::post('/logout', [AuthController::class, 'logout']);
-});
+    // RESTful API routes
+    Route::middleware(['auth:api'])->group(function () {
+        Route::match(['get', 'post'], '/profile', [UserController::class, 'profile']);
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/change-password', [UserController::class, 'changePassword']);
+    });
     Route::get('admin/dashboard', [DashboardController::class, 'adminDashboardStats']);
 
     Route::apiResource('brands', BrandController::class);

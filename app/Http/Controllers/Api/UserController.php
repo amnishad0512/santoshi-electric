@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
@@ -311,6 +312,58 @@ class UserController extends Controller
             'message' => 'Method not allowed.'
         ], 405);
     }
+
+    public function changePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not authenticated',
+            ], 401);
+        }
+
+        // Validate input
+       $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string',
+            'new_password' => [ 'required','string','min:8',
+            'regex:/^(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?=\S+$).+$/'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        // Check if current password matches
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Current password is incorrect',
+            ], 400);
+        }
+
+        // Check if new password is the same as current password
+        if (Hash::check($request->new_password, $user->password)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'New password cannot be the same as the current password',
+            ], 400);
+        }
+
+        // Update to new password
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Password changed successfully',
+        ]);
+    }
+
 
 
 }
