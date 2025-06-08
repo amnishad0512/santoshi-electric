@@ -13,7 +13,7 @@ class BrandController extends Controller
 {
     public function index()
     {
-        $brand = Brand::select('id', 'brand_name', 'brand_image','status', 'created_at')
+        $brand = Brand::select('id', 'brand_name', 'brand_image','status', 'created_at', 'updated_at')
             ->withCount('products')
             ->get();
 
@@ -52,7 +52,9 @@ class BrandController extends Controller
 
     public function show($id)
     {
-        $brand = Brand::withCount('products')->findOrFail($id);
+        $brand = Brand::select('id', 'brand_name', 'brand_image','status', 'created_at', 'updated_at')
+            ->find($id);
+
         if (!$brand) {
             return response()->json([
                 'success' => false,
