@@ -41,7 +41,7 @@ Route::post('/verify-otp', [AuthController::class, 'verifyOtpAndResetPassword'])
 Route::middleware(['auth:api'])->group(function () {
 
 });
-    Route::get('/dashboard', [DashboardController::class, 'adminDashboardStats']);
+    Route::get('/admin-dashboard', [DashboardController::class, 'adminDashboardStats']);
 
     // Route::get('brands',[BrandController::class,'BrandId']);
     Route::apiResource('brands', BrandController::class);
