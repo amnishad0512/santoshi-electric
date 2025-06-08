@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('category_name');
             $table->string('category_slug')->unique();
             $table->string('category_icon')->nullable();
+            $table->boolean('status')->default(1)->comment('0=>Inactive,1=>Active,2=>Deleted'); 
             $table->timestamps();
         });
     }

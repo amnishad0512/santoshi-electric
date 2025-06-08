@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('state');
             $table->string('postal_code');
             $table->string('country');
+            $table->boolean('status')->default(1)->comment('0=>Inactive,1=>Active,2=>Deleted'); 
             $table->timestamps();
         });
     }

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->string('path_name');
+            $table->boolean('status')->default(1)->comment('0=>Inactive,1=>Active,2=>Deleted'); 
             $table->timestamps();
         });
     }

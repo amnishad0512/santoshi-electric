@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->integer('item_quantity');
             $table->decimal('item_price', 10, 2);
+            $table->boolean('status')->default(1)->comment('0=>Inactive,1=>Active,2=>Deleted'); 
             $table->timestamps();
 
         });

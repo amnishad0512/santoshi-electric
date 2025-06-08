@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('sub_category_id')->constrained('sub_categories')->onDelete('cascade');
             $table->string('sub_sub_category_name');
             $table->string('sub_sub_category_slug')->unique();
+            $table->boolean('status')->default(1)->comment('0=>Inactive,1=>Active,2=>Deleted'); 
             $table->timestamps();
         });
     }
