@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +42,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('profile', [UserController::class, 'userProfile']);
     Route::match(['put','post','patch'],'/update/profile', [UserController::class, 'updateProfile']);
 });
+    Route::get('admin/dashboard', [DashboardController::class, 'adminDashboardStats']);
 
     // Route::get('brands',[BrandController::class,'BrandId']);
     Route::apiResource('brands', BrandController::class);
@@ -61,8 +63,12 @@ Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('orders', OrderController::class);
     Route::apiResource('order-items', OrderItemController::class);
     Route::apiResource('payments', PaymentController::class);
+    
     Route::apiResource('products', ProductController::class);
     Route::apiResource('product-images', ProductImageController::class);
+    Route::get('featured-products', [ProductController::class, 'FeaturedProducts']);
+
+
     Route::apiResource('reviews', ReviewController::class);
     Route::apiResource('shipping-addresses', ShippingAddressController::class);
     Route::apiResource('stocks', StockController::class);

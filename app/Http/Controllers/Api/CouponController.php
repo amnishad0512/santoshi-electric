@@ -17,12 +17,23 @@ class CouponController extends Controller
     {
         $request->validate([
             'coupon_name' => 'required|string|max:255',
-            'coupon_discount' => 'required|numeric|min:0|max:100',
+            'discount_type' => 'required',
+            'coupon_discount' => 'required',
             'coupon_validity' => 'required|date',
             'coupon_status' => 'boolean',
         ]);
 
-        $coupon = Coupon::create($request->all());
+        $coupon = Coupon::create([
+            'coupon_name' => $request->coupon_name,
+            'discount_type' => $request->discount_type,
+            'coupon_discount' => $request->coupon_discount,
+            'minimum_purchase' => $request->minimum_purchase,
+            'maximum_discount' => $request->maximum_discount,
+            'usage_limit' => $request->usage_limit,
+            'coupon_start_date' => $request->coupon_start_date,
+            'coupon_validity' => $request->coupon_validity,
+            'coupon_status' => $request->coupon_status,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -57,13 +68,24 @@ class CouponController extends Controller
         }
 
         $request->validate([
-            'coupon_name' => 'sometimes|required|string|max:255',
-            'coupon_discount' => 'sometimes|required|numeric|min:0|max:100',
+            'coupon_name' => 'required|string|max:255',
+            'discount_type' => 'required',
+            'coupon_discount' => 'required',
             'coupon_validity' => 'required|date',
             'coupon_status' => 'boolean',
         ]);
 
-        $coupon->update($request->all());
+        $coupon->update([
+            'coupon_name' => $request->coupon_name,
+            'discount_type' => $request->discount_type,
+            'coupon_discount' => $request->coupon_discount,
+            'minimum_purchase' => $request->minimum_purchase,
+            'maximum_discount' => $request->maximum_discount,
+            'usage_limit' => $request->usage_limit,
+            'coupon_start_date' => $request->coupon_start_date,
+            'coupon_validity' => $request->coupon_validity,
+            'coupon_status' => $request->coupon_status,
+        ]);
 
         return response()->json([
             'success' => true,
