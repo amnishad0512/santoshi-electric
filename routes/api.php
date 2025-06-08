@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +41,7 @@ Route::post('/verify-otp', [AuthController::class, 'verifyOtpAndResetPassword'])
 Route::middleware(['auth:api'])->group(function () {
 
 });
+    Route::get('/dashboard', [DashboardController::class, 'adminDashboardStats']);
 
     // Route::get('brands',[BrandController::class,'BrandId']);
     Route::apiResource('brands', BrandController::class);
