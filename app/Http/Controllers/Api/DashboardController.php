@@ -3,21 +3,29 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Coupon;
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\Review;
+use App\Models\SubCategory;
+use App\Models\SubSubCategory;
+use App\Models\User;
 
 class DashboardController extends Controller
 {
     public function adminDashboardStats()
     {
-        $totalUsers = \App\Models\User::count();
-        $totalOrders = \App\Models\Order::count();
-        $totalProducts = \App\Models\Product::count();
-        $totalCategories = \App\Models\Category::count();
-        $totalSubCategories = \App\Models\SubCategory::count();
-        $totalSubSubCategories = \App\Models\SubSubCategory::count();
-        $totalBrands = \App\Models\Brand::count();
-        $totalReviews = \App\Models\Review::count();
-        $totalActiveCoupons = \App\Models\Coupon::where('status', '1')->count();
+        $totalUsers = User::count();
+        $totalOrders = Order::count();
+        $totalProducts = Product::count();
+        $totalCategories = Category::count();
+        $totalSubCategories = SubCategory::count();
+        $totalSubSubCategories = SubSubCategory::count();
+        $totalBrands = Brand::count();
+        $totalReviews = Review::count();
+        $totalActiveCoupons = Coupon::where('coupon_status', '1')->count();
 
         return response()->json([
             'total_users' => $totalUsers,
