@@ -195,4 +195,19 @@ class ProductController extends Controller
             'message' => 'Product deleted successfully'
         ]);
     }
-}
+    // Get featured products with limit created by Yogi (date: 08jun25)
+    // limit is request parameter, default is 10
+    public function FeaturedProducts(Request $request)
+    {
+        $limit = $request->input('limit', 10); // Default limit is 10 if not provided  
+        $products = Product::with(['brand', 'category', 'subCategory', 'subSubCategory', 'productImages',])
+            ->where('featured', 1)
+            ->limit($limit)
+            ->get();
+        return response()->json([
+            'success' => true,
+            'data' => $products
+        ]);
+    }
+
+ 

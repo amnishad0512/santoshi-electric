@@ -62,8 +62,12 @@ Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('orders', OrderController::class);
     Route::apiResource('order-items', OrderItemController::class);
     Route::apiResource('payments', PaymentController::class);
+    
     Route::apiResource('products', ProductController::class);
     Route::apiResource('product-images', ProductImageController::class);
+    Route::get('featured-products', [ProductController::class, 'FeaturedProducts']);
+
+
     Route::apiResource('reviews', ReviewController::class);
     Route::apiResource('shipping-addresses', ShippingAddressController::class);
     Route::apiResource('stocks', StockController::class);

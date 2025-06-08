@@ -15,6 +15,7 @@ use App\Models\User;
 
 class DashboardController extends Controller
 {
+    // all tables counts api - craeted by Yogi (date: 08jun25)
     public function adminDashboardStats()
     {
         $totalUsers = User::count();
@@ -39,4 +40,5 @@ class DashboardController extends Controller
             'total_active_coupons' => $totalActiveCoupons,
         ]);
     }
+    
 }
