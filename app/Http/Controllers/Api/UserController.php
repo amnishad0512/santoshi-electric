@@ -13,7 +13,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $user = User::select('id', 'name', 'phone_number', 'role', 'status', 'created_at')
+        $user = User::select('id', 'name', 'phone_number', 'email', 'role', 'status', 'created_at')
             ->get();
 
         return response()->json([
@@ -60,7 +60,7 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        $user = User::select('id', 'name', 'phone_number', 'role', 'status', 'created_at')
+        $user = User::select('id', 'name', 'phone_number', 'email', 'role', 'status', 'created_at', 'updated_at')
             ->find($id);
 
         if (!$user) {
