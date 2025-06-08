@@ -54,7 +54,6 @@ class AuthController extends Controller
             DB::commit();
             return response()->json([
                 'status' => 'success',
-                'user' => $user
             ], 201);
         } catch (\Exception  $e) {
             DB::rollBack();
@@ -62,7 +61,6 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage(),
-                'data' => [],
             ], 401);
         }
     }
@@ -79,7 +77,6 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => $validator->errors()->first(),
-                'data' => [], // keeping consistent structure if your API always returns 'data'
             ], 422);
         }
 
@@ -91,7 +88,6 @@ class AuthController extends Controller
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Invalid phone number or password',
-                    'data' => [],
                 ], 401);
             }
 
@@ -102,16 +98,13 @@ class AuthController extends Controller
                 'status' => 'success',
                 'message' => 'Login successful',
                 'data' => [
-                    'token' => $token,
-                    'user' => $user,
-                ]
+                    'token' => $token                ]
             ], 200);
         } catch (\Exception $e) {
 
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage(),
-                'data' => [],
             ], 401);
         }
     }
@@ -127,7 +120,6 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => $validator->errors()->first(),
-                'data' => [],
             ], 422);
         }
 
@@ -140,7 +132,6 @@ class AuthController extends Controller
                 return response()->json([
                     'status' => 'error',
                     'message' => 'No user found with the provided details',
-                    'data' => [],
                 ], 404);
             }
 
@@ -166,13 +157,11 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'OTP sent successfully',
-                'data' => [],
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage(),
-                'data' => [],
             ], 500);
         }
     }
@@ -188,7 +177,6 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => $validator->errors()->first(),
-                'data' => [],
             ], 422);
         }
 
@@ -201,7 +189,6 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Invalid or expired OTP',
-                'data' => [],
             ], 400);
         }
 
@@ -218,7 +205,6 @@ class AuthController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Password has been reset successfully',
-            'data' => [],
         ], 200);
     }
 }
