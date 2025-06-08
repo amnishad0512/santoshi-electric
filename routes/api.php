@@ -39,14 +39,12 @@ Route::post('/verify-otp', [AuthController::class, 'verifyOtpAndResetPassword'])
 
 // RESTful API routes
 Route::middleware(['auth:api'])->group(function () {
-    Route::get('profile', [UserController::class, 'userProfile']);
-    Route::match(['put','post','patch'],'/update/profile', [UserController::class, 'updateProfile']);
+    Route::match(['get', 'post'], '/profile', [UserController::class, 'profile']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
     Route::get('admin/dashboard', [DashboardController::class, 'adminDashboardStats']);
 
-    // Route::get('brands',[BrandController::class,'BrandId']);
     Route::apiResource('brands', BrandController::class);
-    // Route::get('brand/{id}/products', [BrandController::class, 'BrandIdWithProduct']);
     Route::get('brands/{id}/products', [BrandController::class, 'BrandProducts']);
     Route::get('brand-dropdown', [BrandController::class, 'brandDropdown']); 
 

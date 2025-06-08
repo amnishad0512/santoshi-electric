@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SendOtpMail;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -208,5 +209,25 @@ class AuthController extends Controller
             'status' => 'success',
             'message' => 'Password has been reset successfully',
         ], 200);
+    }
+
+    public function logout(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not authenticated',
+            ], 401);
+        }
+
+        // Revoke current access token
+        $user->token()->revoke();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Logged out successfully',
+        ]);
     }
 }
