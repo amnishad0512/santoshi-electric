@@ -202,13 +202,18 @@ export default function AddCouponPage() {
               disabled={isLoadingStatuses}
             >
               {isLoadingStatuses ? (
-                <option>Loading statuses...</option>
-              ) : (
+                <option value="1">Loading statuses...</option>
+              ) : statuses && statuses.length > 0 ? (
                 statuses.map((status) => (
                   <option key={status.id} value={status.value}>
                     {status.name}
                   </option>
                 ))
+              ) : (
+                <>
+                  <option value="1">Active</option>
+                  <option value="0">Inactive</option>
+                </>
               )}
             </select>
             {errors.status && (

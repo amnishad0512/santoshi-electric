@@ -9,7 +9,6 @@ import {
   ShoppingBag,
   Package,
   Tag,
-  Settings,
   FileText,
   Percent,
   UserCircle,
@@ -100,11 +99,6 @@ const menuItems: MenuItem[] = [
     title: 'Profile',
     path: '/admin/profile',
     icon: UserCircle
-  },
-  {
-    title: 'Settings',
-    path: '/admin/settings',
-    icon: Settings
   }
 ];
 

@@ -3,16 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Star, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Star, Trash2 } from 'lucide-react';
 import reviewService, { Review } from '@/services/review.service';
 
 const ReviewsPage = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
 
   useEffect(() => {
     fetchReviews();
@@ -20,55 +17,35 @@ const ReviewsPage = () => {
 
   const fetchReviews = async () => {
     try {
+      setLoading(true);
       const data = await reviewService.getAllReviews();
-      setReviews(data);
+      console.log('Fetched reviews:', data); // Debug log
+      setReviews(Array.isArray(data) ? data : []);
     } catch (error) {
+      console.error('Failed to fetch reviews:', error);
       toast.error('Failed to fetch reviews');
-      console.error(error);
+      setReviews([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleApprove = async (id: string) => {
-    try {
-      await reviewService.approveReview(id);
-      toast.success('Review approved successfully');
-      fetchReviews();
-    } catch (error) {
-      toast.error('Failed to approve review');
-      console.error(error);
-    }
-  };
-
-  const handleReject = async (id: string) => {
-    try {
-      await reviewService.rejectReview(id);
-      toast.success('Review rejected successfully');
-      fetchReviews();
-    } catch (error) {
-      toast.error('Failed to reject review');
-      console.error(error);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this review?')) return;
 
     try {
-      await reviewService.deleteReview(id);
-      toast.success('Review deleted successfully');
-      fetchReviews();
+      const success = await reviewService.deleteReview(id);
+      if (success) {
+        toast.success('Review deleted successfully');
+        fetchReviews();
+      } else {
+        toast.error('Failed to delete review');
+      }
     } catch (error) {
+      console.error('Failed to delete review:', error);
       toast.error('Failed to delete review');
-      console.error(error);
     }
   };
-
-  const filteredReviews = reviews.filter((review) => {
-    if (filter === 'all') return true;
-    return review.status === filter;
-  });
 
   const renderStars = (rating: number) => {
     return Array(5)
@@ -90,23 +67,12 @@ const ReviewsPage = () => {
       </div>
     );
   }
+  console.log(reviews);
 
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Reviews</h1>
-        <div className="flex items-center space-x-4">
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as typeof filter)}
-            className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-          >
-            <option value="all">All Reviews</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
-        </div>
       </div>
 
       <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -125,92 +91,49 @@ const ReviewsPage = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Comment
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date
-              </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredReviews.map((review) => (
-              <tr key={review.id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    {review.product?.image && (
-                      <div className="flex-shrink-0 h-10 w-10 mr-3">
-                        <Image
-                          src={review.product.image}
-                          alt={review.product.name}
-                          width={40}
-                          height={40}
-                          className="rounded-lg object-cover"
-                        />
+            {reviews.length > 0 ? (
+              reviews.map((review) => (
+                <tr key={review.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="text-sm font-medium text-gray-900">
+                        {review.product.product_name}
                       </div>
-                    )}
-                    <div className="text-sm font-medium text-gray-900">
-                      {review.product?.name || 'Unknown Product'}
                     </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{review.user?.name || 'Unknown User'}</div>
-                  <div className="text-sm text-gray-500">{review.user?.email}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">{renderStars(review.rating)}</div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-gray-900 line-clamp-2">{review.comment}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      review.status === 'approved'
-                        ? 'bg-green-100 text-green-800'
-                        : review.status === 'rejected'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}
-                  >
-                    {review.status.charAt(0).toUpperCase() + review.status.slice(1)}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : '-'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                  {review.status === 'pending' && (
-                    <>
-                      <button
-                        onClick={() => handleApprove(review.id)}
-                        className="text-green-600 hover:text-green-900"
-                        title="Approve"
-                      >
-                        <ThumbsUp className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => handleReject(review.id)}
-                        className="text-red-600 hover:text-red-900"
-                        title="Reject"
-                      >
-                        <ThumbsDown className="h-5 w-5" />
-                      </button>
-                    </>
-                  )}
-                  <button
-                    onClick={() => handleDelete(review.id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    Delete
-                  </button>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{review.user.name}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">{renderStars(review.rating)}</div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-900 line-clamp-2">{review.comment}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button
+                      onClick={() => handleDelete(review.id)}
+                      className="text-red-600 hover:text-red-900 transition-colors duration-200"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                  No reviews found
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

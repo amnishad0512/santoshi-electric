@@ -1,28 +1,33 @@
 import api from '@/lib/axios';
 
 export interface Review {
-  id: string;
-  product_id: string;
-  user_id: string;
+  id: number;
+  user_id: number;
+  product_id: number;
   rating: number;
   comment: string;
-  status: 'pending' | 'approved' | 'rejected';
-  createdAt?: string;
-  user?: {
-    id: string;
+  user: {
+    id: number;
     name: string;
-    email: string;
   };
-  product?: {
-    id: string;
-    name: string;
-    image: string;
+  product: {
+    id: number;
+    product_name: string;
   };
 }
 
+interface ReviewResponse {
+  status: string;
+  data: Review[];
+}
+
+interface SingleReviewResponse {
+  status: string;
+  data: Review;
+}
+
 export interface CreateReviewData {
-  product_id: string;
-  user_id: string;
+  product_id: number;
   rating: number;
   comment: string;
 }
@@ -30,7 +35,6 @@ export interface CreateReviewData {
 export interface UpdateReviewData {
   rating?: number;
   comment?: string;
-  status?: 'pending' | 'approved' | 'rejected';
 }
 
 class ReviewService {
@@ -45,39 +49,74 @@ class ReviewService {
     return ReviewService.instance;
   }
 
-  async getAllReviews() {
-    const response = await api.get<Review[]>('/reviews');
-    return response.data;
+  async getAllReviews(): Promise<Review[]> {
+    try {
+      const response = await api.get<ReviewResponse>('/reviews');
+      return response.data;
+    } catch (error) {
+      console.error('Error in getAllReviews:', error);
+      return [];
+    }
   }
 
-  async getReviewById(id: string) {
-    const response = await api.get<Review>(`/reviews/${id}`);
-    return response.data;
+  async getReviewById(id: number): Promise<Review | null> {
+    try {
+      const response = await api.get<SingleReviewResponse>(`/reviews/${id}`);
+      return response.data.data;
+    } catch (error) {
+      console.error('Error in getReviewById:', error);
+      return null;
+    }
   }
 
-  async getReviewsByProduct(productId: string) {
-    const response = await api.get<Review[]>(`/reviews/product/${productId}`);
-    return response.data;
+  async getReviewsByProduct(productId: number): Promise<Review[]> {
+    try {
+      const response = await api.get<ReviewResponse>(`/reviews/product/${productId}`);
+      return response.data.data || [];
+    } catch (error) {
+      console.error('Error in getReviewsByProduct:', error);
+      return [];
+    }
   }
 
-  async getReviewsByUser(userId: string) {
-    const response = await api.get<Review[]>(`/reviews/user/${userId}`);
-    return response.data;
+  async getReviewsByUser(userId: number): Promise<Review[]> {
+    try {
+      const response = await api.get<ReviewResponse>(`/reviews/user/${userId}`);
+      return response.data.data || [];
+    } catch (error) {
+      console.error('Error in getReviewsByUser:', error);
+      return [];
+    }
   }
 
-  async createReview(data: CreateReviewData) {
-    const response = await api.post<Review>('/reviews', data);
-    return response.data;
+  async createReview(data: CreateReviewData): Promise<Review | null> {
+    try {
+      const response = await api.post<SingleReviewResponse>('/reviews', data);
+      return response.data.data;
+    } catch (error) {
+      console.error('Error in createReview:', error);
+      return null;
+    }
   }
 
-  async updateReview(id: string, data: UpdateReviewData) {
-    const response = await api.put<Review>(`/reviews/${id}`, data);
-    return response.data;
+  async updateReview(id: number, data: UpdateReviewData): Promise<Review | null> {
+    try {
+      const response = await api.put<SingleReviewResponse>(`/reviews/${id}`, data);
+      return response.data.data;
+    } catch (error) {
+      console.error('Error in updateReview:', error);
+      return null;
+    }
   }
 
-  async deleteReview(id: string) {
-    const response = await api.delete(`/reviews/${id}`);
-    return response.data;
+  async deleteReview(id: number): Promise<boolean> {
+    try {
+      await api.delete(`/reviews/${id}`);
+      return true;
+    } catch (error) {
+      console.error('Error in deleteReview:', error);
+      return false;
+    }
   }
 
   async approveReview(id: string) {

@@ -16,23 +16,31 @@ interface CommonData {
   refreshData: () => Promise<void>;
 }
 
+const defaultStatuses: Status[] = [
+  { id: 1, name: 'Active', value: 1 },
+  { id: 2, name: 'Inactive', value: 0 },
+];
+
 const CommonDataContext = createContext<CommonData | undefined>(undefined);
 
 // Define the event name (must match the one in AuthContext)
 const REFRESH_DATA_EVENT = 'refreshCommonData';
 
 export function CommonDataProvider({ children }: { children: React.ReactNode }) {
-  const [statuses, setStatuses] = useState<Status[]>([]);
+  const [statuses, setStatuses] = useState<Status[]>(defaultStatuses);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchStatuses = async () => {
     try {
-      // TODO: Replace with your actual API endpoint
+      // Try to fetch from API
       const response = await api.get('/status');
-      setStatuses(response.data);
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+        setStatuses(response.data);
+      }
     } catch (error) {
       console.error('Error fetching statuses:', error);
-      toast.error('Failed to load common data');
+      // If API fails, use default statuses
+      setStatuses(defaultStatuses);
     }
   };
 
@@ -43,6 +51,9 @@ export function CommonDataProvider({ children }: { children: React.ReactNode }) 
         fetchStatuses(),
         // Add other common data fetching here
       ]);
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+      toast.error('Failed to refresh common data');
     } finally {
       setIsLoading(false);
     }
