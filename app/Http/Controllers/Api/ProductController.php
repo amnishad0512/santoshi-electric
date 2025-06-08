@@ -209,5 +209,4 @@ class ProductController extends Controller
             'data' => $products
         ]);
     }
-
- 
+}
