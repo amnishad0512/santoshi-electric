@@ -40,12 +40,12 @@ class ProductController extends Controller
             'product_discount_price' => 'required|numeric|min:0',
             'product_short_desc' => 'required|string',
             'product_long_desc' => 'required|string',
-            'product_thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'hot_deal' => 'required|boolean',
-            'featured' => 'required|boolean',
-            'special_offer' => 'required|boolean',
-            'special_deals' => 'required|boolean',
-            'status' => 'required|boolean',
+            'product_thumbnail' => 'required',
+            'hot_deal' => 'required',
+            'featured' => 'required',
+            'special_offer' => 'required',
+            'special_deals' => 'required',
+            'status' => 'required',
         ]);
 
         $save_url = null;
@@ -118,12 +118,12 @@ class ProductController extends Controller
             'product_discount_price' => 'required|numeric|min:0',
             'product_short_desc' => 'required|string',
             'product_long_desc' => 'required|string',
-            'product_thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'hot_deal' => 'required|boolean',
-            'featured' => 'required|boolean',
-            'special_offer' => 'required|boolean',
-            'special_deals' => 'required|boolean',
-            'status' => 'required|boolean',
+            'product_thumbnail' => 'required',
+            'hot_deal' => 'required',
+            'featured' => 'required',
+            'special_offer' => 'required',
+            'special_deals' => 'required',
+            'status' => 'required',
         ]);
 
         $save_url = $product->product_thumbnail;
