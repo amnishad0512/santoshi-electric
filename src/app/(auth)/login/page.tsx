@@ -39,7 +39,7 @@ export default function LoginPage() {
     delayError: 300,
     defaultValues: {
       phone_number: '8888888888',
-      password: '12345678'
+      password: 'Admin'
     }
   });
 

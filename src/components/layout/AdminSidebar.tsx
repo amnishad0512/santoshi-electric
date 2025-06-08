@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -22,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SubMenuItem {
   title: string;
@@ -105,14 +107,20 @@ const menuItems: MenuItem[] = [
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [expandedMenus, setExpandedMenus] = useState<{ [key: string]: boolean }>({
     Categories: true // Categories menu expanded by default
   });
+  const { user } = useAuth();
 
   const handleLogout = async () => {
     Cookies.remove('token');
     localStorage.clear();
     router.push('/');
+  };
+
+  const handleImageClick = () => {
+    router.push('/admin/profile');
   };
 
   const toggleMenu = (menuTitle: string) => {
@@ -133,8 +141,26 @@ export default function AdminSidebar() {
   return (
     <div className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 flex flex-col">
       {/* Logo/Brand - Fixed at top */}
-      <div className="h-16 flex-shrink-0 flex items-center justify-center border-b border-gray-200">
-        <h1 className="text-xl font-bold text-gray-800">Admin Panel</h1>
+      <div className="h-16 flex-shrink-0 flex items-center justify-between px-8 border-b border-gray-200">
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col items-center">
+            <div 
+              className="relative w-10 h-10 rounded-full overflow-hidden cursor-pointer hover:opacity-90 transition-opacity" 
+              onClick={handleImageClick}
+            >
+              <Image
+                src={user?.profile_photo_path || '/default-avatar.png'}
+                alt="Profile"
+                fill
+                className="object-cover"
+              />
+            </div>
+          </div>
+          <div>
+            <h1 className="text-sm font-semibold text-gray-900">{user?.name || 'Admin'}</h1>
+            <p className="text-xs text-gray-500">{user?.email}</p>
+          </div>
+        </div>
       </div>
 
       {/* Navigation Menu - Scrollable */}

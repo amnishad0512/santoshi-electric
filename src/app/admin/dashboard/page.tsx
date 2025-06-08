@@ -6,60 +6,28 @@ import {
   Users,
   ShoppingBag,
   Tag,
-  DollarSign,
-  BarChart,
-  ArrowUp,
-  ArrowDown,
-  Loader2,
-  TrendingUp
+  LayoutGrid,
+  Grid2X2,
+  Grid3X3,
+  Star,
+  Ticket,
+  BadgePercent,
+  Loader2
 } from 'lucide-react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-} from 'chart.js';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import dashboardService, { 
+  DashboardStats, 
+  RecentOrder, 
+  FeaturedProduct,
+  User,
+  Payment
+} from '@/services/dashboard.service';
+import { toast } from 'react-hot-toast';
+import Image from 'next/image';
 
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-);
-
-interface DashboardStats {
-  totalUsers: number;
-  totalOrders: number;
-  totalProducts: number;
-  totalRevenue: number;
-  recentOrders: any[];
-  topProducts: any[];
-  salesTrend: {
-    labels: string[];
-    data: number[];
-  };
-  analytics: {
-    monthlyRevenue: number[];
-    monthlyOrders: number[];
-    monthlyUsers: number[];
-    categoryDistribution: {
-      labels: string[];
-      data: number[];
-    };
-  };
+interface DashboardState {
+  stats: DashboardStats;
+  recentOrders: RecentOrder[];
+  featuredProducts: FeaturedProduct[];
 }
 
 // Animated Counter Component
@@ -69,8 +37,8 @@ const AnimatedCounter = ({ value, prefix = '', suffix = '' }: { value: number; p
   useEffect(() => {
     let start = 0;
     const end = value;
-    const duration = 2000; // 2 seconds
-    const incrementTime = 20; // Update every 20ms
+    const duration = 1000; // 2 seconds
+    const incrementTime = 10; // Update every 20ms
     const steps = duration / incrementTime;
     const increment = end / steps;
 
@@ -97,63 +65,46 @@ const AnimatedCounter = ({ value, prefix = '', suffix = '' }: { value: number; p
 };
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    totalOrders: 0,
-    totalProducts: 0,
-    totalRevenue: 0,
-    recentOrders: [],
-    topProducts: [],
-    salesTrend: {
-      labels: [],
-      data: []
+  const [dashboardData, setDashboardData] = useState<DashboardState>({
+    stats: {
+      total_users: 0,
+      total_orders: 0,
+      total_products: 0,
+      total_categories: 0,
+      total_sub_categories: 0,
+      total_sub_sub_categories: 0,
+      total_brands: 0,
+      total_reviews: 0,
+      total_active_coupons: 0
     },
-    analytics: {
-      monthlyRevenue: [],
-      monthlyOrders: [],
-      monthlyUsers: [],
-      categoryDistribution: {
-        labels: [],
-        data: []
-      }
-    }
+    recentOrders: [],
+    featuredProducts: []
   });
-
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Simulated API response with analytics data
-        const response = {
-          totalUsers: 50,
-          totalOrders: 26,
-          totalProducts: 97,
-          totalRevenue: 23000,
-          recentOrders: [
-            { id: 1, customer: 'John Doe', amount: 299.99, status: 'Delivered' },
-            { id: 2, customer: 'Jane Smith', amount: 199.99, status: 'Processing' },
-            { id: 3, customer: 'Mike Johnson', amount: 499.99, status: 'Shipped' },
-          ],
-          topProducts: [
-            { id: 1, name: 'Product A', sales: 150, revenue: 15000 },
-            { id: 2, name: 'Product B', sales: 120, revenue: 12000 },
-            { id: 3, name: 'Product C', sales: 100, revenue: 10000 },
-          ],
-          analytics: {
-            monthlyRevenue: [30000, 35000, 32000, 38000, 42000, 45678],
-            monthlyOrders: [120, 150, 130, 160, 180, 200],
-            monthlyUsers: [800, 900, 950, 1000, 1100, 1250],
-            categoryDistribution: {
-              labels: ['Electronics', 'Clothing', 'Books', 'Home', 'Sports'],
-              data: [30, 25, 15, 20, 10]
-            }
-          }
-        };
-        setStats(response);
-        setIsLoading(false);
+        setIsLoading(true);
+        
+        // Fetch stats
+        const statsResponse = await dashboardService.getDashboardStats();
+        
+        // Fetch recent orders
+        const recentOrdersResponse = await dashboardService.getRecentOrders(5);
+        
+        // Fetch featured products
+        const featuredProductsResponse = await dashboardService.getFeaturedProducts(5);
+        
+        setDashboardData({
+          stats: statsResponse,
+          recentOrders: recentOrdersResponse,
+          featuredProducts: featuredProductsResponse
+        });
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
+        toast.error(error instanceof Error ? error.message : 'Failed to fetch dashboard data');
+      } finally {
         setIsLoading(false);
       }
     };
@@ -161,72 +112,17 @@ export default function AdminDashboard() {
     fetchDashboardData();
   }, []);
 
-  // Chart configurations
-  const revenueChartData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    datasets: [
-      {
-        label: 'Revenue',
-        data: stats.analytics.monthlyRevenue,
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        fill: true,
-        tension: 0.4
-      }
-    ]
-  };
-
-  const ordersChartData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    datasets: [
-      {
-        label: 'Orders',
-        data: stats.analytics.monthlyOrders,
-        backgroundColor: 'rgba(16, 185, 129, 0.8)',
-      }
-    ]
-  };
-
-  const categoryChartData = {
-    labels: stats.analytics.categoryDistribution.labels,
-    datasets: [
-      {
-        data: stats.analytics.categoryDistribution.data,
-        backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(16, 185, 129, 0.8)',
-          'rgba(245, 158, 11, 0.8)',
-          'rgba(239, 68, 68, 0.8)',
-          'rgba(139, 92, 246, 0.8)',
-        ],
-      }
-    ]
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-    },
-  };
-
-  const StatCard = ({ title, value, icon: Icon, change, prefix = '', suffix = '' }: { 
+  const StatCard = ({ title, value, icon: Icon }: { 
     title: string; 
     value: number; 
     icon: any;
-    change?: { value: number; isPositive: boolean };
-    prefix?: string;
-    suffix?: string;
   }) => (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-600">{title}</p>
           <p className="text-2xl font-semibold text-gray-900">
-            <AnimatedCounter value={value} prefix={prefix} suffix={suffix} />
+            <AnimatedCounter value={value} />
           </p>
         </div>
         <div className="p-3 bg-blue-50 rounded-full">
@@ -248,65 +144,85 @@ export default function AdminDashboard() {
         ) : (
           <>
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-              <StatCard 
-                title="Total Users" 
-                value={stats.totalUsers} 
-                icon={Users}
-                change={{ value: 12, isPositive: true }}
-              />
-              <StatCard 
-                title="Total Orders" 
-                value={stats.totalOrders} 
-                icon={ShoppingBag}
-                change={{ value: 8, isPositive: true }}
-              />
-              <StatCard 
-                title="Total Products" 
-                value={stats.totalProducts} 
-                icon={Tag}
-                change={{ value: 5, isPositive: true }}
-              />
-              <StatCard 
-                title="Total Revenue" 
-                value={stats.totalRevenue} 
-                icon={DollarSign}
-                prefix="₹"
-                change={{ value: 15, isPositive: true }}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+              <StatCard title="Total Users" value={dashboardData.stats.total_users} icon={Users} />
+              <StatCard title="Total Orders" value={dashboardData.stats.total_orders} icon={ShoppingBag} />
+              <StatCard title="Total Products" value={dashboardData.stats.total_products} icon={Tag} />
+              <StatCard title="Total Categories" value={dashboardData.stats.total_categories} icon={LayoutGrid} />
+              <StatCard title="Total Sub Categories" value={dashboardData.stats.total_sub_categories} icon={Grid2X2} />
+              <StatCard title="Total Sub-Sub Categories" value={dashboardData.stats.total_sub_sub_categories} icon={Grid3X3} />
+              <StatCard title="Total Brands" value={dashboardData.stats.total_brands} icon={Star} />
+              <StatCard title="Total Reviews" value={dashboardData.stats.total_reviews} icon={Ticket} />
+              <StatCard title="Active Coupons" value={dashboardData.stats.total_active_coupons} icon={BadgePercent} />
             </div>
 
-            {/* Analytics Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-              {/* Revenue Trend */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Revenue Trend</h2>
-                <div className="h-80">
-                  <Line data={revenueChartData} options={chartOptions} />
+            <div className="space-y-6">
+              {/* Featured Products */}
+              <div className="bg-white rounded-lg shadow">
+                <div className="p-6 border-b border-gray-200">
+                  <h2 className="text-lg font-medium text-gray-900">Featured Products</h2>
                 </div>
-              </div>
-
-              {/* Orders Trend */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Orders Trend</h2>
-                <div className="h-80">
-                  <Bar data={ordersChartData} options={chartOptions} />
-                </div>
-              </div>
-            </div>
-
-            {/* Category Distribution and Recent Orders */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Category Distribution */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Category Distribution</h2>
-                <div className="h-80">
-                  <Doughnut data={categoryChartData} options={chartOptions} />
+                <div className="p-6">
+                  <div className="overflow-x-auto max-w-full">
+                    <table className="w-full divide-y divide-gray-200">
+                      <thead>
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product Name</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {dashboardData.featuredProducts.map((product) => (
+                          <tr key={product.id}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="relative h-16 w-16">
+                                <Image
+                                  src={`/uploads/${product.product_thumbnail}`}
+                                  alt={product.product_name}
+                                  fill
+                                  className="rounded-lg object-cover"
+                                />
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{product.product_name}</p>
+                                <p className="text-sm text-gray-500">{product.product_short_desc}</p>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {product.product_code}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {product.product_quantity}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              ₹{product.product_selling_price}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600">
+                              ₹{product.product_discount_price}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                ${product.status === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                {product.status === 1 ? 'Active' : 'Inactive'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
 
               {/* Recent Orders */}
-              <div className="bg-white rounded-lg shadow lg:col-span-2">
+              <div className="bg-white rounded-lg shadow">
                 <div className="p-6 border-b border-gray-200">
                   <h2 className="text-lg font-medium text-gray-900">Recent Orders</h2>
                 </div>
@@ -318,22 +234,33 @@ export default function AdminDashboard() {
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Status</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Status</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Method</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {stats.recentOrders.map((order) => (
+                        {dashboardData.recentOrders.map((order) => (
                           <tr key={order.id}>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{order.id}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.customer}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${order.amount}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.user?.name || 'N/A'}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹{order.order_total}</td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                ${order.status === 'Delivered' ? 'bg-green-100 text-green-800' : 
-                                  order.status === 'Processing' ? 'bg-yellow-100 text-yellow-800' : 
-                                  'bg-blue-100 text-blue-800'}`}>
-                                {order.status}
+                                ${order.payment?.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                {order.payment?.payment_status || 'pending'}
                               </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                ${order.order_status === 'completed' ? 'bg-green-100 text-green-800' : 
+                                  order.order_status === 'shipped' ? 'bg-blue-100 text-blue-800' : 
+                                  'bg-yellow-100 text-yellow-800'}`}>
+                                {order.order_status}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {order.payment?.payment_method || 'N/A'}
                             </td>
                           </tr>
                         ))}

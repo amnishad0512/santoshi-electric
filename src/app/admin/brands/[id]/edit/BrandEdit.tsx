@@ -4,9 +4,18 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
-import brandService, { Brand } from '@/services/brand.service';
+import brandService from '@/services/brand.service';
 import { useCommonData } from '@/contexts/CommonDataContext';
 import api from '@/lib/axios';
+
+interface BrandFormData {
+  id: number;
+  brand_name: string;
+  brand_image: string;
+  status: number;
+  products_count: number;
+  created_at: string;
+}
 
 export default function BrandEdit({ id }: { id: string }) {
   const router = useRouter();
@@ -14,13 +23,13 @@ export default function BrandEdit({ id }: { id: string }) {
   const [loadingBrand, setLoadingBrand] = useState(true);
   const { statuses = [], isLoading: isLoadingStatuses } = useCommonData();
   
-  const [formData, setFormData] = useState<Brand>({
-    id: '',
+  const [formData, setFormData] = useState<BrandFormData>({
+    id: 0,
     brand_name: '',
     brand_image: '',
     status: 1,
     products_count: 0,
-    created_at: '',
+    created_at: ''
   });
 
   const [newImage, setNewImage] = useState<File | null>(null);
@@ -30,8 +39,17 @@ export default function BrandEdit({ id }: { id: string }) {
     const fetchBrand = async () => {
       try {
         const response = await brandService.getBrandById(id);
-        setFormData(response.data);
-        setImagePreview(response.data.brand_image);
+        // Transform API response to match form data structure
+        const brandData: BrandFormData = {
+          id: response.data.id,
+          brand_name: response.brand_name,
+          brand_image: response.brand_image || '',
+          status: response.status,
+          products_count: response.products_count,
+          created_at: response.created_at || ''
+        };
+        setFormData(brandData);
+        setImagePreview(brandData.brand_image);
       } catch (error) {
         toast.error('Failed to fetch brand');
         console.error(error);

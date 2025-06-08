@@ -1,20 +1,59 @@
 import api from '@/lib/axios';
 
+export interface User {
+  id: number;
+  name: string;
+  phone_number: string;
+  email: string;
+  last_seen: string | null;
+  email_verified_at: string | null;
+  role: number;
+  status: number;
+  created_by: number;
+  updated_by: number;
+  profile_photo_path: string | null;
+  created_at: string;
+  updated_at: string;
+  otp: string | null;
+  otp_expires_at: string | null;
+}
+
+export interface Product {
+  id: number;
+  brand_id: number | null;
+  category_id: number | null;
+  sub_category_id: number | null;
+  sub_sub_category_id: number | null;
+  product_name: string;
+  product_slug: string;
+  product_code: string;
+  product_quantity: number;
+  product_tags: string;
+  product_size: string;
+  product_colour: string;
+  product_selling_price: string;
+  product_discount_price: string;
+  product_short_desc: string;
+  product_long_desc: string;
+  product_thumbnail: string;
+  hot_deal: number;
+  featured: number;
+  special_offer: number;
+  special_deals: number;
+  status: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface OrderItem {
   id: number;
   order_id: number;
   product_id: number;
   item_quantity: number;
   item_price: string;
-  product: {
-    id: number;
-    product_name: string;
-    product_slug: string;
-    product_code: string;
-    product_selling_price: string;
-    product_discount_price: string;
-    product_thumbnail: string;
-  };
+  created_at: string | null;
+  updated_at: string | null;
+  product: Product;
 }
 
 export interface Payment {
@@ -39,14 +78,8 @@ export interface ShippingAddress {
   state: string;
   postal_code: string;
   country: string;
-}
-
-export interface User {
-  id: number;
-  name: string;
-  phone_number: string;
-  email: string;
-  role: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Order {
@@ -85,7 +118,7 @@ class OrderService {
   async getAllOrders(): Promise<Order[]> {
     try {
       const response = await api.get<OrderResponse>('/orders');
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error('Error fetching orders:', error);
       return [];
@@ -95,7 +128,7 @@ class OrderService {
   async getOrderById(id: number): Promise<Order | null> {
     try {
       const response = await api.get<SingleOrderResponse>(`/orders/${id}`);
-      return response;
+      return response.data.data;
     } catch (error) {
       console.error('Error fetching order:', error);
       return null;

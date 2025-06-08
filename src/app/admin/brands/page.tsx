@@ -4,19 +4,17 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
-import brandService, { Brand } from '@/services/brand.service';
+import Image from 'next/image';
+import brandService from '@/services/brand.service';
 
-const getRoleName = (role: string | number) => {
-  const roleNumber = Number(role);
-  switch (roleNumber) {
-    case 1:
-      return 'Admin';
-    case 2:
-      return 'User';
-    default:
-      return 'Unknown';
-  }
-};
+interface Brand {
+  id: number;
+  brand_name: string;
+  brand_image: string;
+  status: number;
+  created_at: string;
+  products_count: number;
+}
 
 export default function BrandsPage() {
   const router = useRouter();
@@ -29,8 +27,8 @@ export default function BrandsPage() {
 
   const fetchBrands = async () => {
     try {
-      const { data } = await brandService.getAllBrands();
-      setBrands(Array.isArray(data) ? data : []);
+      const response = await brandService.getAllBrands();
+      setBrands(Array.isArray(response) ? response : []);
     } catch (error) {
       console.error('Error fetching brands:', error);
       toast.error('Failed to fetch brands');
@@ -39,14 +37,14 @@ export default function BrandsPage() {
     }
   };
 
-  const handleStatusChange = async (brandId: string, newStatus: number) => {
+  const handleDelete = async (brandId: number) => {
     try {
-      await brandService.updateBrandStatus(brandId, newStatus);
-      toast.success('Brand status updated successfully');
+      await brandService.deleteBrand(brandId);
+      toast.success('Brand deleted successfully');
       fetchBrands();
     } catch (error) {
-      console.error('Error updating brand status:', error);
-      toast.error('Failed to update brand status');
+      console.error('Error deleting brand:', error);
+      toast.error('Failed to delete brand');
     }
   };
 
@@ -76,13 +74,13 @@ export default function BrandsPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
+                  Logo
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Phone Number
+                  Brand
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Role
+                  Products
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
@@ -100,19 +98,20 @@ export default function BrandsPage() {
                 brands.map((brand) => (
                   <tr key={brand.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{brand.name}</div>
+                        <div className="flex-shrink-0 h-12 w-12 relative">
+                          <Image
+                            src={brand.brand_image || '/default-brand.png'}
+                            alt={brand.brand_name}
+                            fill
+                            className="rounded-lg object-cover"
+                          />
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{brand.phone_number}</div>
+                      <div className="text-sm text-gray-900">{brand.brand_name}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        Number(brand.role) === 1 
-                          ? 'bg-purple-100 text-purple-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {getRoleName(brand.role)}
-                      </span>
+                      <div className="text-sm text-gray-900">{brand.products_count}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
@@ -144,19 +143,17 @@ export default function BrandsPage() {
                         Edit
                       </Link>
                       <button
-                        onClick={() => handleStatusChange(brand.id, brand.status === 1 ? 0 : 1)}
-                        className={`text-sm font-medium ${
-                          brand.status === 1 ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'
-                        }`}
+                        onClick={() => handleDelete(brand.id)}
+                        className="text-red-600 hover:text-red-900"
                       >
-                        {brand.status === 1 ? 'Deactivate' : 'Activate'}
+                        Delete
                       </button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
                     No brands found
                   </td>
                 </tr>

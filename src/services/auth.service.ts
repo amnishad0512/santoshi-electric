@@ -37,6 +37,16 @@ export interface AuthResponse {
   };
 }
 
+export interface ProfileResponse{
+  id: string;
+  name: string;
+  email: string;
+  phone_number: string;
+  role: number;
+  status: string;
+  profile_photo_path?: string;
+}
+
 class AuthService {
   private static instance: AuthService;
 
@@ -55,20 +65,26 @@ class AuthService {
   }
 
   getCurrentUser() {
-    const userStr = Cookies.get('user');
-    return userStr ? JSON.parse(userStr) : null;
+    try {
+      const userStr = Cookies.get('user');
+      if (!userStr) return null;
+      return JSON.parse(userStr);
+    } catch (error) {
+      // If there's any error parsing the cookie, remove it and return null
+      Cookies.remove('user', { path: '/' });
+      return null;
+    }
   }
 
   async login(data: LoginData) {
     try {
       const response = await api.post<AuthResponse>('/login', data);
-      const { token, user } = response.data;
+   
+      const { token } = response.data;
+
       // Validate response data
       if (!token) {
         throw new Error('Token is missing from response');
-      }
-      if (!user || !user.id || !user.role) {
-        throw new Error('Invalid user data in response');
       }
 
       // Store in cookies with proper configuration
@@ -78,6 +94,17 @@ class AuthService {
         sameSite: 'Lax',
         expires: 1 // Set cookie to expire in 7 days
       });
+
+      const userData = await api.get<ProfileResponse>('/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const user = userData.data
+
+      if (!user || !user.id || !user.role) {
+        throw new Error('Invalid user data in response');
+      }
       
       Cookies.set('user', JSON.stringify(user), { 
         path: '/',
@@ -134,8 +161,70 @@ class AuthService {
   }
 
   async changePassword(data: ChangePasswordData) {
-    const response = await api.post('/verify-otp', data);
-    return response.data;
+    try {
+      const token = Cookies.get('token');
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
+      const response = await api.post('/change-password', data, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Change password error:', error);
+      throw error;
+    }
+  }
+
+  async updateProfile(data: any, image?: File) {
+    try {
+      const token = Cookies.get('token');
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
+      const formData = new FormData();
+      
+      // Add all profile data to FormData
+      Object.keys(data).forEach(key => {
+        if (data[key]) {
+          formData.append(key, data[key]);
+        }
+      });
+
+      // Add image if provided
+      if (image) {
+        formData.append('profile_photo_path', image);
+      }
+
+      const response = await api.post<ProfileResponse>('/profile', formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        }
+      });
+
+      const updatedUser = response.data;
+      
+      // Update stored user data
+      Cookies.set('user', JSON.stringify(updatedUser), { 
+        path: '/',
+        secure: true,
+        sameSite: 'Lax',
+        expires: 1
+      });
+
+      return updatedUser;
+    } catch (error: any) {
+      console.error('Profile update error:', error);
+      if (error.response?.status === 401) {
+        throw new Error('Not authenticated');
+      }
+      throw error;
+    }
   }
 
   getUserRole() {

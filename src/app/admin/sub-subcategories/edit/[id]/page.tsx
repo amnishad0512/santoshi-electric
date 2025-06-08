@@ -20,13 +20,7 @@ interface Subcategory {
   category_id: string;
 }
 
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function EditSubSubCategoryPage({ params }: PageProps) {
+export default function EditSubSubCategoryPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

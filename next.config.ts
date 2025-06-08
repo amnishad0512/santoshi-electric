@@ -7,14 +7,7 @@ const config = {
     domains: [], // Add your image domains here if needed
   },
   // This ensures that the app works with or without trailing slashes
-  async rewrites() {
-    return [
-      {
-        source: '/:path*',
-        destination: '/:path*',
-      },
-    ];
-  },
+  // rewrites removed for static export compatibility
 };
 
 export default config;

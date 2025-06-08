@@ -11,6 +11,7 @@ interface User {
   email: string;
   phone_number: string;
   role: number;
+  profile_image?: string;
 }
 
 interface AuthContextType {
