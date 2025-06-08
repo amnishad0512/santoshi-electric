@@ -42,6 +42,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'last_login' => 'datetime',
     ];
 
     public function reviews()
@@ -57,5 +58,10 @@ class User extends Authenticatable
     public function shippingAddresses()
     {
         return $this->hasMany(ShippingAddress::class);
+    }
+
+    public function getProfilePhotoPathAttribute($value)
+    {
+        return url('public/storage/' . $value);
     }
 }

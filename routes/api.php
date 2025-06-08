@@ -38,7 +38,8 @@ Route::post('/verify-otp', [AuthController::class, 'verifyOtpAndResetPassword'])
 
 // RESTful API routes
 Route::middleware(['auth:api'])->group(function () {
-
+    Route::get('profile', [UserController::class, 'userProfile']);
+    Route::match(['put','post','patch'],'/update/profile', [UserController::class, 'updateProfile']);
 });
 
     // Route::get('brands',[BrandController::class,'BrandId']);
