@@ -1,6 +1,7 @@
 <?php
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\UserAddressController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -81,6 +82,7 @@ use App\Http\Controllers\Api\SubSubCategoryController;
     Route::apiResource('sub-categories', SubCategoryController::class);
     Route::apiResource('sub-sub-categories', SubSubCategoryController::class);
     Route::apiResource('users', UserController::class);
+    Route::apiResource('user-addresses', UserAddressController::class);
 
     
 

@@ -11,15 +11,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->renameColumn('last_seen', 'last_login');
-        });
+         DB::statement("ALTER TABLE users CHANGE last_seen last_login DATETIME NULL");
     }
 
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->renameColumn('last_login', 'last_seen');
-        });
+         DB::statement("ALTER TABLE users CHANGE last_login last_seen DATETIME NULL");
     }
 };
