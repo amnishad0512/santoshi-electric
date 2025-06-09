@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\BrandController;
+use App\Http\Controllers\API\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CouponController;
 use App\Http\Controllers\Api\OrderController;
@@ -42,6 +43,12 @@ use App\Http\Controllers\Api\SubSubCategoryController;
         Route::match(['get', 'post'], '/profile', [UserController::class, 'profile']);
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/change-password', [UserController::class, 'changePassword']);
+
+        Route::get('/cart', [CartController::class, 'index']);
+        Route::post('/cart', [CartController::class, 'store']);
+        Route::put('/cart/{id}', [CartController::class, 'update']);
+        Route::delete('/cart/{id}', [CartController::class, 'destroy']);
+
     });
     Route::get('admin/dashboard', [DashboardController::class, 'adminDashboardStats']);
 
@@ -74,6 +81,8 @@ use App\Http\Controllers\Api\SubSubCategoryController;
     Route::apiResource('sub-categories', SubCategoryController::class);
     Route::apiResource('sub-sub-categories', SubSubCategoryController::class);
     Route::apiResource('users', UserController::class);
+
+    
 
 // Check status of various entities
 Route::get('/status', [App\Http\Controllers\Api\StatusController::class, 'index']);

@@ -17,8 +17,6 @@ return new class extends Migration
             $table->decimal('maximum_discount', 8, 2)->nullable()->after('minimum_purchase');
             $table->integer('usage_limit')->nullable()->after('maximum_discount');
             $table->date('coupon_start_date')->nullable()->after('usage_limit');
-            $table->timestamp('created_at')->nullable()->after('coupon_status');
-            $table->timestamp('updated_at')->nullable()->after('created_at');
         });
     }
 
