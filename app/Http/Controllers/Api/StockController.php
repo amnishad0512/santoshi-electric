@@ -5,12 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Stock;
 use Illuminate\Http\Request;
+use App\Helpers\ResponseBuilder;
 
 class StockController extends Controller
 {
     public function index()
     {
-        return response()->json(Stock::all());
+        return ResponseBuilder::success(Stock::all(), 'Stocks retrieved successfully');
     }
 
     public function store(Request $request)
@@ -23,30 +24,27 @@ class StockController extends Controller
 
         $stock = Stock::create($request->all());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Stock created successfully',
-            'data' => $stock
-        ], 201);
+        return ResponseBuilder::success($stock, 'Stock created successfully', 201);
     }
 
     public function show($id)
     {
-         $stock = Stock::findOrFail($id);
+        $stock = Stock::find($id);
 
         if (!$stock) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Stock not found'
-            ], 404);
+            return ResponseBuilder::error('Stock not found', 404);
         }
 
-        return response()->json($stock);
+        return ResponseBuilder::success($stock, 'Stock retrieved successfully');
     }
 
     public function update(Request $request, $id)
     {
-        $stock = Stock::findOrFail($id);
+        $stock = Stock::find($id);
+
+        if (!$stock) {
+            return ResponseBuilder::error('Stock not found', 404);
+        }
 
         $request->validate([
             'stock_name' => 'sometimes|required|string|max:255',
@@ -56,11 +54,7 @@ class StockController extends Controller
 
         $stock->update($request->only(['stock_name', 'stock_quantity', 'stock_status']));
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Stock updated successfully',
-            'data' => $stock
-        ]);
+        return ResponseBuilder::success($stock, 'Stock updated successfully');
     }
 
     public function destroy($id)
@@ -68,17 +62,11 @@ class StockController extends Controller
         $stock = Stock::find($id);
 
         if (!$stock) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Stock not found'
-            ], 404);
+            return ResponseBuilder::error('Stock not found', 404);
         }
 
         $stock->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Stock deleted successfully'
-        ]);
+        return ResponseBuilder::success(null, 'Stock deleted successfully');
     }
 }

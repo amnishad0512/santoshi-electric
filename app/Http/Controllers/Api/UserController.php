@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use App\Helpers\ResponseBuilder;
 
 class UserController extends Controller
 {
@@ -19,28 +20,20 @@ class UserController extends Controller
     {
         try {
             $users = User::select('id', 'name', 'phone_number', 'email', 'role', 'status', 'created_at')
-            ->get();
+                ->get();
 
             if ($users->isEmpty()) {
-            return response()->json([
-                'status' => true,
-                'message' => 'No users found'
-            ], 200);
+                return ResponseBuilder::success([
+                    'message' => 'No users found',
+                ]);
             }
 
-            return response()->json([
-            'status' => true,
-            'data' => $users
-            ], 200);
-
+            return ResponseBuilder::success([
+                'data' => $users
+            ]);
         } catch (\Exception $e) {
-            return response()->json([
-            'status' => false,
-            'message' => 'Failed to fetch users',
-            'error' => $e->getMessage(),
-            ], 500);
+            return ResponseBuilder::error('Failed to fetch users', 500, $e->getMessage());
         }
-
     }
 
     /**
@@ -70,18 +63,12 @@ class UserController extends Controller
                 'status' => $request->status ?? 1,
             ]);
 
-            return response()->json([
-                'status' => true,
+            return ResponseBuilder::success([
                 'message' => 'User created successfully',
-                'data' => $user
             ], 201);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Failed to create user',
-                'error' => $e->getMessage(),
-            ], 500);
+            return ResponseBuilder::error('Failed to create user', 500, $e->getMessage());
         }
     }
 
@@ -95,23 +82,15 @@ class UserController extends Controller
                 ->find($id);
 
             if (!$user) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'User not found'
-                ], 404);
+                return ResponseBuilder::error('User not found', 404);
             }
 
-            return response()->json([
-                'status' => true,
+            return ResponseBuilder::success([
                 'data' => $user
             ], 200);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Failed to fetch user',
-                'error' => $e->getMessage(),
-            ], 500);
+            return ResponseBuilder::error('Failed to fetch user', 500, $e->getMessage());
         }
     }
 
@@ -124,39 +103,32 @@ class UserController extends Controller
             $user = User::find($id);
 
             if (!$user) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'User not found'
-                ], 404);
+                return ResponseBuilder::error('User not found', 404);
             }
 
             $request->validate([
-                'name' => 'required',
+                'name' => 'required|string|max:255',
                 'phone_number' => 'required|string|max:15|unique:users,phone_number,' . $id,
-                'email' => 'required|email',
+                'email' => 'required|email|unique:users,email,' . $id,
                 'role' => 'required',
+                'status' => 'nullable|in:0,1',
             ]);
 
-            $user->update([
-                'name' => $request->name,
-                'phone_number' => $request->phone_number,
-                'email' => $request->email,
-                'role' => $request->role,
-                'status' => $request->status,
-            ]);
+            $user->name = $request->name;
+            $user->phone_number = $request->phone_number;
+            $user->email = $request->email;
+            $user->role = $request->role;
+            if ($request->has('status')) {
+                $user->status = $request->status;
+            }
+            $user->save();
 
-            return response()->json([
-                'status' => true,
+            return ResponseBuilder::success([
                 'message' => 'User updated successfully',
-                'data' => $user
             ], 200);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Failed to update user',
-                'error' => $e->getMessage(),
-            ], 500);
+            return ResponseBuilder::error('Failed to update user', 500, $e->getMessage());
         }
     }
 
@@ -169,25 +141,17 @@ class UserController extends Controller
             $user = User::find($id);
 
             if (!$user) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'User not found'
-                ], 404);
+                return ResponseBuilder::error('User not found', 404);
             }
 
             $user->delete();
 
-            return response()->json([
-                'status' => true,
+            return ResponseBuilder::success([
                 'message' => 'User deleted successfully'
             ], 200);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Failed to delete user',
-                'error' => $e->getMessage(),
-            ], 500);
+            return ResponseBuilder::error('Failed to delete user', 500, $e->getMessage());
         }
     }
 
@@ -197,10 +161,7 @@ class UserController extends Controller
             $user = Auth::user();
 
             if (!$user) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'User not authenticated'
-                ], 401);
+                return ResponseBuilder::error('User not authenticated', 401);
             }
 
             // If GET, return user profile
@@ -209,8 +170,7 @@ class UserController extends Controller
                     ->select('id', 'name', 'phone_number', 'email', 'profile_photo_path', 'role', 'status', 'last_login', 'created_at', 'updated_at')
                     ->first();
 
-                return response()->json([
-                    'status' => true,
+                return ResponseBuilder::success([
                     'data' => $userInfo
                 ]);
             }
@@ -227,10 +187,7 @@ class UserController extends Controller
                 ]);
 
                 if ($validator->fails()) {
-                    return response()->json([
-                        'status' => false,
-                        'errors' => $validator->errors()
-                    ], 422);
+                    return ResponseBuilder::error($validator->errors(), 422);
                 }
 
                 // Update fields if provided
@@ -243,10 +200,7 @@ class UserController extends Controller
                     if ($user->role == 1) {
                         $user->role = $request->role;
                     } else {
-                        return response()->json([
-                            'status' => false,
-                            'message' => 'Only admins can update the role.'
-                        ], 403);
+                        return ResponseBuilder::error('Only admins can update the role.', 403);
                     }
                 }
 
@@ -268,24 +222,16 @@ class UserController extends Controller
                 $user->updated_by = $user->id;
                 $user->save();
 
-                return response()->json([
-                    'status' => true,
+                return ResponseBuilder::success([
                     'message' => 'Profile updated successfully',
                 ]);
             }
 
             // Invalid Method
-            return response()->json([
-                'status' => false,
-                'message' => 'Method not allowed.'
-            ], 405);
+            return ResponseBuilder::error('Method not allowed.', 405);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred while processing the request.',
-                'error' => $e->getMessage(),
-            ], 500);
+            return ResponseBuilder::error('An error occurred while processing the request.', 500, $e->getMessage());
         }
     }
 
@@ -295,10 +241,7 @@ class UserController extends Controller
             $user = Auth::user();
 
             if (!$user) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'User not authenticated',
-                ], 401);
+                return ResponseBuilder::error('User not authenticated', 401);
             }
 
             // Validate input
@@ -313,42 +256,28 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'errors' => $validator->errors(),
-                ], 422);
+                return ResponseBuilder::error($validator->errors(), 422);
             }
 
             // Check if current password matches
             if (!Hash::check($request->current_password, $user->password)) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Current password is incorrect',
-                ], 400);
+                return ResponseBuilder::error('Current password is incorrect', 400);
             }
 
             // Check if new password is the same as current password
             if (Hash::check($request->new_password, $user->password)) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'New password cannot be the same as the current password',
-                ], 400);
+                return ResponseBuilder::error('New password cannot be the same as the current password', 400);
             }
 
             // Update to new password
             $user->password = Hash::make($request->new_password);
             $user->save();
 
-            return response()->json([
-                'status' => true,
+            return ResponseBuilder::success([
                 'message' => 'Password changed successfully',
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Failed to change password',
-                'error' => $e->getMessage(),
-            ], 500);
+            return ResponseBuilder::error('Failed to change password', 500, $e->getMessage());
         }
     }
 }

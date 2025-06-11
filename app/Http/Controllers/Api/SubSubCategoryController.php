@@ -6,121 +6,123 @@ use App\Http\Controllers\Controller;
 use App\Models\SubSubCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Helpers\ResponseBuilder;
 
 class SubSubCategoryController extends Controller
 {
     public function index()
     {
-        $subsubcategories = SubSubCategory::select('id', 'sub_sub_category_name')
-            ->with(['category:id,category_name', 'subCategory:id,subcategory_name'])
-            ->get();
-        
-        return response()->json([
-            'status' => 'success',
-            'data' => $subsubcategories
-        ], 200);
+        try {
+            $subsubcategories = SubSubCategory::select('id', 'sub_sub_category_name')
+                ->with(['category:id,category_name', 'subCategory:id,subcategory_name'])
+                ->get();
+
+            return ResponseBuilder::success($subsubcategories);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error('Failed to fetch sub sub categories.', 500, $e->getMessage());
+        }
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'category_id'            => 'required|exists:categories,id',
-            'sub_category_id'        => 'required|exists:sub_categories,id',
-            'sub_sub_category_name'  => 'required|string|max:255',
-        ]);
+        try {
+            $request->validate([
+                'category_id'            => 'required|exists:categories,id',
+                'sub_category_id'        => 'required|exists:sub_categories,id',
+                'sub_sub_category_name'  => 'required|string|max:255',
+            ]);
 
-        $subSubCategory = SubSubCategory::create([
-            'category_id' => $request->category_id,
-            'sub_category_id' => $request->sub_category_id,
-            'sub_sub_category_name' => $request->sub_sub_category_name,
-            'sub_sub_category_slug' => Str::slug($request->sub_sub_category_name),
-        ]);
+            $subSubCategory = SubSubCategory::create([
+                'category_id' => $request->category_id,
+                'sub_category_id' => $request->sub_category_id,
+                'sub_sub_category_name' => $request->sub_sub_category_name,
+                'sub_sub_category_slug' => Str::slug($request->sub_sub_category_name),
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Sub Sub Category created successfully',
-            'data' => $subSubCategory
-        ], 201);
+            return ResponseBuilder::success($subSubCategory, 'Sub Sub Category created successfully', 201);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error('Failed to create sub sub category.', 500, $e->getMessage());
+        }
     }
 
     public function show($id)
     {
-        $subSubCategory = SubSubCategory::with(['category', 'subCategory'])->findOrFail($id);
+        try {
+            $subSubCategory = SubSubCategory::with(['category', 'subCategory'])->find($id);
 
-        if (!$subSubCategory) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sub Sub Category not found'
-            ], 404);
+            if (!$subSubCategory) {
+                return ResponseBuilder::error('Sub Sub Category not found', 404);
+            }
+
+            return ResponseBuilder::success($subSubCategory);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error('Failed to fetch sub sub category.', 500, $e->getMessage());
         }
-
-        return response()->json($subSubCategory);
     }
 
     public function update(Request $request, $id)
     {
-        $subSubCategory = SubSubCategory::findOrFail($id);
+        try {
+            $subSubCategory = SubSubCategory::find($id);
 
-        $request->validate([
-            'category_id'            => 'required|exists:categories,id',
-            'sub_category_id'        => 'required|exists:sub_categories,id',
-            'sub_sub_category_name'  => 'required|string|max:255',
-        ]);
+            if (!$subSubCategory) {
+                return ResponseBuilder::error('Sub Sub Category not found', 404);
+            }
 
-        $subSubCategory->update([
-            'category_id' => $request->category_id,
-            'sub_category_id' => $request->sub_category_id,
-            'sub_sub_category_name' => $request->sub_sub_category_name,
-            'sub_sub_category_slug' => Str::slug($request->sub_sub_category_name),
-        ]);
+            $request->validate([
+                'category_id'            => 'required|exists:categories,id',
+                'sub_category_id'        => 'required|exists:sub_categories,id',
+                'sub_sub_category_name'  => 'required|string|max:255',
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Sub Sub Category updated successfully',
-            'data' => $subSubCategory
-        ]);
+            $subSubCategory->update([
+                'category_id' => $request->category_id,
+                'sub_category_id' => $request->sub_category_id,
+                'sub_sub_category_name' => $request->sub_sub_category_name,
+                'sub_sub_category_slug' => Str::slug($request->sub_sub_category_name),
+            ]);
+
+            return ResponseBuilder::success($subSubCategory, 'Sub Sub Category updated successfully');
+        } catch (\Exception $e) {
+            return ResponseBuilder::error('Failed to update sub sub category.', 500, $e->getMessage());
+        }
     }
 
     public function destroy($id)
     {
-        $subSubCategory = SubSubCategory::find($id);
+        try {
+            $subSubCategory = SubSubCategory::find($id);
 
-        if (!$subSubCategory) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sub Sub Category not found'
-            ], 404);
+            if (!$subSubCategory) {
+                return ResponseBuilder::error('Sub Sub Category not found', 404);
+            }
+
+            $subSubCategory->delete();
+
+            return ResponseBuilder::success(null, 'Sub Sub Category deleted successfully');
+        } catch (\Exception $e) {
+            return ResponseBuilder::error('Failed to delete sub sub category.', 500, $e->getMessage());
         }
-
-        $subSubCategory->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Sub Sub Category deleted successfully'
-        ]);
     }
-    // sub sub category dropdown list api craeted by Yogi (date: 08jun25)
-    // This method returns a dropdown list of sub sub categories based on the provided sub category ID
-    // If no ID is provided, it returns all sub sub categories.
-    public function SubSubCategoryDropdown($id='')
+
+    public function SubSubCategoryDropdown($id = '')
     {
-        if ($id) {
-            $subSubCategories = SubSubCategory::where('sub_category_id', $id)
-                ->select('id as value', 'sub_sub_category_name as label')
-                ->get();
-        } else {
-            $subSubCategories = SubSubCategory::select('id as value', 'sub_sub_category_name as label')->get();
-        }
-        if (!$subSubCategories) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sub Sub Category not found'
-            ], 404);
-        }else{
-            return response()->json([
-            'success' => true,
-            'data' => $subSubCategories
-            ]);
+        try {
+            if ($id) {
+                $subSubCategories = SubSubCategory::where('sub_category_id', $id)
+                    ->select('id as value', 'sub_sub_category_name as label')
+                    ->get();
+            } else {
+                $subSubCategories = SubSubCategory::select('id as value', 'sub_sub_category_name as label')->get();
+            }
+
+            if ($subSubCategories->isEmpty()) {
+                return ResponseBuilder::error('Sub Sub Category not found', 404);
+            }
+
+            return ResponseBuilder::success($subSubCategories);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error('Failed to fetch sub sub categories.', 500, $e->getMessage());
         }
     }
 }

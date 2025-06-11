@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
+use App\Helpers\ResponseBuilder;
 
 class ProductImageController extends Controller
 {
@@ -14,10 +15,7 @@ class ProductImageController extends Controller
             ->select('id', 'product_id', 'path_name')
             ->get();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $productImages
-        ], 200);
+        return ResponseBuilder::success($productImages, 'Product Images fetched successfully');
     }
 
     public function store(Request $request)
@@ -29,30 +27,27 @@ class ProductImageController extends Controller
 
         $productImage = ProductImage::create($request->all());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Product Image created successfully',
-            'data' => $productImage
-        ], 201);
+        return ResponseBuilder::success($productImage, 'Product Image created successfully', 201);
     }
 
     public function show($id)
     {
-        $productImage = ProductImage::with('product')->findOrFail($id);
+        $productImage = ProductImage::with('product')->find($id);
 
         if (!$productImage) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Product Image not found'
-            ], 404);
+            return ResponseBuilder::error('Product Image not found', 404);
         }
 
-        return response()->json($productImage);
+        return ResponseBuilder::success($productImage, 'Product Image fetched successfully');
     }
 
     public function update(Request $request, $id)
     {
-        $productImage = ProductImage::findOrFail($id);
+        $productImage = ProductImage::find($id);
+
+        if (!$productImage) {
+            return ResponseBuilder::error('Product Image not found', 404);
+        }
 
         $request->validate([
             'path_name' => 'sometimes|required|string|max:255',
@@ -60,11 +55,7 @@ class ProductImageController extends Controller
 
         $productImage->update($request->only(['path_name']));
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Product Image updated successfully',
-            'data' => $productImage
-        ]);
+        return ResponseBuilder::success($productImage, 'Product Image updated successfully');
     }
 
     public function destroy($id)
@@ -72,17 +63,11 @@ class ProductImageController extends Controller
         $productImage = ProductImage::find($id);
 
         if (!$productImage) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Product Image not found'
-            ], 404);
+            return ResponseBuilder::error('Product Image not found', 404);
         }
 
         $productImage->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Product Image deleted successfully'
-        ]);
+        return ResponseBuilder::success(null, 'Product Image deleted successfully');
     }
 }

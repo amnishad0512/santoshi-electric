@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Helpers\ResponseBuilder;
 
 class CategoryController extends Controller
 {
@@ -15,15 +16,12 @@ class CategoryController extends Controller
             ->withCount('products', 'subCategories', 'subSubCategories')
             ->get();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $categories
-        ], 200);
+        return ResponseBuilder::success($categories);
     }
 
     public function store(Request $request)
     {
-         $request->validate([
+        $request->validate([
             'category_name' => 'required|string|max:255',
         ]);
 
@@ -33,29 +31,19 @@ class CategoryController extends Controller
             'category_icon' => $request->category_icon,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Category created successfully',
-            'data' => $category
-        ], 201);
+        return ResponseBuilder::created($category, 'Category created successfully');
     }
 
     public function show($id)
     {
         $category = Category::select('id', 'category_name', 'category_icon', 'status', 'created_at', 'updated_at')
-        ->withCount('products', 'subCategories', 'subSubCategories')->find($id);
+            ->withCount('products', 'subCategories', 'subSubCategories')->find($id);
 
         if (!$category) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Category not found'
-            ], 404);
+            return ResponseBuilder::error('Category not found', 404);
         }
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $category
-        ], 200);
+        return ResponseBuilder::success($category);
     }
 
     public function update(Request $request, $id)
@@ -63,13 +51,10 @@ class CategoryController extends Controller
         $category = Category::find($id);
 
         if (!$category) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Category not found'
-            ], 404);
+            return ResponseBuilder::error('Category not found', 404);
         }
 
-         $request->validate([
+        $request->validate([
             'category_name' => 'required|string|max:255',
         ]);
 
@@ -79,11 +64,7 @@ class CategoryController extends Controller
             'category_icon' => $request->category_icon,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Category updated successfully',
-            'data' => $category
-        ]);
+        return ResponseBuilder::success($category, 'Category updated successfully');
     }
 
     public function destroy($id)
@@ -91,23 +72,18 @@ class CategoryController extends Controller
         $category = Category::find($id);
 
         if (!$category) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Category not found'
-            ], 404);
+            return ResponseBuilder::error('Category not found', 404);
         }
 
         $category->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Category deleted successfully'
-        ]);
+        return ResponseBuilder::success(null, 'Category deleted successfully');
     }
-// category dropdown list api - craeted by Yogi (date: 08jun25)
-// This method returns a dropdown list of categories based on the brand ID provided.
-// If no ID is provided, it returns all categories.
-    public function categoryDropdown($id='')
+
+    // category dropdown list api - created by Yogi (date: 08jun25)
+    // This method returns a dropdown list of categories based on the brand ID provided.
+    // If no ID is provided, it returns all categories.
+    public function categoryDropdown($id = '')
     {
         if ($id) {
             $categories = Category::where('brand_id', $id)
@@ -117,17 +93,9 @@ class CategoryController extends Controller
             $categories = Category::select('id as value', 'category_name as label')->get();
         }
         if (!$categories) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Category not found'
-            ], 404);
-        }else{
-            return response()->json([
-            'success' => true,
-            'data' => $categories
-            ]);
+            return ResponseBuilder::error('Category not found', 404);
+        } else {
+            return ResponseBuilder::success($categories);
         }
     }
-
-
 }

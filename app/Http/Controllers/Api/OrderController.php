@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use App\Helpers\ResponseBuilder;
 
 class OrderController extends Controller
 {
@@ -14,10 +15,7 @@ class OrderController extends Controller
             ->select('id', 'user_id', 'order_status', 'order_total')
             ->get();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $orders
-        ], 200);
+        return ResponseBuilder::success($orders, 'Orders fetched successfully');
     }
 
     public function store(Request $request)
@@ -34,25 +32,18 @@ class OrderController extends Controller
             'order_total' => $request->order_total,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Order created successfully',
-            'data' => $order
-        ], 201);
+        return ResponseBuilder::success($order, 'Order created successfully', 201);
     }
 
     public function show($id)
     {
-        $order = Order::with(['user', 'orderItems.product', 'payment', 'shippingAddress'])->findOrFail($id);
+        $order = Order::with(['user', 'orderItems.product', 'payment', 'shippingAddress'])->find($id);
 
         if (!$order) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Order not found'
-            ], 404);
+            return ResponseBuilder::error('Order not found', 404);
         }
 
-        return response()->json($order);
+        return ResponseBuilder::success($order, 'Order fetched successfully');
     }
 
     public function update(Request $request, $id)
@@ -60,10 +51,7 @@ class OrderController extends Controller
         $order = Order::find($id);
 
         if (!$order) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Order not found'
-            ], 404);
+            return ResponseBuilder::error('Order not found', 404);
         }
 
         $request->validate([
@@ -74,11 +62,7 @@ class OrderController extends Controller
 
         $order->update($request->only(['user_id', 'order_status', 'order_total']));
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Order updated successfully',
-            'data' => $order
-        ]);
+        return ResponseBuilder::success($order, 'Order updated successfully');
     }
 
     public function destroy($id)
@@ -86,17 +70,11 @@ class OrderController extends Controller
         $order = Order::find($id);
 
         if (!$order) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Order not found'
-            ], 404);
+            return ResponseBuilder::error('Order not found', 404);
         }
 
         $order->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Order deleted successfully'
-        ]);
+        return ResponseBuilder::success(null, 'Order deleted successfully');
     }
 }

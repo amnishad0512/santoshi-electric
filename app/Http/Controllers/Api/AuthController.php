@@ -1,7 +1,4 @@
 <?php
-
-
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -14,10 +11,10 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SendOtpMail;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\ResponseBuilder;
 
 class AuthController extends Controller
 {
-
     public function Register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -30,15 +27,10 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-
-            return response()->json([
-                'status' => 'error',
-                'message' => $validator->errors()->first(),
-            ], 422);
+            return ResponseBuilder::error($validator->errors()->first(), 422);
         }
 
         try {
-
             $user = User::create([
                 'name' => $request->name,
                 'phone_number' => $request->phone_number,
@@ -48,24 +40,17 @@ class AuthController extends Controller
                 'role' => $request->role,
                 'status' => $request->status,
             ]);
-            $user->created_by = $user->id; // or any other user ID
-            $user->updated_by = $user->id; // or any other user ID
+            $user->created_by = $user->id;
+            $user->updated_by = $user->id;
             $user->save();
 
             DB::commit();
-            return response()->json([
-                'status' => 'success',
-            ], 201);
+            return ResponseBuilder::success([], 'User registered successfully', 201);
         } catch (\Exception  $e) {
             DB::rollBack();
-
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage(),
-            ], 401);
+            return ResponseBuilder::error($e->getMessage(), 401);
         }
     }
-
 
     public function Login(Request $request)
     {
@@ -75,43 +60,27 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $validator->errors()->first(),
-            ], 422);
+            return ResponseBuilder::error($validator->errors()->first(), 422);
         }
 
         try {
-
             $user = User::where('phone_number', $request->phone_number)->first();
 
             if (!$user || !Hash::check($request->password, $user->password)) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Invalid phone number or password',
-                ], 401);
+                return ResponseBuilder::error('Invalid phone number or password', 401);
             }
 
-            // Create Passport token
             $token = $user->createToken('LaravelAuthApp')->accessToken;
             $user->last_login = date('Y-m-d H:i:s');
             $user->save();
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Login successful',
-                'data' => [
-                    'token' => $token                ]
-            ], 200);
+            return ResponseBuilder::success([
+                'token' => $token
+            ], 'Login successful', 200);
         } catch (\Exception $e) {
-
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage(),
-            ], 401);
+            return ResponseBuilder::error($e->getMessage(), 401);
         }
     }
-
 
     public function forgotPassword(Request $request)
     {
@@ -120,10 +89,7 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $validator->errors()->first(),
-            ], 422);
+            return ResponseBuilder::error($validator->errors()->first(), 422);
         }
 
         try {
@@ -132,40 +98,27 @@ class AuthController extends Controller
             }
 
             if (!$user) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'No user found with the provided details',
-                ], 404);
+                return ResponseBuilder::error('No user found with the provided details', 404);
             }
 
             $otp = rand(100000, 999999);
             $otpExpiry = now()->addMinutes(10);
 
-            // Save OTP and expiry in user table
             $user->otp = $otp;
             $user->otp_expires_at = $otpExpiry;
             $user->save();
 
-            // Send SMS (if phone exists and you have SMS service)
             if ($request->phone_number) {
-                // $this->sendSmsOtp($request->phone_number, $otp);
                 \Log::info("OTP for {$request->phone_number} is {$otp}");
             }
 
-            // Send email if email provided
             if ($user->email) {
                 Mail::to($user->email)->send(new SendOtpMail($otp));
             }
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'OTP sent successfully',
-            ], 200);
+            return ResponseBuilder::success([], 'OTP sent successfully', 200);
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage(),
-            ], 500);
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
     }
 
@@ -177,38 +130,24 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $validator->errors()->first(),
-            ], 422);
+            return ResponseBuilder::error($validator->errors()->first(), 422);
         }
 
-        // Find user by OTP and check expiry
         $user = User::where('otp', $request->otp)
             ->where('otp_expires_at', '>', now())
             ->first();
 
         if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Invalid or expired OTP',
-            ], 400);
+            return ResponseBuilder::error('Invalid or expired OTP', 400);
         }
 
-        // Update password
         $user->password = Hash::make($request->password);
         $user->password_salt = $request->password;
-
-        // Clear OTP after use
         $user->otp = null;
         $user->otp_expires_at = null;
-
         $user->save();
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Password has been reset successfully',
-        ], 200);
+        return ResponseBuilder::success([], 'Password has been reset successfully', 200);
     }
 
     public function logout(Request $request)
@@ -216,18 +155,11 @@ class AuthController extends Controller
         $user = Auth::user();
 
         if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'User not authenticated',
-            ], 401);
+            return ResponseBuilder::error('User not authenticated', 401);
         }
 
-        // Revoke current access token
         $user->token()->revoke();
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Logged out successfully',
-        ]);
+        return ResponseBuilder::success([], 'Logged out successfully');
     }
 }

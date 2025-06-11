@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Coupon;
 use Illuminate\Http\Request;
+use App\Helpers\ResponseBuilder;
 
 class CouponController extends Controller
 {
@@ -12,10 +13,7 @@ class CouponController extends Controller
     {   
         $coupons = Coupon::select('id', 'coupon_name', 'discount_type', 'coupon_discount', 'minimum_purchase', 'maximum_discount', 'usage_limit', 'coupon_start_date', 'coupon_validity', 'coupon_status', 'created_at')->get();
         
-        return response()->json([
-            'status' => 'success',
-            'data' => $coupons
-        ], 200);
+        return ResponseBuilder::success($coupons, 'Coupons fetched successfully');
     }
 
     public function store(Request $request)
@@ -40,11 +38,7 @@ class CouponController extends Controller
             'coupon_status' => $request->coupon_status,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Coupon created successfully',
-            'data' => $coupon
-        ], 201);
+        return ResponseBuilder::success($coupon, 'Coupon created successfully', 201);
     }
 
     public function show($id)
@@ -52,13 +46,10 @@ class CouponController extends Controller
         $coupon = Coupon::find($id);
 
         if (!$coupon) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Coupon not found'
-            ], 404);
+            return ResponseBuilder::error('Coupon not found', 404);
         }
 
-        return response()->json(Coupon::findOrFail($id));
+        return ResponseBuilder::success($coupon, 'Coupon fetched successfully');
     }
 
     public function update(Request $request, $id)
@@ -66,10 +57,7 @@ class CouponController extends Controller
         $coupon = Coupon::find($id);
 
         if (!$coupon) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Coupon not found'
-            ], 404);
+            return ResponseBuilder::error('Coupon not found', 404);
         }
 
         $request->validate([
@@ -92,11 +80,7 @@ class CouponController extends Controller
             'coupon_status' => $request->coupon_status,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Coupon updated successfully',
-            'data' => $coupon
-        ]);
+        return ResponseBuilder::success($coupon, 'Coupon updated successfully');
     }
 
     public function destroy($id)
@@ -104,17 +88,11 @@ class CouponController extends Controller
         $coupon = Coupon::find($id);
 
         if (!$coupon) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Coupon not found'
-            ], 404);
+            return ResponseBuilder::error('Coupon not found', 404);
         }
 
         $coupon->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Coupon deleted successfully'
-        ]);
+        return ResponseBuilder::success(null, 'Coupon deleted successfully');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\UserAddress;
 use Illuminate\Http\Request;
+use App\Helpers\ResponseBuilder;
 
 class UserAddressController extends Controller
 {
@@ -13,13 +14,14 @@ class UserAddressController extends Controller
      */
     public function index()
     {
-        $userAddresses = UserAddress::select('id', 'user_id', 'full_name', 'phone_number', 'street_address', 'city', 'state', 'pincode', 'created_at', 'updated_at')
-            ->get();
+        try {
+            $userAddresses = UserAddress::select('id', 'user_id', 'full_name', 'phone_number', 'street_address', 'city', 'state', 'pincode', 'created_at', 'updated_at')
+                ->get();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $userAddresses
-        ], 200);
+            return ResponseBuilder::success($userAddresses);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error('Failed to fetch user addresses.', 500, $e->getMessage());
+        }
     }
 
     /**
@@ -27,23 +29,23 @@ class UserAddressController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'full_name' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:15',
-            'street_address' => 'nullable|string|max:255',
-            'city' => 'required|string|max:100',
-            'state' => 'nullable|string|max:100',
-            'pincode' => 'nullable|string|max:10',
-        ]);
+        try {
+            $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'full_name' => 'required|string|max:255',
+                'phone_number' => 'required|string|max:15',
+                'street_address' => 'nullable|string|max:255',
+                'city' => 'required|string|max:100',
+                'state' => 'nullable|string|max:100',
+                'pincode' => 'nullable|string|max:10',
+            ]);
 
-        $userAddress = UserAddress::create($request->all());
+            $userAddress = UserAddress::create($request->all());
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'User address created successfully',
-            'data' => $userAddress
-        ], 201);
+            return ResponseBuilder::success($userAddress, 'User address created successfully', 201);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error('Failed to create user address.', 500, $e->getMessage());
+        }
     }
 
     /**
@@ -51,20 +53,18 @@ class UserAddressController extends Controller
      */
     public function show(string $id)
     {
-        $userAddress = UserAddress::select('id', 'user_id', 'full_name', 'phone_number', 'street_address', 'city', 'state', 'pincode', 'created_at', 'updated_at')
-            ->find($id);
+        try {
+            $userAddress = UserAddress::select('id', 'user_id', 'full_name', 'phone_number', 'street_address', 'city', 'state', 'pincode', 'created_at', 'updated_at')
+                ->find($id);
 
-        if (!$userAddress) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'User address not found'
-            ], 404);
+            if (!$userAddress) {
+                return ResponseBuilder::error('User address not found', 404);
+            }
+
+            return ResponseBuilder::success($userAddress);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error('Failed to fetch user address.', 500, $e->getMessage());
         }
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $userAddress
-        ], 200);
     }
 
     /**
@@ -72,31 +72,28 @@ class UserAddressController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $request->validate([
-            'full_name' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:15',
-            'street_address' => 'nullable|string|max:255',
-            'city' => 'required|string|max:100',
-            'state' => 'nullable|string|max:100',
-            'pincode' => 'nullable|string|max:10',
-        ]);
+        try {
+            $request->validate([
+                'full_name' => 'required|string|max:255',
+                'phone_number' => 'required|string|max:15',
+                'street_address' => 'nullable|string|max:255',
+                'city' => 'required|string|max:100',
+                'state' => 'nullable|string|max:100',
+                'pincode' => 'nullable|string|max:10',
+            ]);
 
-        $userAddress = UserAddress::find($id);
+            $userAddress = UserAddress::find($id);
 
-        if (!$userAddress) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'User address not found'
-            ], 404);
+            if (!$userAddress) {
+                return ResponseBuilder::error('User address not found', 404);
+            }
+
+            $userAddress->update($request->all());
+
+            return ResponseBuilder::success($userAddress, 'User address updated successfully');
+        } catch (\Exception $e) {
+            return ResponseBuilder::error('Failed to update user address.', 500, $e->getMessage());
         }
-
-        $userAddress->update($request->all());
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'User address updated successfully',
-            'data' => $userAddress
-        ], 200);
     }
 
     /**
@@ -104,20 +101,18 @@ class UserAddressController extends Controller
      */
     public function destroy(string $id)
     {
-        $userAddress = UserAddress::find($id);
+        try {
+            $userAddress = UserAddress::find($id);
 
-        if (!$userAddress) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'User address not found'
-            ], 404);
+            if (!$userAddress) {
+                return ResponseBuilder::error('User address not found', 404);
+            }
+
+            $userAddress->delete();
+
+            return ResponseBuilder::success(null, 'User address deleted successfully');
+        } catch (\Exception $e) {
+            return ResponseBuilder::error('Failed to delete user address.', 500, $e->getMessage());
         }
-
-        $userAddress->delete();
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'User address deleted successfully'
-        ], 200);
     }
 }

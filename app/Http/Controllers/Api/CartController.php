@@ -7,6 +7,7 @@ use App\Models\Cart;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\ResponseBuilder;
 
 class CartController extends Controller
 {
@@ -15,13 +16,7 @@ class CartController extends Controller
         $user = Auth::user();
         $cartItems = Cart::with('product')->where('user_id', $user->id)->get();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Cart fetched successfully',
-            'data' => $cartItems
-        ], 200);
-
-        
+        return ResponseBuilder::success('Cart fetched successfully', $cartItems);
     }
 
     public function store(Request $request)
@@ -40,11 +35,7 @@ class CartController extends Controller
             ['quantity' => \DB::raw('quantity + ' . $request->quantity), 'price' => $product->price]
         );
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Product added to cart successfully',
-            'data' => $cartItem
-        ], 200);
+        return ResponseBuilder::success('Product added to cart successfully', $cartItem);
     }
 
     public function update(Request $request, $id)
@@ -54,19 +45,12 @@ class CartController extends Controller
         $cartItem = Cart::findOrFail($id);
 
         if ($cartItem->user_id !== Auth::id()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized'
-            ], 403);
+            return ResponseBuilder::error('Unauthorized', null, 403);
         }
 
         $cartItem->update(['quantity' => $request->quantity]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Cart item updated successfully',
-            'data' => $cartItem
-        ], 200);
+        return ResponseBuilder::success('Cart item updated successfully', $cartItem);
     }
 
     public function destroy($id)
@@ -74,17 +58,11 @@ class CartController extends Controller
         $cartItem = Cart::findOrFail($id);
 
         if ($cartItem->user_id !== Auth::id()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized'
-            ], 403);
+            return ResponseBuilder::error('Unauthorized', null, 403);
         }
 
         $cartItem->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Cart item removed successfully'
-        ], 200);
+        return ResponseBuilder::success('Cart item removed successfully');
     }
 }
