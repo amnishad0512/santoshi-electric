@@ -19,7 +19,7 @@ class UserController extends Controller
     public function index()
     {
         try {
-            $users = User::select('id', 'name', 'phone_number', 'email', 'role', 'status', 'created_at')
+            $users = User::select('id', 'name', 'phone_number', 'profile_photo_path', 'email', 'role', 'status', 'created_at', 'updated_at')
                 ->get();
 
             if ($users->isEmpty()) {
