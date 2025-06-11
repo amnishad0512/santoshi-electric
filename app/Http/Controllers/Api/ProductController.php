@@ -12,15 +12,13 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::with(['brand', 'category', 'subCategory', 'subSubCategory', 'productImages', 'reviews.user'])
-            ->select('id', 'brand_id', 'category_id', 'sub_category_id', 'sub_sub_category_id', 'product_name', 'product_slug', 'product_code', 'product_quantity', 'product_tags', 'product_size', 'product_colour', 'product_selling_price', 'product_discount_price', 'product_short_desc', 'product_long_desc', 'product_thumbnail', 'hot_deal', 'featured', 'special_offer', 'special_deals', 'status')
+        $products = Product::select('id', 'brand_id', 'category_id', 'sub_category_id', 'sub_sub_category_id', 'product_name', 'product_quantity', 'product_selling_price', 'product_discount_price', 'product_thumbnail', 'status', 'created_at')
             ->get();
 
         return response()->json([
             'status' => 'success',
             'data' => $products
         ], 200);
-        // return response()->json(Product::with(['brand', 'category', 'subCategory', 'subSubCategory', 'productImages', 'reviews'])->get());
     }
 
     public function store(Request $request)
@@ -81,7 +79,6 @@ class ProductController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Product created successfully',
-            'data' => $product
         ], 201);
     }
 

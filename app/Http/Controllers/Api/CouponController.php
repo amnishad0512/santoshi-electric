@@ -9,8 +9,13 @@ use Illuminate\Http\Request;
 class CouponController extends Controller
 {
     public function index()
-    {
-        return response()->json(Coupon::all());
+    {   
+        $coupons = Coupon::select('id', 'coupon_name', 'discount_type', 'coupon_discount', 'minimum_purchase', 'maximum_discount', 'usage_limit', 'coupon_start_date', 'coupon_validity', 'coupon_status', 'created_at')->get();
+        
+        return response()->json([
+            'status' => 'success',
+            'data' => $coupons
+        ], 200);
     }
 
     public function store(Request $request)
