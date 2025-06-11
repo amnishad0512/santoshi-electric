@@ -18,18 +18,19 @@ class DashboardController extends Controller
     // all tables counts api - craeted by Yogi (date: 08jun25)
     public function adminDashboardStats()
     {
-        $totalUsers = User::count();
-        $totalOrders = Order::count();
-        $totalProducts = Product::count();
-        $totalCategories = Category::count();
-        $totalSubCategories = SubCategory::count();
-        $totalSubSubCategories = SubSubCategory::count();
-        $totalBrands = Brand::count();
-        $totalReviews = Review::count();
-        $totalActiveCoupons = Coupon::where('coupon_status', '1')->count();
+        try {
+            $totalUsers = User::count();
+            $totalOrders = Order::count();
+            $totalProducts = Product::count();
+            $totalCategories = Category::count();
+            $totalSubCategories = SubCategory::count();
+            $totalSubSubCategories = SubSubCategory::count();
+            $totalBrands = Brand::count();
+            $totalReviews = Review::count();
+            $totalActiveCoupons = Coupon::where('coupon_status', '1')->count();
 
-         return response()->json([
-            'status' => 'success',
+            return response()->json([
+            'status' => true,
             'data' => [
                 'total_users' => $totalUsers,
                 'total_orders' => $totalOrders,
@@ -41,7 +42,14 @@ class DashboardController extends Controller
                 'total_reviews' => $totalReviews,
                 'total_active_coupons' => $totalActiveCoupons,
             ]
-        ], 200);
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+            'status' => false,
+            'message' => 'Failed to fetch dashboard stats.',
+            'error' => $e->getMessage(),
+            ], 500);
+        }
 
     }
     
