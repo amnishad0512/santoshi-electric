@@ -11,13 +11,18 @@ class OrderController extends Controller
 {
     public function index($limit = 5)
     {
-        $orders = Order::with(['user', 'orderItems.product', 'payment', 'shippingAddress'])
+        try {
+          
+            $orders = Order::with(['user', 'orderItems.product', 'payment', 'shippingAddress'])
             ->select('id', 'user_id', 'order_status', 'order_total')
             ->orderBy('id', 'desc')
             ->limit($limit)
             ->get();
-
-        return ResponseBuilder::success($orders, 'Orders fetched successfully');
+            
+            return ResponseBuilder::success($orders, 'Orders fetched successfully');
+        } catch (\Exception $e) {
+            return ResponseBuilder::error('Invalid limit value', $e->getMessage());
+        }
     }
 
     public function store(Request $request)
