@@ -45,7 +45,7 @@ class AuthController extends Controller
             $user->save();
 
             DB::commit();
-            return ResponseBuilder::success([], 'User registered successfully', 201);
+            return ResponseBuilder::success('User registered successfully', 201);
         } catch (\Exception  $e) {
             DB::rollBack();
             return ResponseBuilder::error($e->getMessage(), 401);
@@ -73,10 +73,8 @@ class AuthController extends Controller
             $token = $user->createToken('LaravelAuthApp')->accessToken;
             $user->last_login = date('Y-m-d H:i:s');
             $user->save();
-
-            return ResponseBuilder::success([
-                'token' => $token
-            ], 'Login successful', 200);
+            $data['token'] = $token;
+            return ResponseBuilder::success($data);
         } catch (\Exception $e) {
             return ResponseBuilder::error($e->getMessage(), 401);
         }
@@ -116,7 +114,7 @@ class AuthController extends Controller
                 Mail::to($user->email)->send(new SendOtpMail($otp));
             }
 
-            return ResponseBuilder::success([], 'OTP sent successfully', 200);
+            return ResponseBuilder::success('OTP sent successfully', 200);
         } catch (\Exception $e) {
             return ResponseBuilder::error($e->getMessage(), 500);
         }
@@ -147,7 +145,7 @@ class AuthController extends Controller
         $user->otp_expires_at = null;
         $user->save();
 
-        return ResponseBuilder::success([], 'Password has been reset successfully', 200);
+        return ResponseBuilder::success('Password has been reset successfully', 200);
     }
 
     public function logout(Request $request)
@@ -160,6 +158,6 @@ class AuthController extends Controller
 
         $user->token()->revoke();
 
-        return ResponseBuilder::success([], 'Logged out successfully');
+        return ResponseBuilder::success('Logged out successfully');
     }
 }
