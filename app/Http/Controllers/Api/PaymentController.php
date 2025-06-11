@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use App\Helpers\ResponseBuilder;
 
 class PaymentController extends Controller
 {
@@ -12,10 +13,7 @@ class PaymentController extends Controller
     {
         $payments = Payment::with('order:id,order_number')->get(['id', 'order_id', 'payment_method', 'payment_status', 'amount', 'transaction_id', 'paid_at']);
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $payments
-        ], 200);
+        return ResponseBuilder::success($payments, 'Payments fetched successfully');
     }
 
     public function store(Request $request)
@@ -31,30 +29,27 @@ class PaymentController extends Controller
 
         $payment = Payment::create($request->all());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Payment created successfully',
-            'data' => $payment
-        ], 201);
+        return ResponseBuilder::created($payment, 'Payment created successfully');
     }
 
     public function show($id)
     {
-        $payment = Payment::with('order')->findOrFail($id);
+        $payment = Payment::with('order')->find($id);
 
         if (!$payment) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Payment not found'
-            ], 404);
+            return ResponseBuilder::error('Payment not found', 404);
         }
 
-        return response()->json($payment);
+        return ResponseBuilder::success($payment, 'Payment fetched successfully');
     }
 
     public function update(Request $request, $id)
     {
-        $payment = Payment::findOrFail($id);
+        $payment = Payment::find($id);
+
+        if (!$payment) {
+            return ResponseBuilder::error('Payment not found', 404);
+        }
 
         $request->validate([
             'order_id'        => 'required|exists:orders,id',
@@ -67,11 +62,7 @@ class PaymentController extends Controller
 
         $payment->update($request->all());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Payment updated successfully',
-            'data' => $payment
-        ]);
+        return ResponseBuilder::success($payment, 'Payment updated successfully');
     }
 
     public function destroy($id)
@@ -79,17 +70,11 @@ class PaymentController extends Controller
         $payment = Payment::find($id);
 
         if (!$payment) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Payment not found'
-            ], 404);
+            return ResponseBuilder::error('Payment not found', 404);
         }
 
         $payment->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Payment deleted successfully'
-        ]);
+        return ResponseBuilder::success(null, 'Payment deleted successfully');
     }
 }

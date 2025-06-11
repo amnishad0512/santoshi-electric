@@ -7,6 +7,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Helpers\ResponseBuilder;
 
 class ProductController extends Controller
 {
@@ -14,32 +15,25 @@ class ProductController extends Controller
     {
         $products = Product::with([
             'brand' => function ($query) {
-            $query->select('id', 'brand_name');
+                $query->select('id', 'brand_name');
             },
             'category' => function ($query) {
-            $query->select('id', 'category_name');
+                $query->select('id', 'category_name');
             },
             'subCategory' => function ($query) {
-            $query->select('id', 'subcategory_name');
+                $query->select('id', 'subcategory_name');
             },
             'subSubCategory' => function ($query) {
-            $query->select('id', 'sub_sub_category_name');
+                $query->select('id', 'sub_sub_category_name');
             },
             'productImages'
         ])->get();
 
         if ($products->isEmpty()) {
-            return response()->json([
-            'status' => 'success',
-            'data' => [],
-            'message' => 'No products found'
-            ], 200);
+            return ResponseBuilder::success([], 'No products found');
         }
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $products
-        ], 200);
+        return ResponseBuilder::success($products);
     }
 
     public function store(Request $request)
@@ -97,29 +91,27 @@ class ProductController extends Controller
             'status' => $request->status,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Product created successfully',
-        ], 201);
+        return ResponseBuilder::created(null, 'Product created successfully');
     }
 
     public function show($id)
     {
-        $product = Product::with(['brand', 'category', 'subCategory', 'subSubCategory', 'productImages', 'reviews.user'])->findOrFail($id);
+        $product = Product::with(['brand', 'category', 'subCategory', 'subSubCategory', 'productImages', 'reviews.user'])->find($id);
 
         if (!$product) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Product not found'
-            ], 404);
+            return ResponseBuilder::error('Product not found', 404);
         }
 
-        return response()->json($product);
+        return ResponseBuilder::success($product);
     }
 
     public function update(Request $request, $id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::find($id);
+
+        if (!$product) {
+            return ResponseBuilder::error('Product not found', 404);
+        }
 
         $request->validate([
             'brand_id' => 'required|exists:brands,id',
@@ -181,11 +173,7 @@ class ProductController extends Controller
             'status' => $request->status,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Product updated successfully',
-            'data' => $product
-        ]);
+        return ResponseBuilder::success($product, 'Product updated successfully');
     }
 
     public function destroy($id)
@@ -193,10 +181,7 @@ class ProductController extends Controller
         $product = Product::find($id);
 
         if (!$product) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Product not found'
-            ], 404);
+            return ResponseBuilder::error('Product not found', 404);
         }
 
         if ($product->product_thumbnail) {
@@ -208,16 +193,12 @@ class ProductController extends Controller
 
         $product->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Product deleted successfully'
-        ]);
+        return ResponseBuilder::success(null, 'Product deleted successfully');
     }
-    // Get featured products with limit created by Yogi (date: 08jun25)
-    // limit is request parameter, default is 10
+
     public function FeaturedProducts(Request $request)
     {
-        $limit = $request->input('limit', 10); // Default limit is 10 if not provided  
+        $limit = $request->input('limit', 10);  
         $products = Product::with([
             'brand' => function ($query) {
                 $query->select('id', 'brand_name');
@@ -237,9 +218,7 @@ class ProductController extends Controller
         ->where('featured', 1)
         ->limit($limit)
         ->get();
-        return response()->json([
-            'success' => true,
-            'data' => $products
-        ]);
+
+        return ResponseBuilder::success($products);
     }
 }

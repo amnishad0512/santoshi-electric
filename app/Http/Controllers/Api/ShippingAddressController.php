@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ShippingAddress;
 use Illuminate\Http\Request;
+use App\Helpers\ResponseBuilder;
 
 class ShippingAddressController extends Controller
 {
@@ -14,10 +15,7 @@ class ShippingAddressController extends Controller
             ->select('id', 'user_id', 'order_id', 'address_line_1', 'address_line_2', 'city', 'state', 'postal_code', 'country')
             ->get();
 
-        return response()->json([   
-            'status' => 'success',
-            'data' => $shippingAddresses
-        ], 200);
+        return ResponseBuilder::success('Shipping Addresses fetched successfully', $shippingAddresses);
     }
 
     public function store(Request $request)
@@ -35,30 +33,27 @@ class ShippingAddressController extends Controller
 
         $shippingAddress = ShippingAddress::create($request->all());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Shipping Address created successfully',
-            'data' => $shippingAddress
-        ], 201);
+        return ResponseBuilder::success('Shipping Address created successfully', $shippingAddress, 201);
     }
 
     public function show($id)
     {
-        $shippingAddress = ShippingAddress::with(['user', 'order'])->findOrFail($id);
+        $shippingAddress = ShippingAddress::with(['user', 'order'])->find($id);
 
         if (!$shippingAddress) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Shipping Address not found'
-            ], 404);
+            return ResponseBuilder::error('Shipping Address not found', null, 404);
         }
 
-        return response()->json($shippingAddress);
+        return ResponseBuilder::success('Shipping Address fetched successfully', $shippingAddress);
     }
 
     public function update(Request $request, $id)
     {
-        $shippingAddress = ShippingAddress::findOrFail($id);
+        $shippingAddress = ShippingAddress::find($id);
+
+        if (!$shippingAddress) {
+            return ResponseBuilder::error('Shipping Address not found', null, 404);
+        }
 
         $request->validate([
             'user_id'        => 'required|exists:users,id',
@@ -73,11 +68,7 @@ class ShippingAddressController extends Controller
 
         $shippingAddress->update($request->all());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Shipping Address updated successfully',
-            'data' => $shippingAddress
-        ]);
+        return ResponseBuilder::success('Shipping Address updated successfully', $shippingAddress);
     }
 
     public function destroy($id)
@@ -85,17 +76,11 @@ class ShippingAddressController extends Controller
         $shippingAddress = ShippingAddress::find($id);
 
         if (!$shippingAddress) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Shipping Address not found'
-            ], 404);
+            return ResponseBuilder::error('Shipping Address not found', null, 404);
         }
 
         $shippingAddress->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Shipping Address deleted successfully'
-        ]);
+        return ResponseBuilder::success('Shipping Address deleted successfully');
     }
 }

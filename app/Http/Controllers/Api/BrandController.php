@@ -8,6 +8,7 @@ use App\Models\Brand;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Helpers\ResponseBuilder;
 
 class BrandController extends Controller
 {
@@ -17,10 +18,7 @@ class BrandController extends Controller
             ->withCount('products')
             ->get();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $brand
-        ], 200);
+        return ResponseBuilder::success($brand);
     }
 
     public function store(Request $request)
@@ -43,11 +41,7 @@ class BrandController extends Controller
             'status' => $request->status,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Brand created successfully',
-            'data' => $brand
-        ], 201);
+        return ResponseBuilder::created('Brand created successfully');
     }
 
     public function show($id)
@@ -56,26 +50,18 @@ class BrandController extends Controller
             ->find($id);
 
         if (!$brand) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Brand not found'
-            ], 404);
+            return ResponseBuilder::error('Brand not found', 404);
         }
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $brand
-        ], 200);
+        return ResponseBuilder::success($brand);
     }
 
 
     public function BrandProducts(Request $request, $id)
     {
-        // Get skip and limit from query params, set defaults
         $skip = $request->query('skip', 0);
         $limit = $request->query('limit', 5);
 
-        // Fetch products for brand_id with pagination (offset + limit)
         $products = Product::with(['category' => function ($query) {
             $query->select('id', 'category_name');
         }])
@@ -95,7 +81,6 @@ class BrandController extends Controller
         ->take($limit)
         ->get();
 
-        // Map to include category name
         $data = $products->map(function ($product) {
             return [
                 'id' => $product->id,
@@ -109,10 +94,7 @@ class BrandController extends Controller
             ];
         });
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $data
-        ], 200);
+        return ResponseBuilder::success($data);
     }
 
     public function update(Request $request, $id)
@@ -120,10 +102,7 @@ class BrandController extends Controller
         $brand = Brand::find($id);
 
         if (!$brand) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Brand not found'
-            ], 404);
+            return ResponseBuilder::error('Brand not found', 404);
         }
 
         $request->validate([
@@ -133,16 +112,12 @@ class BrandController extends Controller
 
         $save_url = $brand->brand_image;
         if ($request->hasFile('brand_image')) {
-
-            // Delete old image if it exists
             if ($brand->brand_image) {
                 $oldImagePath = str_replace('storage/', '', $brand->brand_image);
                 if (Storage::disk('public')->exists($oldImagePath)) {
                     Storage::disk('public')->delete($oldImagePath);
                 }
             }
-
-            // Store new image
             $imagePath = $request->file('brand_image')->store('brands', 'public');
             $save_url = 'storage/' . $imagePath;
         }
@@ -152,14 +127,9 @@ class BrandController extends Controller
             'brand_slug' => Str::slug($request->brand_name),
             'brand_image' => $save_url,
             'status' => $request->status,
-
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Brand updated successfully',
-            'data' => $brand
-        ],200);
+        return ResponseBuilder::success('Brand updated successfully');
     }
 
     public function destroy($id)
@@ -167,10 +137,7 @@ class BrandController extends Controller
         $brand = Brand::find($id);
 
         if (!$brand) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Brand not found'
-            ], 404);
+            return ResponseBuilder::error('Brand not found', 404);
         }
 
         if ($brand->brand_image) {
@@ -182,27 +149,17 @@ class BrandController extends Controller
 
         $brand->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Brand deleted successfully'
-        ],200);
+        return ResponseBuilder::success(null, 'Brand deleted successfully');
     }
-    //brand dropdown for select options - created by Yogi (date: 08jun25)
-    // this function returns a JSON response with all brands
+
     public function brandDropdown()
     {
         $brands = Brand::select('id as value', 'brand_name as label')->get();
 
         if ($brands->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No brands found'
-            ], 404);
+            return ResponseBuilder::error('No brands found', 404);
         } else {
-            return response()->json([
-                'success' => true,
-                'data' => $brands
-            ]);
+            return ResponseBuilder::success($brands);
         }
     }
 }

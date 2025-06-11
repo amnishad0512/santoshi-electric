@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\SubCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Helpers\ResponseBuilder;
 
 class SubCategoryController extends Controller
 {
@@ -15,10 +16,7 @@ class SubCategoryController extends Controller
             ->with(['category:id,category_name', 'subSubCategories:id,sub_category_id,sub_sub_category_name'])
             ->get();
         
-        return response()->json([
-            'status' => 'success',
-            'data' => $subcategories
-        ], 200);
+        return ResponseBuilder::success($subcategories);
     }
 
     public function store(Request $request)
@@ -34,30 +32,27 @@ class SubCategoryController extends Controller
             'subcategory_slug' => Str::slug($request->subcategory_name),
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Sub Category created successfully',
-            'data' => $subCategory
-        ], 201);
+        return ResponseBuilder::created('Sub Category created successfully', $subCategory);
     }
 
     public function show($id)
     {
-        $subCategory = SubCategory::with(['category', 'subSubCategories'])->findOrFail($id);
+        $subCategory = SubCategory::with(['category', 'subSubCategories'])->find($id);
 
         if (!$subCategory) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sub Category not found'
-            ], 404);
+            return ResponseBuilder::error('Sub Category not found', 404);
         }
 
-        return response()->json($subCategory);
+        return ResponseBuilder::success($subCategory);
     }
 
     public function update(Request $request, $id)
     {
-        $subCategory = SubCategory::findOrFail($id);
+        $subCategory = SubCategory::find($id);
+
+        if (!$subCategory) {
+            return ResponseBuilder::error('Sub Category not found', 404);
+        }
 
         $request->validate([
             'category_id'       => 'required|exists:categories,id',
@@ -70,11 +65,7 @@ class SubCategoryController extends Controller
             'subcategory_slug' => Str::slug($request->subcategory_name),
         ]);
         
-        return response()->json([
-            'success' => true,
-            'message' => 'Sub Category updated successfully',
-            'data' => $subCategory
-        ]);
+        return ResponseBuilder::success($subCategory, 'Sub Category updated successfully');
     }
 
     public function destroy($id)
@@ -82,19 +73,14 @@ class SubCategoryController extends Controller
         $subCategory = SubCategory::find($id);
 
         if (!$subCategory) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sub Category not found'
-            ], 404);
+            return ResponseBuilder::error('Sub Category not found', 404);
         }
 
         $subCategory->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Sub Category deleted successfully'
-        ]);
+        return ResponseBuilder::success(null, 'Sub Category deleted successfully');
     }
+
     // sub category dropdown list api craeted by Yogi (date: 08jun25)
     // This method returns a dropdown list of subcategories based on the category ID
     // If no ID is provided, it returns all subcategories.
@@ -108,15 +94,9 @@ class SubCategoryController extends Controller
             $subCategories = SubCategory::select('id as value', 'subcategory_name as label')->get();
         }
         if (!$subCategories) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sub Category not found'
-            ], 404);
-        }else{
-            return response()->json([
-            'success' => true,
-            'data' => $subCategories
-            ]);
+            return ResponseBuilder::error('Sub Category not found', 404);
+        } else {
+            return ResponseBuilder::success($subCategories);
         }
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
+use App\Helpers\ResponseBuilder;
 
 class OrderItemController extends Controller
 {
@@ -14,10 +15,7 @@ class OrderItemController extends Controller
             ->select('id', 'order_id', 'product_id', 'item_quantity', 'item_price')
             ->get();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $orderItems
-        ], 200);
+        return ResponseBuilder::success($orderItems);
     }
 
     public function store(Request $request)
@@ -31,32 +29,29 @@ class OrderItemController extends Controller
 
         $orderItem = OrderItem::create($request->all());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'OrderItem created successfully',
-            'data' => $orderItem
-        ], 201);
+        return ResponseBuilder::created($orderItem, 'OrderItem created successfully');
     }
 
     public function show($id)
     {
-        $orderItem = OrderItem::with(['order', 'product'])->findOrFail($id);
+        $orderItem = OrderItem::with(['order', 'product'])->find($id);
 
         if (!$orderItem) {
-            return response()->json([
-                'success' => false,
-                'message' => 'OrderItem not found'
-            ], 404);
+            return ResponseBuilder::error('OrderItem not found', 404);
         }
 
-        return response()->json($orderItem);
+        return ResponseBuilder::success($orderItem);
     }
 
     public function update(Request $request, $id)
     {
-        $orderItem = OrderItem::findOrFail($id);
+        $orderItem = OrderItem::find($id);
 
-         $request->validate([
+        if (!$orderItem) {
+            return ResponseBuilder::error('OrderItem not found', 404);
+        }
+
+        $request->validate([
             'order_id'     => 'required|exists:orders,id',
             'product_id'   => 'required|exists:products,id',
             'item_quantity'=> 'required|integer|min:1',
@@ -65,11 +60,7 @@ class OrderItemController extends Controller
 
         $orderItem->update($request->all());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'OrderItem updated successfully',
-            'data' => $orderItem
-        ]);
+        return ResponseBuilder::success($orderItem, 'OrderItem updated successfully');
     }
 
     public function destroy($id)
@@ -77,17 +68,11 @@ class OrderItemController extends Controller
         $orderItem = OrderItem::find($id);
 
         if (!$orderItem) {
-            return response()->json([
-                'success' => false,
-                'message' => 'OrderItem not found'
-            ], 404);
+            return ResponseBuilder::error('OrderItem not found', 404);
         }
 
         $orderItem->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'OrderItem deleted successfully'
-        ]);
+        return ResponseBuilder::success(null, 'OrderItem deleted successfully');
     }
 }

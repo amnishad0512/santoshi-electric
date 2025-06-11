@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Review;
 use Illuminate\Http\Request;
+use App\Helpers\ResponseBuilder;
 
 class ReviewController extends Controller
 {
@@ -14,10 +15,7 @@ class ReviewController extends Controller
             ->select('id', 'user_id', 'product_id', 'rating', 'comment')
             ->get();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $reviews
-        ], 200);
+        return ResponseBuilder::success($reviews, 'Reviews fetched successfully');
     }
 
     public function store(Request $request)
@@ -31,30 +29,27 @@ class ReviewController extends Controller
 
         $review = Review::create($request->all());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Review created successfully',
-            'data' => $review
-        ], 201);
+        return ResponseBuilder::created($review, 'Review created successfully');
     }
 
     public function show($id)
     {
-        $review = Review::with(['user', 'product'])->findOrFail($id);
+        $review = Review::with(['user', 'product'])->find($id);
 
         if (!$review) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Review not found'
-            ], 404);
+            return ResponseBuilder::error('Review not found', 404);
         }
 
-        return response()->json($review);
+        return ResponseBuilder::success($review, 'Review fetched successfully');
     }
 
     public function update(Request $request, $id)
     {
-        $review = Review::findOrFail($id);
+        $review = Review::find($id);
+
+        if (!$review) {
+            return ResponseBuilder::error('Review not found', 404);
+        }
 
         $request->validate([
             'user_id' => 'required|exists:users,id',
@@ -65,11 +60,7 @@ class ReviewController extends Controller
 
         $review->update($request->all());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Review updated successfully',
-            'data' => $review
-        ]);
+        return ResponseBuilder::success($review, 'Review updated successfully');
     }
 
     public function destroy($id)
@@ -77,17 +68,11 @@ class ReviewController extends Controller
         $review = Review::find($id);
 
         if (!$review) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Review not found'
-            ], 404);
+            return ResponseBuilder::error('Review not found', 404);
         }
 
         $review->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Review deleted successfully'
-        ]);
+        return ResponseBuilder::success(null, 'Review deleted successfully');
     }
 }
