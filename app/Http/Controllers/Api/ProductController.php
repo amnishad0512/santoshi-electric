@@ -12,8 +12,29 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::select('id', 'brand_id', 'category_id', 'sub_category_id', 'sub_sub_category_id', 'product_name', 'product_quantity', 'product_selling_price', 'product_discount_price', 'product_thumbnail', 'status', 'created_at')
-            ->get();
+        $products = Product::with([
+            'brand' => function ($query) {
+            $query->select('id', 'brand_name');
+            },
+            'category' => function ($query) {
+            $query->select('id', 'category_name');
+            },
+            'subCategory' => function ($query) {
+            $query->select('id', 'subcategory_name');
+            },
+            'subSubCategory' => function ($query) {
+            $query->select('id', 'sub_sub_category_name');
+            },
+            'productImages'
+        ])->get();
+
+        if ($products->isEmpty()) {
+            return response()->json([
+            'status' => 'success',
+            'data' => [],
+            'message' => 'No products found'
+            ], 200);
+        }
 
         return response()->json([
             'status' => 'success',
