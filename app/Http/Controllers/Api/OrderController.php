@@ -19,7 +19,7 @@ class OrderController extends Controller
             ->limit($limit)
             ->get();
             
-            return ResponseBuilder::success($orders, 'Orders fetched successfully');
+            return ResponseBuilder::success($orders);
         } catch (\Exception $e) {
             return ResponseBuilder::error('Invalid limit value', $e->getMessage());
         }
@@ -40,6 +40,7 @@ class OrderController extends Controller
         ]);
 
         return ResponseBuilder::success('Order created successfully', 201);
+        
     }
 
     public function show($id)
