@@ -198,16 +198,24 @@ class ProductController extends Controller
     {
         $limit = $request->input('limit', 10); // Default limit is 10 if not provided  
         $products = Product::with([
-            'brand:id,brand_name',
-            'category:id,category_name',
-            'subCategory:id,sub_category_name',
-            'subSubCategory:id,sub_sub_category_name',
+            'brand' => function ($query) {
+                $query->select('id', 'brand_name');
+            },
+            'category' => function ($query) {
+                $query->select('id', 'category_name');
+            },
+            'subCategory' => function ($query) {
+                $query->select('id', 'sub_category_name');
+            },
+            'subSubCategory' => function ($query) {
+                $query->select('id', 'sub_sub_category_name');
+            },
             'productImages'
-            ])
-            ->select('id', 'brand_id', 'category_id', 'sub_category_id', 'sub_sub_category_id', 'product_name', 'product_quantity', 'product_selling_price', 'product_discount_price', 'product_thumbnail', 'status', 'created_at')
-            ->where('featured', 1)
-            ->limit($limit)
-            ->get();
+        ])
+        ->select('id', 'brand_id', 'category_id', 'sub_category_id', 'sub_sub_category_id', 'product_name', 'product_quantity', 'product_selling_price', 'product_discount_price', 'product_thumbnail', 'status', 'created_at')
+        ->where('featured', 1)
+        ->limit($limit)
+        ->get();
         return response()->json([
             'success' => true,
             'data' => $products

@@ -28,17 +28,21 @@ class DashboardController extends Controller
         $totalReviews = Review::count();
         $totalActiveCoupons = Coupon::where('coupon_status', '1')->count();
 
-        return response()->json([
-            'total_users' => $totalUsers,
-            'total_orders' => $totalOrders,
-            'total_products' => $totalProducts,
-            'total_categories' => $totalCategories,
-            'total_sub_categories' => $totalSubCategories,
-            'total_sub_sub_categories' => $totalSubSubCategories,
-            'total_brands' => $totalBrands,
-            'total_reviews' => $totalReviews,
-            'total_active_coupons' => $totalActiveCoupons,
-        ]);
+         return response()->json([
+            'status' => 'success',
+            'data' => [
+                'total_users' => $totalUsers,
+                'total_orders' => $totalOrders,
+                'total_products' => $totalProducts,
+                'total_categories' => $totalCategories,
+                'total_sub_categories' => $totalSubCategories,
+                'total_sub_sub_categories' => $totalSubSubCategories,
+                'total_brands' => $totalBrands,
+                'total_reviews' => $totalReviews,
+                'total_active_coupons' => $totalActiveCoupons,
+            ]
+        ], 200);
+
     }
     
 }
