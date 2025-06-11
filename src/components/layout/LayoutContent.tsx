@@ -10,7 +10,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   return (
     <>
       {!isAdminRoute && <Header />}
-      <main className={!isAdminRoute ? "pt-14" : ""}>
+      <main>
         {children}
       </main>
     </>

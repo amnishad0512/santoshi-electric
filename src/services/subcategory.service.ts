@@ -24,6 +24,7 @@ export interface UpdateSubCategoryData {
 
 class SubCategoryService {
   private static instance: SubCategoryService;
+  getSubCategoriesByCategory: any;
 
   private constructor() {}
 

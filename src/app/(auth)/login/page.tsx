@@ -38,8 +38,8 @@ export default function LoginPage() {
     mode: 'onChange',
     delayError: 300,
     defaultValues: {
-      phone_number: '8888888888',
-      password: 'Admin'
+      phone_number: '9999999999',
+      password: 'User'
     }
   });
 

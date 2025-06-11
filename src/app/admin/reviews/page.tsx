@@ -34,7 +34,7 @@ const ReviewsPage = () => {
     if (!window.confirm('Are you sure you want to delete this review?')) return;
 
     try {
-      const success = await reviewService.deleteReview(id);
+      const success = await reviewService.deleteReview(id.toString());
       if (success) {
         toast.success('Review deleted successfully');
         fetchReviews();

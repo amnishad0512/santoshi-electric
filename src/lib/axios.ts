@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const isServer = typeof window === 'undefined';
 
@@ -18,8 +19,8 @@ api.interceptors.request.use(
       return config;
     }
 
-    // Get token from localStorage (only in browser)
-    const token = localStorage.getItem('auth_token');
+    // Get token from Cookies
+    const token = Cookies.get('token');
     
     // If token exists, add it to request headers
     if (token) {
@@ -58,14 +59,19 @@ api.interceptors.response.use(
 
       try {
         // Try to refresh token
-        const refreshToken = localStorage.getItem('refresh_token');
+        const refreshToken = Cookies.get('refresh_token');
         if (refreshToken) {
           const response = await api.post('/auth/refresh-token', {
             refresh_token: refreshToken,
           });
 
           const { token } = response.data;
-          localStorage.setItem('auth_token', token);
+          Cookies.set('token', token, { 
+            path: '/',
+            secure: true,
+            sameSite: 'Lax',
+            expires: 1
+          });
 
           // Retry original request with new token
           originalRequest.headers.Authorization = `Bearer ${token}`;
@@ -73,8 +79,8 @@ api.interceptors.response.use(
         }
       } catch (error) {
         // If refresh token fails, logout user
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('refresh_token');
+        Cookies.remove('token', { path: '/' });
+        Cookies.remove('refresh_token', { path: '/' });
         window.location.href = '/login';
       }
     }

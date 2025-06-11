@@ -6,6 +6,7 @@ export interface Brand {
   brand_image: string;
   status: number;
   created_at: string;
+  updated_at: string;
   products_count: number;
 }
 
@@ -43,7 +44,7 @@ class BrandService {
     return response.data;
   }
 
-  async getBrandById(id: number) {
+  async getBrandById(id: string) {
     const response = await api.get<ApiResponse<Brand>>(`/brands/${id}`);
     return response;
   }

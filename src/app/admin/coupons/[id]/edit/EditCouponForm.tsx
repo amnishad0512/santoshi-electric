@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
-import couponService, { updateCouponSchema, type Coupon } from '@/services/couponService';
+import couponService, { createCouponSchema, type Coupon } from '@/services/couponService';
 
 type CouponFormData = {
   code: string;
@@ -30,7 +30,7 @@ export default function EditCouponForm({ id, initialData }: Props) {
     handleSubmit,
     formState: { errors },
   } = useForm<CouponFormData>({
-    resolver: zodResolver(updateCouponSchema),
+    resolver: zodResolver(createCouponSchema),
     defaultValues: {
       code: initialData.code,
       discount: initialData.discount,

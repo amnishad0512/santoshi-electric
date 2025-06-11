@@ -38,8 +38,8 @@ const BrandView = ({ id }: { id: string }) => {
   useEffect(() => {
     const fetchBrand = async () => {
       try {
-        const {data} = await brandService.getBrandById(id);
-        setBrand(data);
+        const response = await brandService.getBrandById(id);
+        setBrand(response.data.data);
       } catch (error) {
         toast.error('Failed to fetch brand');
         console.error(error);

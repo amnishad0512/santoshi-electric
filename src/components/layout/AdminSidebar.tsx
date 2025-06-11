@@ -149,7 +149,7 @@ export default function AdminSidebar() {
               onClick={handleImageClick}
             >
               <Image
-                src={user?.profile_photo_path || '/default-avatar.png'}
+                src={user?.profile_image || '/default-avatar.png'}
                 alt="Profile"
                 fill
                 className="object-cover"

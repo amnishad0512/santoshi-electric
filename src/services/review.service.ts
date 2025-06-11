@@ -35,6 +35,7 @@ export interface CreateReviewData {
 export interface UpdateReviewData {
   rating?: number;
   comment?: string;
+  status?: string;
 }
 
 class ReviewService {
@@ -52,7 +53,7 @@ class ReviewService {
   async getAllReviews(): Promise<Review[]> {
     try {
       const response = await api.get<ReviewResponse>('/reviews');
-      return response.data;
+      return response.data.data || [];
     } catch (error) {
       console.error('Error in getAllReviews:', error);
       return [];
@@ -99,7 +100,7 @@ class ReviewService {
     }
   }
 
-  async updateReview(id: number, data: UpdateReviewData): Promise<Review | null> {
+  async updateReview(id: string, data: UpdateReviewData): Promise<Review | null> {
     try {
       const response = await api.put<SingleReviewResponse>(`/reviews/${id}`, data);
       return response.data.data;
@@ -109,7 +110,7 @@ class ReviewService {
     }
   }
 
-  async deleteReview(id: number): Promise<boolean> {
+  async deleteReview(id: string): Promise<boolean> {
     try {
       await api.delete(`/reviews/${id}`);
       return true;

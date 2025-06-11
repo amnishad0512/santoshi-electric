@@ -36,7 +36,7 @@ export default function CouponsPage() {
           id: 1,
           code: 'SUMMER2024',
           discount: 20,
-          type: 'percentage',
+          type: 'percentage' as const,
           minPurchase: 50,
           maxDiscount: 100,
           startDate: '2024-03-01',

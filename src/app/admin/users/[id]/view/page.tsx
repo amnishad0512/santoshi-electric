@@ -27,8 +27,10 @@ export async function generateStaticParams() {
   }
 }
 
-export default async function ViewUserPage({ params }: { params: { id: string } }) {
-  if (params.id === 'undefined' || !params.id) {
+export default async function ViewUserPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  
+  if (id === 'undefined' || !id) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white shadow-lg rounded-lg p-6 text-center">
@@ -47,7 +49,7 @@ export default async function ViewUserPage({ params }: { params: { id: string } 
 
   let user;
   try {
-    const {data} = await userService.getUserById(params.id);
+    const {data} = await userService.getUserById(id);
     user = data;
   } catch (error) {
     console.error('Error fetching user:', error);

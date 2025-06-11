@@ -40,13 +40,14 @@ export default function BrandEdit({ id }: { id: string }) {
       try {
         const response = await brandService.getBrandById(id);
         // Transform API response to match form data structure
+        const brand = response.data.data; // AxiosResponse<ApiResponse<Brand>> -> Brand
         const brandData: BrandFormData = {
-          id: response.data.id,
-          brand_name: response.brand_name,
-          brand_image: response.brand_image || '',
-          status: response.status,
-          products_count: response.products_count,
-          created_at: response.created_at || ''
+          id: brand.id,
+          brand_name: brand.brand_name,
+          brand_image: brand.brand_image || '',
+          status: brand.status,
+          products_count: brand.products_count,
+          created_at: brand.created_at || ''
         };
         setFormData(brandData);
         setImagePreview(brandData.brand_image);

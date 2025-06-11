@@ -32,7 +32,7 @@ export default function BrandEdit({ id }: Props) {
 
   const fetchBrand = async () => {
     try {
-      const response = await brandService.getBrandById(Number(id));
+      const response = await brandService.getBrandById(id);
       console.log('Brand Response:', response);
       
       if (response && response.data) {

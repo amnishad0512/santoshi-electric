@@ -65,8 +65,8 @@ export default function AddBrandPage() {
 
       // Then create the brand with the image URL
       await brandService.createBrand({
-        name: formData.name,
-        image: imageUrl,
+        brand_name: formData.name,
+        brand_image: imageUrl,
         status: formData.status
       });
 

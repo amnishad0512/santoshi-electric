@@ -2,28 +2,27 @@ import BrandView from '@/components/brands/BrandView';
 import brandService from '@/services/brand.service';
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-// This function is required for static site generation
 export async function generateStaticParams() {
   try {
-    // Fetch all brands to generate static paths
-    const response = await brandService.getAllBrands();
-    const brands = Array.isArray(response) ? response : [];
+    // For static export, we'll generate some common brand IDs
+    // In a real app, this would fetch from your brands API/database
+    const brandIds = ['1', '2', '3', '4', '5'];
     
-    // Return an array of objects with id parameter
-    return brands.map((brand) => ({
-      id: brand.id.toString(),
+    return brandIds.map((id) => ({
+      id: id,
     }));
   } catch (error) {
-    console.error('Error generating static params:', error);
-    return []; // Return empty array if fetch fails
+    console.error('Error generating static params for brands view:', error);
+    return [];
   }
 }
 
-export default function ViewBrandPage({ params }: Props) {
-  return <BrandView id={params.id} />;
+export default async function ViewBrandPage({ params }: Props) {
+  const { id } = await params;
+  return <BrandView id={id} />;
 } 

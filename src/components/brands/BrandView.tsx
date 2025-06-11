@@ -17,6 +17,7 @@ interface Brand {
 }
 
 interface Props {
+
   id: string;
 }
 
@@ -31,8 +32,8 @@ export default function BrandView({ id }: Props) {
 
   const fetchBrand = async () => {
     try {
-      const response = await brandService.getBrandById(Number(id));
-      if (response.status === 'success' && response.data) {
+      const response = await brandService.getBrandById(id);
+      if (response.data) {
         setBrand(Array.isArray(response.data) ? response.data[0] : response.data);
       } else {
         throw new Error('Invalid response format');

@@ -58,8 +58,8 @@ export default function AdminProfilePage() {
       // Remove empty fields
       const updateData = { ...formData };
       Object.keys(updateData).forEach(key => {
-        if (!updateData[key]) {
-          delete updateData[key];
+        if (!updateData[key as keyof typeof updateData]) {
+          delete updateData[key as keyof typeof updateData];
         }
       });
 
@@ -88,7 +88,10 @@ export default function AdminProfilePage() {
         return;
       }
 
-      await authService.changePassword(passwordData);
+      await authService.changePassword({
+        password: passwordData.new_password,
+        password_confirmation: passwordData.password_confirmation,
+      });
       alert('Password updated successfully');
       setPasswordData({
         current_password: '',

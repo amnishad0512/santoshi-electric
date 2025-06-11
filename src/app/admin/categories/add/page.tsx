@@ -91,8 +91,7 @@ const AddCategoryPage = () => {
       await categoryService.createCategory({
         category_name: formData.category_name,
         category_icon: categoryImage,
-        status: Boolean(formData.status),
-        brand_id: formData.brand_id
+        status: formData.status,
       });
       
       toast.success('Category created successfully');

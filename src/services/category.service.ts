@@ -41,7 +41,7 @@ class CategoryService {
       console.log('Fetching categories from API...');
       const response = await api.get('/categories');
       console.log('Categories API raw response:', response);
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Error in getAllCategories:', error);
       throw error;

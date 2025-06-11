@@ -15,9 +15,9 @@ export async function generateStaticParams() {
   }
 }
 
-export default async function EditUserPage({ params }: { params: { id: string } }) {
+export default async function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
   // Parse the params to ensure we have a plain object
-  const userId = params.id;
+  const { id } = await params;
 
   return (
     <Suspense fallback={
@@ -25,7 +25,7 @@ export default async function EditUserPage({ params }: { params: { id: string } 
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     }>
-      <EditUserForm userId={userId} />
+      <EditUserForm userId={id} />
     </Suspense>
   );
 } 

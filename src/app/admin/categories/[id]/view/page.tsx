@@ -4,33 +4,27 @@ import CategoryView from './CategoryView';
 // For static exports, we need to pre-render all possible paths
 export async function generateStaticParams() {
   try {
-    const response = await categoryService.getAllCategories();
-    const categories = response || [];
+    // For static export, we'll generate some common category IDs
+    // In a real app, this would fetch from your categories API/database
+    const categoryIds = ['1', '2', '3', '4', '5'];
     
-    // Generate paths for all categories
-    return categories.map((category: Category) => ({
-      id: String(category.id),
+    return categoryIds.map((id) => ({
+      id: id,
     }));
   } catch (error) {
-    console.error('Failed to generate static params:', error);
-    // For static generation, return these default paths
-    return [
-      { id: '1' },
-      { id: '2' },
-      { id: '3' },
-      { id: '4' },
-      { id: '5' },
-    ];
+    console.error('Error generating static params for categories view:', error);
+    return [];
   }
 }
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function Page({ params }: Props) {
+export default async function Page({ params }: Props) {
+  const { id } = await params;
   // Pass the id directly instead of the params object
-  return <CategoryView id={params.id} />;
+  return <CategoryView id={id} />;
 } 

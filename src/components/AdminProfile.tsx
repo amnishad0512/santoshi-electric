@@ -29,7 +29,7 @@ const AdminProfile = () => {
 
     try {
       setIsUploading(true);
-      await authService.updateProfileImage(file);
+      await authService.updateProfile(file);
       alert('Profile image updated successfully');
       // Refresh the page to show new image
       window.location.reload();

@@ -80,7 +80,7 @@ class DashboardService {
 
   async getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
     const response = await api.get('/admin/dashboard');
-    return response;
+    return response.data;
   }
 
   async getRecentOrders(limit: number): Promise<ApiResponse<RecentOrder[]>> {

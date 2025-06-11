@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import EditCouponForm from './EditCouponForm';
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 // This function will be used to generate the static paths at build time
@@ -20,9 +20,10 @@ export async function generateStaticParams() {
 // This function runs at build time for static generation
 // and on the server at runtime for server-side rendering
 export async function generateMetadata({ params }: Props) {
+  const { id } = await params;
   return {
-    title: `Edit Coupon ${params.id}`,
-    description: `Edit coupon details for coupon ${params.id}`,
+    title: `Edit Coupon ${id}`,
+    description: `Edit coupon details for coupon ${id}`,
   };
 }
 
@@ -30,13 +31,16 @@ async function getData(id: string) {
   try {
     // In a real application, you would fetch the coupon data from your API
     // For now, we'll return a mock object
+    const now = new Date().toISOString();
     return {
       id,
       code: `COUPON${id}`,
       discount: 10,
-      validFrom: new Date().toISOString(),
+      validFrom: now,
       validTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-      status: 'active'
+      status: 'active' as const,
+      createdAt: now,
+      updatedAt: now,
     };
   } catch (error) {
     console.error('Error fetching coupon data:', error);
@@ -45,7 +49,8 @@ async function getData(id: string) {
 }
 
 export default async function Page({ params }: Props) {
-  const couponData = await getData(params.id);
+  const { id } = await params;
+  const couponData = await getData(id);
 
   return (
     <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -57,7 +62,7 @@ export default async function Page({ params }: Props) {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       }>
-        <EditCouponForm id={params.id} initialData={couponData} />
+        <EditCouponForm id={id} initialData={couponData} />
       </Suspense>
     </div>
   );

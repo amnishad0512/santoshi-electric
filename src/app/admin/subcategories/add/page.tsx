@@ -46,7 +46,10 @@ const AddSubcategoryPage = () => {
     setSaving(true);
 
     try {
-      await subcategoryService.createSubcategory(formData);
+      await subcategoryService.createSubCategory({
+        ...formData,
+        status: 1,
+      });
       toast.success('Subcategory created successfully');
       router.push('/admin/categories/' + formData.category_id + '/view');
     } catch (error) {

@@ -76,7 +76,7 @@ export default function AddSubSubCategoryPage() {
     setSubcategories([]); // Clear existing subcategories while loading
     
     try {
-      const response = await subcategoryService.getSubcategoriesByCategory(categoryId);
+      const response = await subcategoryService.getSubCategoryById(categoryId);
       console.log('Subcategories response:', response);
       
       let subcategoriesData: Subcategory[] = [];
@@ -112,7 +112,11 @@ export default function AddSubSubCategoryPage() {
 
     setLoading(true);
     try {
-      await subSubCategoryService.createSubSubCategory(formData);
+      await subSubCategoryService.createSubSubCategory({
+        name: formData.sub_sub_category_name,
+        category_id: formData.category_id,
+        subcategory_id: formData.sub_category_id,
+      });
       toast.success('Sub-subcategory created successfully');
       router.push('/admin/sub-subcategories');
     } catch (error) {

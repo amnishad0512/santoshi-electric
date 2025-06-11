@@ -56,7 +56,7 @@ class CouponService {
       // Validate input data
       createCouponSchema.parse(data);
       const response = await api.post<Coupon>('/coupons', data);
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Error creating coupon:', error);
       throw error;
@@ -71,7 +71,7 @@ class CouponService {
   }): Promise<{ coupons: Coupon[]; total: number }> {
     try {
       const response = await api.get<{ coupons: Coupon[]; total: number }>('/coupons', { params });
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Error fetching coupons:', error);
       throw error;
@@ -82,7 +82,7 @@ class CouponService {
   async getCouponById(id: string): Promise<Coupon> {
     try {
       const response = await api.get<Coupon>(`/coupons/${id}`);
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Error fetching coupon:', error);
       throw error;
@@ -96,7 +96,7 @@ class CouponService {
       updateCouponSchema.parse(data);
       const { id, ...updateData } = data;
       const response = await api.put<Coupon>(`/coupons/${id}`, updateData);
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Error updating coupon:', error);
       throw error;
@@ -109,17 +109,6 @@ class CouponService {
       await api.delete(`/coupons/${id}`);
     } catch (error) {
       console.error('Error deleting coupon:', error);
-      throw error;
-    }
-  }
-
-  // Check if a coupon code already exists
-  async checkCouponExists(code: string): Promise<boolean> {
-    try {
-      const response = await api.get<{ exists: boolean }>(`/coupons/check/${code}`);
-      return response.exists;
-    } catch (error) {
-      console.error('Error checking coupon:', error);
       throw error;
     }
   }

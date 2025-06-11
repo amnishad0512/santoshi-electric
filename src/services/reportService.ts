@@ -64,7 +64,7 @@ class ReportService {
         total: number;
         totalPages: number;
       }>('/reports', { params: filters });
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Error fetching reports:', error);
       throw error;
@@ -75,7 +75,7 @@ class ReportService {
   async getReportById(id: string): Promise<Report> {
     try {
       const response = await api.get<Report>(`/reports/${id}`);
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Error fetching report:', error);
       throw error;
@@ -88,7 +88,7 @@ class ReportService {
       const response = await api.post<Reply>(`/reports/${data.reportId}/replies`, {
         message: data.message
       });
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Error adding reply:', error);
       throw error;
@@ -101,7 +101,7 @@ class ReportService {
       const response = await api.patch<Report>(`/reports/${data.reportId}/status`, {
         status: data.status
       });
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Error updating report status:', error);
       throw error;
@@ -114,7 +114,7 @@ class ReportService {
       const response = await api.patch<Report>(`/reports/${reportId}/priority`, {
         priority
       });
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Error updating report priority:', error);
       throw error;

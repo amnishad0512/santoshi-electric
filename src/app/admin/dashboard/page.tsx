@@ -97,9 +97,9 @@ export default function AdminDashboard() {
         const featuredProductsResponse = await dashboardService.getFeaturedProducts(5);
         
         setDashboardData({
-          stats: statsResponse,
-          recentOrders: recentOrdersResponse,
-          featuredProducts: featuredProductsResponse
+          stats: statsResponse.data,
+          recentOrders: recentOrdersResponse.data,
+          featuredProducts: featuredProductsResponse.data
         });
       } catch (error) {
         console.error('Error fetching dashboard data:', error);

@@ -26,6 +26,9 @@ export interface UpdateSubSubCategoryData {
 }
 
 class SubSubCategoryService {
+  getSubSubCategoryBySubCategory(id: string): any {
+    throw new Error('Method not implemented.');
+  }
   private static instance: SubSubCategoryService;
 
   private constructor() {}
