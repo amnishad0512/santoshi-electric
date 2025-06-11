@@ -3,7 +3,9 @@ import api from '@/lib/axios';
 interface StatusResponse {
   brandStatus: any[];
   categoryStatus: any[];
-  productStatus: any[];
+  userStatus: any[];
+  orderStatus: any[];
+  couponStatus: any[];
 }
 
 class StatusService {

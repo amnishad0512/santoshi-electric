@@ -6,15 +6,15 @@ export interface ApiResponse<T> {
 }
 
 export interface DashboardStats {
-  total_users: number;
-  total_orders: number;
-  total_products: number;
-  total_categories: number;
-  total_sub_categories: number;
-  total_sub_sub_categories: number;
-  total_brands: number;
-  total_reviews: number;
-  total_active_coupons: number;
+  totalUsers: number;
+  totalOrders: number;
+  totalProducts: number;
+  totalCategories: number;
+  totalSubCategories: number;
+  totalSubSubCategories: number;
+  totalBrands: number;
+  totalReviews: number;
+  totalActiveCoupons: number;
 }
 
 export interface User {
@@ -80,17 +80,17 @@ class DashboardService {
 
   async getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
     const response = await api.get('/admin/dashboard');
-    return response.data;
+    return response;
   }
 
   async getRecentOrders(limit: number): Promise<ApiResponse<RecentOrder[]>> {
     const response = await api.get(`/orders?limit=${limit}`);
-    return response.data;
+    return response;
   }
 
   async getFeaturedProducts(limit: number): Promise<ApiResponse<FeaturedProduct[]>> {
     const response = await api.get(`/featured-products?limit=${limit}`);
-    return response.data;
+    return response;
   }
 }
 

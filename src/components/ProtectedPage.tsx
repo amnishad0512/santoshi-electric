@@ -22,9 +22,9 @@ export default function ProtectedPage({
   useEffect(() => {
     const fetchStatuses = async () => {
       try {
-        const response = await statusService.getAllStatuses();
-        const { brandStatus, categoryStatus, productStatus } = response.data;
-        setStatuses(brandStatus, categoryStatus, [], [], []);
+        const {success, data} = await statusService.getAllStatuses();
+        const { brand_status, category_status, user_status, order_status, coupon_status } = data;
+        setStatuses(brand_status, category_status, user_status, order_status, coupon_status);
       } catch (error) {
         console.error('Error fetching statuses:', error);
         toast.error('Failed to load status data');
