@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\ResponseBuilder;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 
 class StatusController extends Controller
 {
