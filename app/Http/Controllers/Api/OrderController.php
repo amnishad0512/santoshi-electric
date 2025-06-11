@@ -9,10 +9,12 @@ use App\Helpers\ResponseBuilder;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index($limit = 5)
     {
         $orders = Order::with(['user', 'orderItems.product', 'payment', 'shippingAddress'])
             ->select('id', 'user_id', 'order_status', 'order_total')
+            ->orderBy('id', 'desc')
+            ->limit($limit)
             ->get();
 
         return ResponseBuilder::success($orders, 'Orders fetched successfully');
@@ -32,7 +34,7 @@ class OrderController extends Controller
             'order_total' => $request->order_total,
         ]);
 
-        return ResponseBuilder::success($order, 'Order created successfully', 201);
+        return ResponseBuilder::success('Order created successfully', 201);
     }
 
     public function show($id)
@@ -43,7 +45,7 @@ class OrderController extends Controller
             return ResponseBuilder::error('Order not found', 404);
         }
 
-        return ResponseBuilder::success($order, 'Order fetched successfully');
+        return ResponseBuilder::success($order);
     }
 
     public function update(Request $request, $id)
@@ -62,7 +64,7 @@ class OrderController extends Controller
 
         $order->update($request->only(['user_id', 'order_status', 'order_total']));
 
-        return ResponseBuilder::success($order, 'Order updated successfully');
+        return ResponseBuilder::success( 'Order updated successfully');
     }
 
     public function destroy($id)
@@ -75,6 +77,6 @@ class OrderController extends Controller
 
         $order->delete();
 
-        return ResponseBuilder::success(null, 'Order deleted successfully');
+        return ResponseBuilder::success( 'Order deleted successfully');
     }
 }
