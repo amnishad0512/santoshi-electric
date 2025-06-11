@@ -34,14 +34,14 @@ class BrandController extends Controller
             $save_url = $imagePath;
         }
 
-        $brand = Brand::create([
+         Brand::create([
             'brand_name' => $request->brand_name,
             'brand_slug' => Str::slug($request->brand_name),
             'brand_image' => $save_url,
             'status' => $request->status,
         ]);
 
-        return ResponseBuilder::created('Brand created successfully');
+        return ResponseBuilder::success('Brand created successfully');
     }
 
     public function show($id)

@@ -28,9 +28,7 @@ class UserController extends Controller
                 ]);
             }
 
-            return ResponseBuilder::success([
-                'data' => $users
-            ]);
+            return ResponseBuilder::success($users);
         } catch (\Exception $e) {
             return ResponseBuilder::error('Failed to fetch users', 500, $e->getMessage());
         }
@@ -48,29 +46,36 @@ class UserController extends Controller
                 'email' => 'required|email|unique:users,email',
                 'role' => 'required',
                 'status' => 'nullable|in:0,1',
+                'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Optional image validation
             ]);
 
             $pass = rand(100000, 999999);
 
-            $user = User::create([
-                'name' => $request->name,
-                'phone_number' => $request->phone_number,
-                'role' => $request->role,
-                'email' => $request->email,
-                'email_verified_at' => now(),
-                'password' => bcrypt($pass), // Random password
-                'password_salt' => $pass,
-                'status' => $request->status ?? 1,
-            ]);
+            $user = new User();
+            $user->name = $request->name;
+            $user->phone_number = $request->phone_number;
+            $user->email = $request->email;
+            $user->role = $request->role;
+            $user->email_verified_at = now();
+            $user->password = bcrypt($pass);
+            $user->password_salt = $pass;
+            $user->status = $request->status ?? 1;
 
-            return ResponseBuilder::success([
-                'message' => 'User created successfully',
-            ], 201);
+            // Handle image upload
+            if ($request->hasFile('profile_photo_path')) {
+                $imagePath = $request->file('profile_photo_path')->store('profile_photos', 'public');
+                $user->profile_photo_path = $imagePath;
+            }
+
+            $user->save();
+
+            return ResponseBuilder::success('User created successfully', 201);
 
         } catch (\Exception $e) {
             return ResponseBuilder::error('Failed to create user', 500, $e->getMessage());
         }
     }
+
 
     /**
      * Display the specified resource.
@@ -88,7 +93,6 @@ class UserController extends Controller
             return ResponseBuilder::success([
                 'data' => $user
             ], 200);
-
         } catch (\Exception $e) {
             return ResponseBuilder::error('Failed to fetch user', 500, $e->getMessage());
         }
@@ -121,12 +125,21 @@ class UserController extends Controller
             if ($request->has('status')) {
                 $user->status = $request->status;
             }
+            // Handle profile photo update
+            if ($request->hasFile('profile_photo_path')) {
+                if ($user->profile_photo_path) {
+                    $oldImagePath = str_replace('storage/', '', $user->profile_photo_path);
+                    if (Storage::disk('public')->exists($oldImagePath)) {
+                        Storage::disk('public')->delete($oldImagePath);
+                    }
+                }
+
+                $imagePath = $request->file('profile_photo_path')->store('profile_photos', 'public');
+                $user->profile_photo_path = $imagePath;
+            }
             $user->save();
 
-            return ResponseBuilder::success([
-                'message' => 'User updated successfully',
-            ], 200);
-
+            return ResponseBuilder::success('User updated successfully', 200);
         } catch (\Exception $e) {
             return ResponseBuilder::error('Failed to update user', 500, $e->getMessage());
         }
@@ -149,7 +162,6 @@ class UserController extends Controller
             return ResponseBuilder::success([
                 'message' => 'User deleted successfully'
             ], 200);
-
         } catch (\Exception $e) {
             return ResponseBuilder::error('Failed to delete user', 500, $e->getMessage());
         }
@@ -170,9 +182,7 @@ class UserController extends Controller
                     ->select('id', 'name', 'phone_number', 'email', 'profile_photo_path', 'role', 'status', 'last_login', 'created_at', 'updated_at')
                     ->first();
 
-                return ResponseBuilder::success([
-                    'data' => $userInfo
-                ]);
+                return ResponseBuilder::success($userInfo);
             }
 
             // If POST, update user profile
@@ -222,14 +232,11 @@ class UserController extends Controller
                 $user->updated_by = $user->id;
                 $user->save();
 
-                return ResponseBuilder::success([
-                    'message' => 'Profile updated successfully',
-                ]);
+                return ResponseBuilder::success('Profile updated successfully');
             }
 
             // Invalid Method
             return ResponseBuilder::error('Method not allowed.', 405);
-
         } catch (\Exception $e) {
             return ResponseBuilder::error('An error occurred while processing the request.', 500, $e->getMessage());
         }
@@ -273,9 +280,7 @@ class UserController extends Controller
             $user->password = Hash::make($request->new_password);
             $user->save();
 
-            return ResponseBuilder::success([
-                'message' => 'Password changed successfully',
-            ]);
+            return ResponseBuilder::success('Password changed successfully');
         } catch (\Exception $e) {
             return ResponseBuilder::error('Failed to change password', 500, $e->getMessage());
         }
