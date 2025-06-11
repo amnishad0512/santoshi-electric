@@ -17,13 +17,30 @@ class UserController extends Controller
      */
     public function index()
     {
-        $user = User::select('id', 'name', 'phone_number', 'email', 'role', 'status', 'created_at')
+        try {
+            $users = User::select('id', 'name', 'phone_number', 'email', 'role', 'status', 'created_at')
             ->get();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $user
-        ], 200);
+            if ($users->isEmpty()) {
+            return response()->json([
+                'status' => true,
+                'message' => 'No users found'
+            ], 200);
+            }
+
+            return response()->json([
+            'status' => true,
+            'data' => $users
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+            'status' => false,
+            'message' => 'Failed to fetch users',
+            'error' => $e->getMessage(),
+            ], 500);
+        }
+
     }
 
     /**
@@ -31,31 +48,41 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:15|unique:users,phone_number',
-            'email' => 'required|email',
-            'role' => 'required',
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'phone_number' => 'required|string|max:15|unique:users,phone_number',
+                'email' => 'required|email|unique:users,email',
+                'role' => 'required',
+                'status' => 'nullable|in:0,1',
+            ]);
 
-        $pass = rand(100000, 999999);
+            $pass = rand(100000, 999999);
 
-        $user = User::create([
-            'name' => $request->name,
-            'phone_number' => $request->phone_number,
-            'role' => $request->role,
-            'email' => $request->email,
-            'email_verified_at' => now(),
-            'password' => bcrypt($pass), // Random password
-            'password_salt' => $pass,
-            'status' => $request->status,
-        ]);
+            $user = User::create([
+                'name' => $request->name,
+                'phone_number' => $request->phone_number,
+                'role' => $request->role,
+                'email' => $request->email,
+                'email_verified_at' => now(),
+                'password' => bcrypt($pass), // Random password
+                'password_salt' => $pass,
+                'status' => $request->status ?? 1,
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User created successfully',
-            'data' => $user
-        ], 201);
+            return response()->json([
+                'status' => true,
+                'message' => 'User created successfully',
+                'data' => $user
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to create user',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -63,20 +90,29 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        $user = User::select('id', 'name', 'phone_number', 'email', 'role', 'status', 'created_at', 'updated_at')
-            ->find($id);
+        try {
+            $user = User::select('id', 'name', 'phone_number', 'email', 'role', 'status', 'created_at', 'updated_at')
+                ->find($id);
 
-        if (!$user) {
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User not found'
+                ], 404);
+            }
+
             return response()->json([
-                'success' => false,
-                'message' => 'User not found'
-            ], 404);
-        }
+                'status' => true,
+                'data' => $user
+            ], 200);
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $user
-        ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to fetch user',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -84,35 +120,44 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $user = User::find($id);
+        try {
+            $user = User::find($id);
 
-        if (!$user) {
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User not found'
+                ], 404);
+            }
+
+            $request->validate([
+                'name' => 'required',
+                'phone_number' => 'required|string|max:15|unique:users,phone_number,' . $id,
+                'email' => 'required|email',
+                'role' => 'required',
+            ]);
+
+            $user->update([
+                'name' => $request->name,
+                'phone_number' => $request->phone_number,
+                'email' => $request->email,
+                'role' => $request->role,
+                'status' => $request->status,
+            ]);
+
             return response()->json([
-                'success' => false,
-                'message' => 'User not found'
-            ], 404);
+                'status' => true,
+                'message' => 'User updated successfully',
+                'data' => $user
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to update user',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $request->validate([
-            'name' => 'required',
-            'phone_number' => 'required|string|max:15|unique:users,phone_number,' . $id,
-            'email' => 'required|email',
-            'role' => 'required',
-        ]);
-
-        $user->update([
-            'name' => $request->name,
-            'phone_number' => $request->phone_number,
-            'email' => $request->email,
-            'role' => $request->role,
-            'status' => $request->status,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'User updated successfully',
-            'data' => $user
-        ], 200);
     }
 
     /**
@@ -120,250 +165,190 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        $user = User::find($id);
+        try {
+            $user = User::find($id);
 
-        if (!$user) {
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User not found'
+                ], 404);
+            }
+
+            $user->delete();
+
             return response()->json([
-                'success' => false,
-                'message' => 'User not found'
-            ], 404);
+                'status' => true,
+                'message' => 'User deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to delete user',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $user->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'User deleted successfully'
-        ], 200);
     }
-
-    // public function userProfile()
-    // {
-    //     $user = Auth::user();
-    //     if (!$user) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'User not authenticated'
-    //         ], 401);
-    //     }
-    //     $userInfo = User::where('id', $user->id)
-    //         ->select('id', 'name', 'phone_number', 'email', 'profile_photo_path', 'role', 'status', 'last_login', 'created_at', 'updated_at')
-    //         ->first();
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'data' => $userInfo
-    //     ]);
-    // }
-
-
-    // public function updateProfile(Request $request)
-    // {
-    //     $user = Auth::user();
-
-    //     if (!$user) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'User not authenticated'
-    //         ], 401);
-    //     }
-
-    //     // Validate the request data
-    //     $validator = Validator::make($request->all(), [
-    //         'name' => 'nullable|string|max:255',
-    //         'phone_number' => 'nullable|digits:10|unique:users,phone_number,' . $user->id,
-    //         'email' => 'nullable|email|unique:users,email,' . $user->id,
-    //         'role' => 'nullable|in:1,2',
-    //         'status' => 'nullable|in:0,1',
-    //         'profile_photo_path' => 'nullable|image',
-    //     ]);
-
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'errors' => $validator->errors()
-    //         ], 422);
-    //     }
-
-    //     // Update the fields if provided
-    //     if ($request->filled('name')) $user->name = $request->name;
-    //     if ($request->filled('phone_number')) $user->phone_number = $request->phone_number;
-    //     if ($request->filled('email')) $user->email = $request->email;
-    //     if (Auth::user()->role == 1 && $request->filled('role')) {
-    //             $user->role = $request->role;
-    //         }
-    //         if ($request->filled('role') && Auth::user()->role != 1) {
-    //             return response()->json([
-    //                 'status' => 'error',
-    //                 'message' => 'Only admins can update the role.'
-    //             ], 403);
-    //         }
-        
-    //     if ($request->filled('status')) $user->status = $request->status;
-
-    //     // Handle profile photo update
-    //     if ($request->hasFile('profile_photo_path')) {
-    //         // Delete old image if it exists
-    //         if ($user->profile_photo_path) {
-    //             $oldImagePath = str_replace('storage/', '', $user->profile_photo_path);
-    //             if (Storage::disk('public')->exists($oldImagePath)) {
-    //                 Storage::disk('public')->delete($oldImagePath);
-    //             }
-    //         }
-
-    //         // Store new image
-    //         $imagePath = $request->file('profile_photo_path')->store('profile_photos', 'public');
-    //         $user->profile_photo_path =  $imagePath;
-    //     }
-
-    //     $user->updated_by = $user->id; 
-    //     $user->save();
-
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'message' => 'Profile updated successfully',
-    //     ]);
-    // }
 
     public function profile(Request $request)
     {
-        $user = Auth::user();
+        try {
+            $user = Auth::user();
 
-        if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'User not authenticated'
-            ], 401);
-        }
-
-        // If GET, return user profile
-        if ($request->isMethod('get')) {
-            $userInfo = User::where('id', $user->id)
-                ->select('id', 'name', 'phone_number', 'email', 'profile_photo_path', 'role', 'status', 'last_login', 'created_at', 'updated_at')
-                ->first();
-
-            return response()->json([
-                'status' => 'success',
-                'data' => $userInfo
-            ]);
-        }
-
-        // If POST, update user profile
-        if ($request->isMethod('post')) {
-            $validator = Validator::make($request->all(), [
-                'name' => 'nullable|string|max:255',
-                'phone_number' => 'nullable|digits:10|unique:users,phone_number,' . $user->id,
-                'email' => 'nullable|email|unique:users,email,' . $user->id,
-                'role' => 'nullable|in:1,2',
-                'status' => 'nullable|in:0,1',
-                'profile_photo_path' => 'nullable|image',
-            ]);
-
-            if ($validator->fails()) {
+            if (!$user) {
                 return response()->json([
-                    'status' => 'error',
-                    'errors' => $validator->errors()
-                ], 422);
+                    'status' => false,
+                    'message' => 'User not authenticated'
+                ], 401);
             }
 
-            // Update fields if provided
-            if ($request->filled('name')) $user->name = $request->name;
-            if ($request->filled('phone_number')) $user->phone_number = $request->phone_number;
-            if ($request->filled('email')) $user->email = $request->email;
+            // If GET, return user profile
+            if ($request->isMethod('get')) {
+                $userInfo = User::where('id', $user->id)
+                    ->select('id', 'name', 'phone_number', 'email', 'profile_photo_path', 'role', 'status', 'last_login', 'created_at', 'updated_at')
+                    ->first();
 
-            // Role update only by admin
-            if ($request->filled('role')) {
-                if ($user->role == 1) {
-                    $user->role = $request->role;
-                } else {
+                return response()->json([
+                    'status' => true,
+                    'data' => $userInfo
+                ]);
+            }
+
+            // If POST, update user profile
+            if ($request->isMethod('post')) {
+                $validator = Validator::make($request->all(), [
+                    'name' => 'nullable|string|max:255',
+                    'phone_number' => 'nullable|digits:10|unique:users,phone_number,' . $user->id,
+                    'email' => 'nullable|email|unique:users,email,' . $user->id,
+                    'role' => 'nullable|in:1,2',
+                    'status' => 'nullable|in:0,1',
+                    'profile_photo_path' => 'nullable|image',
+                ]);
+
+                if ($validator->fails()) {
                     return response()->json([
-                        'status' => 'error',
-                        'message' => 'Only admins can update the role.'
-                    ], 403);
+                        'status' => false,
+                        'errors' => $validator->errors()
+                    ], 422);
                 }
-            }
 
-            if ($request->filled('status')) $user->status = $request->status;
+                // Update fields if provided
+                if ($request->filled('name')) $user->name = $request->name;
+                if ($request->filled('phone_number')) $user->phone_number = $request->phone_number;
+                if ($request->filled('email')) $user->email = $request->email;
 
-            // Handle profile photo update
-            if ($request->hasFile('profile_photo_path')) {
-                if ($user->profile_photo_path) {
-                    $oldImagePath = str_replace('storage/', '', $user->profile_photo_path);
-                    if (Storage::disk('public')->exists($oldImagePath)) {
-                        Storage::disk('public')->delete($oldImagePath);
+                // Role update only by admin
+                if ($request->filled('role')) {
+                    if ($user->role == 1) {
+                        $user->role = $request->role;
+                    } else {
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'Only admins can update the role.'
+                        ], 403);
                     }
                 }
 
-                $imagePath = $request->file('profile_photo_path')->store('profile_photos', 'public');
-                $user->profile_photo_path = $imagePath;
+                if ($request->filled('status')) $user->status = $request->status;
+
+                // Handle profile photo update
+                if ($request->hasFile('profile_photo_path')) {
+                    if ($user->profile_photo_path) {
+                        $oldImagePath = str_replace('storage/', '', $user->profile_photo_path);
+                        if (Storage::disk('public')->exists($oldImagePath)) {
+                            Storage::disk('public')->delete($oldImagePath);
+                        }
+                    }
+
+                    $imagePath = $request->file('profile_photo_path')->store('profile_photos', 'public');
+                    $user->profile_photo_path = $imagePath;
+                }
+
+                $user->updated_by = $user->id;
+                $user->save();
+
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Profile updated successfully',
+                ]);
             }
 
-            $user->updated_by = $user->id;
-            $user->save();
-
+            // Invalid Method
             return response()->json([
-                'status' => 'success',
-                'message' => 'Profile updated successfully',
-            ]);
-        }
+                'status' => false,
+                'message' => 'Method not allowed.'
+            ], 405);
 
-        // Invalid Method
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Method not allowed.'
-        ], 405);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while processing the request.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function changePassword(Request $request)
     {
-        $user = Auth::user();
+        try {
+            $user = Auth::user();
 
-        if (!$user) {
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User not authenticated',
+                ], 401);
+            }
+
+            // Validate input
+            $validator = Validator::make($request->all(), [
+                'current_password' => 'required|string',
+                'new_password' => [
+                    'required',
+                    'string',
+                    'min:8',
+                    'regex:/^(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?=\S+$).+$/'
+                ],
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            // Check if current password matches
+            if (!Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Current password is incorrect',
+                ], 400);
+            }
+
+            // Check if new password is the same as current password
+            if (Hash::check($request->new_password, $user->password)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'New password cannot be the same as the current password',
+                ], 400);
+            }
+
+            // Update to new password
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
             return response()->json([
-                'status' => 'error',
-                'message' => 'User not authenticated',
-            ], 401);
-        }
-
-        // Validate input
-       $validator = Validator::make($request->all(), [
-            'current_password' => 'required|string',
-            'new_password' => [ 'required','string','min:8',
-            'regex:/^(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?=\S+$).+$/'],
-        ]);
-
-        if ($validator->fails()) {
+                'status' => true,
+                'message' => 'Password changed successfully',
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
-                'status' => 'error',
-                'errors' => $validator->errors(),
-            ], 422);
+                'status' => false,
+                'message' => 'Failed to change password',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        // Check if current password matches
-        if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Current password is incorrect',
-            ], 400);
-        }
-
-        // Check if new password is the same as current password
-        if (Hash::check($request->new_password, $user->password)) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'New password cannot be the same as the current password',
-            ], 400);
-        }
-
-        // Update to new password
-        $user->password = Hash::make($request->new_password);
-        $user->save();
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Password changed successfully',
-        ]);
     }
-
-
-
 }
