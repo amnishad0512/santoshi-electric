@@ -20,6 +20,8 @@ class CartController extends Controller
             'message' => 'Cart fetched successfully',
             'data' => $cartItems
         ], 200);
+
+        
     }
 
     public function store(Request $request)

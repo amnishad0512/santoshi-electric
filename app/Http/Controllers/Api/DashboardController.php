@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ResponseBuilder;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Category;
@@ -19,36 +20,20 @@ class DashboardController extends Controller
     public function adminDashboardStats()
     {
         try {
-            $totalUsers = User::count();
-            $totalOrders = Order::count();
-            $totalProducts = Product::count();
-            $totalCategories = Category::count();
-            $totalSubCategories = SubCategory::count();
-            $totalSubSubCategories = SubSubCategory::count();
-            $totalBrands = Brand::count();
-            $totalReviews = Review::count();
-            $totalActiveCoupons = Coupon::where('coupon_status', '1')->count();
+            $data['totalUsers'] = User::count();
+            $data['totalOrders'] = Order::count();
+            $data['totalProducts'] = Product::count();
+            $data['totalCategories'] = Category::count();
+            $data['totalSubCategories'] = SubCategory::count();
+            $data['totalSubSubCategories'] = SubSubCategory::count();
+            $data['totalBrands'] = Brand::count();
+            $data['totalReviews'] = Review::count();
+            $data['totalActiveCoupons'] = Coupon::where('coupon_status', '1')->count();
 
-            return response()->json([
-            'status' => true,
-            'data' => [
-                'total_users' => $totalUsers,
-                'total_orders' => $totalOrders,
-                'total_products' => $totalProducts,
-                'total_categories' => $totalCategories,
-                'total_sub_categories' => $totalSubCategories,
-                'total_sub_sub_categories' => $totalSubSubCategories,
-                'total_brands' => $totalBrands,
-                'total_reviews' => $totalReviews,
-                'total_active_coupons' => $totalActiveCoupons,
-            ]
-            ], 200);
+            return ResponseBuilder::success($data);
+            
         } catch (\Exception $e) {
-            return response()->json([
-            'status' => false,
-            'message' => 'Failed to fetch dashboard stats.',
-            'error' => $e->getMessage(),
-            ], 500);
+            return ResponseBuilder::error('Failed to fetch dashboard stats.', 500, $e->getMessage());
         }
 
     }
