@@ -197,7 +197,7 @@ class ProductController extends Controller
     public function FeaturedProducts(Request $request)
     {
         $limit = $request->input('limit', 10); // Default limit is 10 if not provided  
-        $products = Product::with(['brand', 'category', 'subCategory', 'subSubCategory', 'productImages',])
+        $products = Product::with(['brand', 'category', 'subCategory', 'subSubCategory', 'productImages'])
             ->where('featured', 1)
             ->limit($limit)
             ->get();
