@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import userService, { User } from '@/services/user.service';
+import Image from 'next/image';
 
 interface EditUserFormProps {
   userId: string;
@@ -13,12 +14,15 @@ export default function EditUserForm({ userId }: EditUserFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<User>>({
     name: '',
     email: '',
     phone_number: '',
     role: 2,
     status: 1,
+    profile_photo_path: '',
   });
 
   useEffect(() => {
@@ -36,18 +40,24 @@ export default function EditUserForm({ userId }: EditUserFormProps) {
     try {
       console.log('Fetching user with ID:', userId);
       const response = await userService.getUserById(userId);
-      console.log('User data received:', response.data);
-      const user = response.data;
+      console.log('User data received:', response);
+      const user = response;
       setFormData({
         name: user.name,
         email: user.email,
         phone_number: user.phone_number,
         role: user.role,
         status: user.status,
+        profile_photo_path: user.profile_photo_path,
       });
-    } catch (error) {
+      
+      // Set initial image preview if user has a profile photo
+      if (user.profile_photo_path) {
+        setImagePreview(user.profile_photo_path);
+      }
+    } catch (error: any) {
       console.error('Error fetching user:', error);
-      toast.error('Failed to fetch user');
+      toast.error(error.response.data.message || 'Failed to fetch user details');
       router.push('/admin/users');
     } finally {
       setLoading(false);
@@ -59,7 +69,23 @@ export default function EditUserForm({ userId }: EditUserFormProps) {
     setSaving(true);
 
     try {
-      await userService.updateUser(userId, formData);
+      let updateData: FormData | Partial<User>;
+      
+      if (imageFile) {
+        // If there's an image file, use FormData
+        updateData = new FormData();
+        updateData.append('name', formData.name || '');
+        updateData.append('email', formData.email || '');
+        updateData.append('phone_number', formData.phone_number || '');
+        updateData.append('role', formData.role?.toString() || '2');
+        updateData.append('status', formData.status?.toString() || '1');
+        updateData.append('profile_photo_path', imageFile);
+      } else {
+        // If no image file, use regular object
+        updateData = formData;
+      }
+      
+      await userService.updateUser(userId, updateData);
       toast.success('User updated successfully');
       router.push('/admin/users');
     } catch (error) {
@@ -76,6 +102,42 @@ export default function EditUserForm({ userId }: EditUserFormProps) {
       ...prev,
       [name]: name === 'role' || name === 'status' ? Number(value) : value,
     }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select a valid image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
+      
+      setImageFile(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(formData.profile_photo_path || null);
+    // Reset file input
+    const fileInput = document.getElementById('profile_photo') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
   };
 
   if (loading) {
@@ -101,6 +163,55 @@ export default function EditUserForm({ userId }: EditUserFormProps) {
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
         <form onSubmit={handleSubmit} className="p-8">
           <div className="grid grid-cols-1 gap-y-8">
+            {/* Profile Image Section */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Profile Image
+              </label>
+              <div className="flex items-start space-x-6">
+                <div className="flex-shrink-0">
+                  <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-300">
+                    {imagePreview ? (
+                      <Image
+                        src={imagePreview}
+                        alt="Profile preview"
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <input
+                    type="file"
+                    id="profile_photo"
+                    name="profile_photo"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <p className="mt-2 text-sm text-gray-500">
+                    Upload a new profile image. Supported formats: JPG, PNG, GIF. Max size: 5MB.
+                  </p>
+                  {imageFile && (
+                    <button
+                      type="button"
+                      onClick={removeImage}
+                      className="mt-2 text-sm text-red-600 hover:text-red-800"
+                    >
+                      Remove selected image
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                 Name

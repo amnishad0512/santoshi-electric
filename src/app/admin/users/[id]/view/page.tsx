@@ -1,6 +1,8 @@
+import { formatDate } from '@/lib/utils/date';
 import userService from '@/services/user.service';
+import UserProfileImage from '@/components/UserProfileImage';
 
-// Provide static paths for build time
+// Required for static export builds
 export async function generateStaticParams() {
   try {
     const response = await userService.getAllUsers();
@@ -49,8 +51,7 @@ export default async function ViewUserPage({ params }: { params: Promise<{ id: s
 
   let user;
   try {
-    const {data} = await userService.getUserById(id);
-    user = data;
+    user = await userService.getUserById(id);
   } catch (error) {
     console.error('Error fetching user:', error);
     return (
@@ -100,7 +101,40 @@ export default async function ViewUserPage({ params }: { params: Promise<{ id: s
 
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="p-8">
+          {/* Profile Image Section */}
+          <div className="flex items-center mb-8 pb-8 border-b border-gray-200">
+            <div className="flex-shrink-0">
+              <UserProfileImage
+                src={user.profile_photo_path}
+                alt={user.name}
+              />
+            </div>
+            <div className="ml-6">
+              <h2 className="text-2xl font-bold text-gray-900">{user.name}</h2>
+              <p className="text-lg text-gray-600">{user.email}</p>
+              <span
+                className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-2 ${
+                  user.status === 1
+                    ? 'bg-green-100 text-green-800'
+                    : user.status === 2
+                    ? 'bg-red-100 text-red-800'
+                    : user.status === 3
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : user.status === 4
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-gray-100 text-gray-800'
+                }`}
+              >
+                {user.status === 1 ? 'Active' : user.status === 2 ? 'Inactive' : user.status === 3 ? 'Pending' : user.status === 4 ? 'Banned' : 'Unknown'}
+              </span>
+            </div>
+          </div>
+
           <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+            <div className="sm:col-span-1">
+              <dt className="text-sm font-medium text-gray-500">User ID</dt>
+              <dd className="mt-1 text-sm text-gray-900">{user.id}</dd>
+            </div>
             <div className="sm:col-span-1">
               <dt className="text-sm font-medium text-gray-500">Name</dt>
               <dd className="mt-1 text-sm text-gray-900">{user.name}</dd>
@@ -124,31 +158,16 @@ export default async function ViewUserPage({ params }: { params: Promise<{ id: s
             </div>
 
             <div className="sm:col-span-1">
-              <dt className="text-sm font-medium text-gray-500">Status</dt>
-              <dd className="mt-1 text-sm text-gray-900">
-                <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    user.status === 1
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}
-                >
-                  {user.status === 1 ? 'Active' : 'Inactive'}
-                </span>
-              </dd>
-            </div>
-
-            <div className="sm:col-span-1">
               <dt className="text-sm font-medium text-gray-500">Created At</dt>
               <dd className="mt-1 text-sm text-gray-900">
-                {new Date(user.created_at).toLocaleDateString()}
+                {user.created_at ? formatDate(user.created_at) : "-"}
               </dd>
             </div>
 
             <div className="sm:col-span-1">
               <dt className="text-sm font-medium text-gray-500">Updated At</dt>
               <dd className="mt-1 text-sm text-gray-900">
-              {user.updated_at ? new Date(user.updated_at).toLocaleDateString() : "-"}
+              {user.updated_at ? formatDate(user.updated_at) : "-"}
               </dd>
             </div>
           </dl>

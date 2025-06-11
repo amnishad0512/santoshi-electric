@@ -11,7 +11,10 @@ interface User {
   email: string;
   phone_number: string;
   role: number;
-  profile_image?: string;
+  status: number;
+  profile_photo_path?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface AuthContextType {

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import userService, { User } from '@/services/user.service';
+import { formatDate } from '@/lib/utils/date';
 
 const getRoleName = (role: string | number) => {
   const roleNumber = Number(role);
@@ -15,6 +16,21 @@ const getRoleName = (role: string | number) => {
       return 'User';
     default:
       return 'Unknown';
+  }
+};
+
+const getUserNameColorClass = (status: number) => {
+  switch (status) {
+    case 1:
+      return 'text-gray-900'; // active - default dark color
+    case 2:
+      return 'text-orange-600'; // inactive - orange
+    case 3:
+      return 'text-blue-600'; // pending - blue
+    case 4:
+      return 'text-red-600'; // banned - red
+    default:
+      return 'text-gray-900';
   }
 };
 
@@ -31,9 +47,9 @@ export default function UsersPage() {
     try {
       const {data} = await userService.getAllUsers();
       setUsers(Array.isArray(data) ? data : []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching users:', error);
-      toast.error('Failed to fetch users');
+      toast.error(error.response.data.message || 'Failed to fetch users');
     } finally {
       setLoading(false);
     }
@@ -42,11 +58,11 @@ export default function UsersPage() {
   const handleDelete = async (userId: string,) => {
     try {
       await userService.deleteUser(userId);
-      toast.success('User status updated successfully');
+      toast.success('User deleted successfully');
       fetchUsers();
-    } catch (error) {
-      console.error('Error updating user status:', error);
-      toast.error('Failed to update user status');
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      toast.error(error.response.data.message || 'Failed to delete user');
     }
   };
 
@@ -76,7 +92,7 @@ export default function UsersPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
+                  User
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Phone Number
@@ -85,10 +101,7 @@ export default function UsersPage() {
                   Role
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created At
+                  Created Date
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -100,36 +113,38 @@ export default function UsersPage() {
                 users.map((user) => (
                   <tr key={user.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10">
+                          <img
+                            className="h-10 w-10 rounded-full object-cover"
+                            src={user.profile_photo_path ? user.profile_photo_path : '/images/user.jpg'}
+                            alt={user.name}
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = '/images/user.jpg';
+                            }}
+                          />
+                        </div>
+                        <div className={`ml-4 ${getUserNameColorClass(user.status)}`}>
+                          <div className={`text-sm font-medium `}>
+                            {user.name}
+                          </div>
+                          <div className="text-sm">{user.email}</div>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{user.phone_number}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        Number(user.role) === 1 
-                          ? 'bg-purple-100 text-purple-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span className="text-sm text-gray-900">
                         {getRoleName(user.role)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          user.status === 1
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
-                      >
-                        {user.status === 1 ? 'Active' : 'Inactive'}
-                      </span>
+                      <div className="text-sm text-gray-900">{formatDate(user.created_at)}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {new Date(user.created_at).toLocaleDateString()}
-                      </div>
-                    </td>
+    
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                       <Link
                         href={`/admin/users/${user.id}/view`}
@@ -156,7 +171,7 @@ export default function UsersPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
                     No users found
                   </td>
                 </tr>

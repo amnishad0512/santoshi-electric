@@ -9,6 +9,8 @@ import userService from '@/services/user.service';
 export default function AddUserPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -22,16 +24,23 @@ export default function AddUserPage() {
     setLoading(true);
 
     try {
-      await userService.createUser({
-        ...formData,
-        role: Number(formData.role),
-        status: Number(formData.status),
-      });
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('phone_number', formData.phone_number);
+      formDataToSend.append('role', formData.role);
+      formDataToSend.append('status', formData.status);
+
+      if (profileImage) {
+        formDataToSend.append('profile_photo_path', profileImage);
+      }
+
+      await userService.createUser(formDataToSend);
       toast.success('User created successfully');
       router.push('/admin/users');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating user:', error);
-      toast.error('Failed to create user');
+      toast.error(error.response.data.message || 'Failed to create user');
     } finally {
       setLoading(false);
     }
@@ -40,6 +49,28 @@ export default function AddUserPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProfileImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setProfileImage(null);
+    setProfileImagePreview(null);
+    // Reset the file input
+    const fileInput = document.getElementById('profile_photo_path') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
   };
 
   return (
@@ -57,6 +88,58 @@ export default function AddUserPage() {
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
         <form onSubmit={handleSubmit} className="p-8">
           <div className="grid grid-cols-1 gap-y-8">
+            {/* Profile Picture Upload */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Profile Picture
+              </label>
+              <div className="flex items-center space-x-6">
+                <div className="flex-shrink-0">
+                  {profileImagePreview ? (
+                    <img
+                      src={profileImagePreview}
+                      alt="Profile preview"
+                      className="h-20 w-20 rounded-full object-cover border-2 border-gray-300"
+                    />
+                  ) : (
+                    <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300">
+                      <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col space-y-2">
+                  <label
+                    htmlFor="profile_photo_path"
+                    className="cursor-pointer px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-300 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Choose Image
+                  </label>
+                  <input
+                    type="file"
+                    id="profile_photo_path"
+                    name="profile_photo_path"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                  {profileImage && (
+                    <button
+                      type="button"
+                      onClick={removeImage}
+                      className="text-sm text-red-600 hover:text-red-800"
+                    >
+                      Remove Image
+                    </button>
+                  )}
+                </div>
+                <p className="mt-1 text-sm text-gray-500">
+                  JPG, PNG, GIF up to 10MB
+                </p>
+              </div>
+            </div>
+
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                 Name
@@ -137,7 +220,9 @@ export default function AddUserPage() {
               >
                 <option value="">Select status</option>
                 <option value="1">Active</option>
-                <option value="0">Inactive</option>
+                <option value="2">Inactive</option>
+                <option value="3">Pending</option>
+                <option value="4">Banned</option>
               </select>
             </div>
           </div>
@@ -153,9 +238,8 @@ export default function AddUserPage() {
             <button
               type="submit"
               disabled={loading}
-              className={`px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                loading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+              className={`px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
             >
               {loading ? (
                 <span className="flex items-center">

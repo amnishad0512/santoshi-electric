@@ -24,6 +24,7 @@ import {
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { useAuth } from '@/contexts/AuthContext';
+import authService from '@/services/auth.service';
 
 interface SubMenuItem {
   title: string;
@@ -114,8 +115,7 @@ export default function AdminSidebar() {
   const { user } = useAuth();
 
   const handleLogout = async () => {
-    Cookies.remove('token');
-    localStorage.clear();
+    await authService.logout();
     router.push('/');
   };
 
@@ -149,7 +149,7 @@ export default function AdminSidebar() {
               onClick={handleImageClick}
             >
               <Image
-                src={user?.profile_image || '/default-avatar.png'}
+                src={user?.profile_photo_path || '/images/user.jpg'}
                 alt="Profile"
                 fill
                 className="object-cover"

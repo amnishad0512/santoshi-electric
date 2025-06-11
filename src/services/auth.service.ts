@@ -114,39 +114,26 @@ class AuthService {
       });
       return { token, user };
     } catch (error: any) {
-      console.error('Login error:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-      
       // Clear any existing auth cookies on error
       Cookies.remove('token', { path: '/' });
       Cookies.remove('user', { path: '/' });
-
-      // Throw a more informative error
-      if (error.response?.status === 401) {
-        throw new Error('Invalid credentials');
-      } else if (error.response?.status === 422) {
-        throw new Error('Invalid input data');
-      } else if (!error.response) {
-        throw new Error('Network error - please check your connection');
-      } else {
-        throw new Error(error.response?.data?.message || 'Login failed');
-      }
+      
+        throw new Error(error.response.data.message || 'Login failed');
+      
     }
   }
 
   async logout() {
     try {
       await api.post('/logout');
-    } catch (error) {
-      console.error('Logout API call failed:', error);
+    } catch (error: any) {
+      console.error(error.response.data.message || 'Logout failed');
     } finally {
       // Always clear cookies regardless of API call success
       Cookies.remove('token', { path: '/' });
       Cookies.remove('refresh_token', { path: '/' });
       Cookies.remove('user', { path: '/' });
+      localStorage.clear();
     }
   }
 
@@ -219,11 +206,7 @@ class AuthService {
 
       return updatedUser;
     } catch (error: any) {
-      console.error('Profile update error:', error);
-      if (error.response?.status === 401) {
-        throw new Error('Not authenticated');
-      }
-      throw error;
+      throw new Error(error.response.data.message || 'Update profile failed');
     }
   }
 

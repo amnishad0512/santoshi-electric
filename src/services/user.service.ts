@@ -5,6 +5,7 @@ export interface User {
   name: string;
   email: string;
   phone_number: string;
+  profile_photo_path?: string;
   role: number;
   status: number;
   created_at: string;
@@ -25,6 +26,7 @@ export interface UpdateUserData {
   phone_number?: string;
   role?: number;
   status?: number;
+  profile_photo_path?: string;
 }
 
 class UserService {
@@ -46,17 +48,25 @@ class UserService {
 
   async getUserById(id: string) {
     console.log(id)
-    const response = await api.get<User>(`/users/${id}`);
+    const {data} = await api.get<User>(`/users/${id}`);
+    return data.data;
+  }
+
+  async createUser(data: CreateUserData | FormData) {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : {};
+    
+    const response = await api.post<User>('/users', data, config);
     return response;
   }
 
-  async createUser(data: CreateUserData) {
-    const response = await api.post<User>('/users', data);
-    return response;
-  }
-
-  async updateUser(id: string, data: UpdateUserData) {
-    const response = await api.put<User>(`/users/${id}`, data);
+  async updateUser(id: string, data: UpdateUserData | FormData) {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : {};
+    
+    const response = await api.put<User>(`/users/${id}`, data, config);
     return response;
   }
 

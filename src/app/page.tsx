@@ -547,8 +547,9 @@ export default function Home() {
                         </div>
                         <div>
                           <div className="text-[#10100e] font-medium text-sm mb-1">Phone & Email</div>
-                          <div className="text-[#666666] text-xs">+91 1234567890</div>
-                          <div className="text-[#666666] text-xs">info@santoshielectric.com</div>
+                          <div className="text-[#666666] text-xs">+91 7692977552</div>
+                          <div className="text-[#666666] text-xs">+91 7509155041</div>
+                          <div className="text-[#666666] text-xs">info@santoshielectric.in</div>
                         </div>
                       </div>
                     </div>
@@ -559,7 +560,7 @@ export default function Home() {
                           <div className="w-4 h-4 bg-[#e69204] rounded-sm"></div>
                         </div>
                         <div>
-                          <div className="text-[#10100e] font-medium text-sm mb-1">Store Hours</div>
+                          <div className="text-[#10100e] font-medium text-sm mb-1">Opening Hours</div>
                           <div className="text-[#666666] text-xs">Mon-Sat: 9AM-8PM</div>
                           <div className="text-[#666666] text-xs">Sun: 10AM-6PM</div>
                         </div>
