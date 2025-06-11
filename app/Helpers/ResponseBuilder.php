@@ -4,9 +4,6 @@ namespace App\Helpers;
 
 class ResponseBuilder
 {
-    /**
-     * Success Response
-     */
     public static function success($dataOrMessage = [], $code = 200)
     {
         $method = request()->method();
@@ -24,14 +21,17 @@ class ResponseBuilder
         ], $code);
     }
 
-    /**
-     * Error Response
-     */
-    public static function error($message = 'Something went wrong', $code = 400)
+    public static function error($message = 'Something went wrong', $code = 400, $errorDetails = null)
     {
-        return response()->json([
+        $response = [
             'status' => false,
             'message' => $message,
-        ], $code);
+        ];
+
+        if (!is_null($errorDetails)) {
+            $response['error'] = $errorDetails;
+        }
+
+        return response()->json($response, $code);
     }
 }
