@@ -11,7 +11,6 @@ class ResponseBuilder
         if ($method === 'GET') {
             return response()->json([
                 'status' => true,
-                
                 is_string($dataOrMessage) ? 'message' : 'data' => $dataOrMessage,
             ], $code);
 
