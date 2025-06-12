@@ -11,13 +11,14 @@ class ResponseBuilder
         if ($method === 'GET') {
             return response()->json([
                 'status' => true,
-                'data' => $dataOrMessage,
+                is_array($dataOrMessage) ? 'data' : 'message' => $dataOrMessage,
             ], $code);
+
         }
 
         return response()->json([
             'status' => true,
-            'data' => $dataOrMessage,
+            is_array($dataOrMessage) ? 'data' : 'message' => $dataOrMessage,
         ], $code);
     }
 
