@@ -13,7 +13,7 @@ class PaymentController extends Controller
     {
         $payments = Payment::with('order:id,order_number')->get(['id', 'order_id', 'payment_method', 'payment_status', 'amount', 'transaction_id', 'paid_at']);
 
-        return ResponseBuilder::success($payments, 'Payments fetched successfully');
+        return ResponseBuilder::success($payments);
     }
 
     public function store(Request $request)
@@ -29,7 +29,7 @@ class PaymentController extends Controller
 
         $payment = Payment::create($request->all());
 
-        return ResponseBuilder::created($payment, 'Payment created successfully');
+        return ResponseBuilder::success('Payment created successfully');
     }
 
     public function show($id)
@@ -40,7 +40,7 @@ class PaymentController extends Controller
             return ResponseBuilder::error('Payment not found', 404);
         }
 
-        return ResponseBuilder::success($payment, 'Payment fetched successfully');
+        return ResponseBuilder::success($payment);
     }
 
     public function update(Request $request, $id)
@@ -62,7 +62,7 @@ class PaymentController extends Controller
 
         $payment->update($request->all());
 
-        return ResponseBuilder::success($payment, 'Payment updated successfully');
+        return ResponseBuilder::success('Payment updated successfully');
     }
 
     public function destroy($id)
@@ -75,6 +75,6 @@ class PaymentController extends Controller
 
         $payment->delete();
 
-        return ResponseBuilder::success(null, 'Payment deleted successfully');
+        return ResponseBuilder::success('Payment deleted successfully');
     }
 }

@@ -31,7 +31,7 @@ class CategoryController extends Controller
             'category_icon' => $request->category_icon,
         ]);
 
-        return ResponseBuilder::created($category, 'Category created successfully');
+        return ResponseBuilder::success('Category created successfully');
     }
 
     public function show($id)
@@ -64,7 +64,7 @@ class CategoryController extends Controller
             'category_icon' => $request->category_icon,
         ]);
 
-        return ResponseBuilder::success($category, 'Category updated successfully');
+        return ResponseBuilder::success('Category updated successfully');
     }
 
     public function destroy($id)
@@ -77,12 +77,9 @@ class CategoryController extends Controller
 
         $category->delete();
 
-        return ResponseBuilder::success(null, 'Category deleted successfully');
+        return ResponseBuilder::success('Category deleted successfully');
     }
 
-    // category dropdown list api - created by Yogi (date: 08jun25)
-    // This method returns a dropdown list of categories based on the brand ID provided.
-    // If no ID is provided, it returns all categories.
     public function categoryDropdown($id = '')
     {
         if ($id) {

@@ -39,7 +39,7 @@ class SubSubCategoryController extends Controller
                 'sub_sub_category_slug' => Str::slug($request->sub_sub_category_name),
             ]);
 
-            return ResponseBuilder::success($subSubCategory, 'Sub Sub Category created successfully', 201);
+            return ResponseBuilder::success('Sub Sub Category created successfully', 201);
         } catch (\Exception $e) {
             return ResponseBuilder::error('Failed to create sub sub category.', 500, $e->getMessage());
         }
@@ -82,7 +82,7 @@ class SubSubCategoryController extends Controller
                 'sub_sub_category_slug' => Str::slug($request->sub_sub_category_name),
             ]);
 
-            return ResponseBuilder::success($subSubCategory, 'Sub Sub Category updated successfully');
+            return ResponseBuilder::success('Sub Sub Category updated successfully');
         } catch (\Exception $e) {
             return ResponseBuilder::error('Failed to update sub sub category.', 500, $e->getMessage());
         }
@@ -99,7 +99,7 @@ class SubSubCategoryController extends Controller
 
             $subSubCategory->delete();
 
-            return ResponseBuilder::success(null, 'Sub Sub Category deleted successfully');
+            return ResponseBuilder::success('Sub Sub Category deleted successfully');
         } catch (\Exception $e) {
             return ResponseBuilder::error('Failed to delete sub sub category.', 500, $e->getMessage());
         }

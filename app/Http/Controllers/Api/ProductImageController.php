@@ -15,7 +15,7 @@ class ProductImageController extends Controller
             ->select('id', 'product_id', 'path_name')
             ->get();
 
-        return ResponseBuilder::success($productImages, 'Product Images fetched successfully');
+        return ResponseBuilder::success($productImages);
     }
 
     public function store(Request $request)
@@ -27,7 +27,7 @@ class ProductImageController extends Controller
 
         $productImage = ProductImage::create($request->all());
 
-        return ResponseBuilder::success($productImage, 'Product Image created successfully', 201);
+        return ResponseBuilder::success('Product Image created successfully', 201);
     }
 
     public function show($id)
@@ -38,7 +38,7 @@ class ProductImageController extends Controller
             return ResponseBuilder::error('Product Image not found', 404);
         }
 
-        return ResponseBuilder::success($productImage, 'Product Image fetched successfully');
+        return ResponseBuilder::success($productImage);
     }
 
     public function update(Request $request, $id)
@@ -55,7 +55,7 @@ class ProductImageController extends Controller
 
         $productImage->update($request->only(['path_name']));
 
-        return ResponseBuilder::success($productImage, 'Product Image updated successfully');
+        return ResponseBuilder::success('Product Image updated successfully');
     }
 
     public function destroy($id)
@@ -68,6 +68,6 @@ class ProductImageController extends Controller
 
         $productImage->delete();
 
-        return ResponseBuilder::success(null, 'Product Image deleted successfully');
+        return ResponseBuilder::success('Product Image deleted successfully');
     }
 }

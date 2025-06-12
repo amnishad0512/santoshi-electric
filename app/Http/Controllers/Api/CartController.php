@@ -16,7 +16,7 @@ class CartController extends Controller
         $user = Auth::user();
         $cartItems = Cart::with('product')->where('user_id', $user->id)->get();
 
-        return ResponseBuilder::success('Cart fetched successfully', $cartItems);
+        return ResponseBuilder::success($cartItems);
     }
 
     public function store(Request $request)
@@ -35,7 +35,7 @@ class CartController extends Controller
             ['quantity' => \DB::raw('quantity + ' . $request->quantity), 'price' => $product->price]
         );
 
-        return ResponseBuilder::success('Product added to cart successfully', $cartItem);
+        return ResponseBuilder::success('Product added to cart successfully');
     }
 
     public function update(Request $request, $id)
@@ -45,12 +45,12 @@ class CartController extends Controller
         $cartItem = Cart::findOrFail($id);
 
         if ($cartItem->user_id !== Auth::id()) {
-            return ResponseBuilder::error('Unauthorized', null, 403);
+            return ResponseBuilder::error('Unauthorized', 403);
         }
 
         $cartItem->update(['quantity' => $request->quantity]);
 
-        return ResponseBuilder::success('Cart item updated successfully', $cartItem);
+        return ResponseBuilder::success('Cart item updated successfully');
     }
 
     public function destroy($id)
@@ -58,7 +58,7 @@ class CartController extends Controller
         $cartItem = Cart::findOrFail($id);
 
         if ($cartItem->user_id !== Auth::id()) {
-            return ResponseBuilder::error('Unauthorized', null, 403);
+            return ResponseBuilder::error('Unauthorized', 403);
         }
 
         $cartItem->delete();

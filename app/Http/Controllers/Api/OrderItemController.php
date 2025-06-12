@@ -29,7 +29,7 @@ class OrderItemController extends Controller
 
         $orderItem = OrderItem::create($request->all());
 
-        return ResponseBuilder::created($orderItem, 'OrderItem created successfully');
+        return ResponseBuilder::success('OrderItem created successfully');
     }
 
     public function show($id)
@@ -60,7 +60,7 @@ class OrderItemController extends Controller
 
         $orderItem->update($request->all());
 
-        return ResponseBuilder::success($orderItem, 'OrderItem updated successfully');
+        return ResponseBuilder::success('OrderItem updated successfully');
     }
 
     public function destroy($id)
@@ -73,6 +73,6 @@ class OrderItemController extends Controller
 
         $orderItem->delete();
 
-        return ResponseBuilder::success(null, 'OrderItem deleted successfully');
+        return ResponseBuilder::success('OrderItem deleted successfully');
     }
 }

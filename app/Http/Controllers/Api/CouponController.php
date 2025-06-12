@@ -13,7 +13,7 @@ class CouponController extends Controller
     {   
         $coupons = Coupon::select('id', 'coupon_name', 'discount_type', 'coupon_discount', 'minimum_purchase', 'maximum_discount', 'usage_limit', 'coupon_start_date', 'coupon_validity', 'coupon_status', 'created_at')->get();
         
-        return ResponseBuilder::success($coupons, 'Coupons fetched successfully');
+        return ResponseBuilder::success($coupons);
     }
 
     public function store(Request $request)
@@ -38,7 +38,7 @@ class CouponController extends Controller
             'coupon_status' => $request->coupon_status,
         ]);
 
-        return ResponseBuilder::success($coupon, 'Coupon created successfully', 201);
+        return ResponseBuilder::success('Coupon created successfully', 201);
     }
 
     public function show($id)
@@ -49,7 +49,7 @@ class CouponController extends Controller
             return ResponseBuilder::error('Coupon not found', 404);
         }
 
-        return ResponseBuilder::success($coupon, 'Coupon fetched successfully');
+        return ResponseBuilder::success($coupon);
     }
 
     public function update(Request $request, $id)
@@ -80,7 +80,7 @@ class CouponController extends Controller
             'coupon_status' => $request->coupon_status,
         ]);
 
-        return ResponseBuilder::success($coupon, 'Coupon updated successfully');
+        return ResponseBuilder::success('Coupon updated successfully');
     }
 
     public function destroy($id)
@@ -93,6 +93,6 @@ class CouponController extends Controller
 
         $coupon->delete();
 
-        return ResponseBuilder::success(null, 'Coupon deleted successfully');
+        return ResponseBuilder::success('Coupon deleted successfully');
     }
 }

@@ -69,7 +69,7 @@ class UserController extends Controller
 
             $user->save();
 
-            return ResponseBuilder::success('User created successfully', 201);
+            return ResponseBuilder::success('User created successfully');
 
         } catch (\Exception $e) {
             return ResponseBuilder::error('Failed to create user', 500, $e->getMessage());
@@ -90,9 +90,7 @@ class UserController extends Controller
                 return ResponseBuilder::error('User not found', 404);
             }
 
-            return ResponseBuilder::success([
-                'data' => $user
-            ], 200);
+            return ResponseBuilder::success($user);
         } catch (\Exception $e) {
             return ResponseBuilder::error('Failed to fetch user', 500, $e->getMessage());
         }
@@ -139,7 +137,7 @@ class UserController extends Controller
             }
             $user->save();
 
-            return ResponseBuilder::success('User updated successfully', 200);
+            return ResponseBuilder::success('User updated successfully');
         } catch (\Exception $e) {
             return ResponseBuilder::error('Failed to update user', 500, $e->getMessage());
         }
@@ -159,9 +157,7 @@ class UserController extends Controller
 
             $user->delete();
 
-            return ResponseBuilder::success([
-                'message' => 'User deleted successfully'
-            ], 200);
+            return ResponseBuilder::success('User deleted successfully');
         } catch (\Exception $e) {
             return ResponseBuilder::error('Failed to delete user', 500, $e->getMessage());
         }

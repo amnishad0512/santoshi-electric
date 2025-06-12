@@ -11,62 +11,86 @@ class StockController extends Controller
 {
     public function index()
     {
-        return ResponseBuilder::success(Stock::all(), 'Stocks retrieved successfully');
+        try {
+            $stocks = Stock::all();
+            if ($stocks->isEmpty()) {
+                return ResponseBuilder::error('No stocks found', 404);
+            }
+            return ResponseBuilder::success($stocks);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
+        }
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'stock_name' => 'required|string|max:255',
-            'stock_quantity' => 'nullable|integer|min:0',
-            'stock_status' => 'nullable|boolean',
-        ]);
+        try {
+            $request->validate([
+                'stock_name' => 'required|string|max:255',
+                'stock_quantity' => 'nullable|integer|min:0',
+                'stock_status' => 'nullable|boolean',
+            ]);
 
-        $stock = Stock::create($request->all());
+            $stock = Stock::create($request->all());
 
-        return ResponseBuilder::success($stock, 'Stock created successfully', 201);
+            return ResponseBuilder::success('Stock created successfully');
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
+        }
     }
 
     public function show($id)
     {
-        $stock = Stock::find($id);
+        try {
+            $stock = Stock::find($id);
 
-        if (!$stock) {
-            return ResponseBuilder::error('Stock not found', 404);
+            if (!$stock) {
+                return ResponseBuilder::error('Stock not found', 404);
+            }
+
+            return ResponseBuilder::success($stock);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
-
-        return ResponseBuilder::success($stock, 'Stock retrieved successfully');
     }
 
     public function update(Request $request, $id)
     {
-        $stock = Stock::find($id);
+        try {
+            $stock = Stock::find($id);
 
-        if (!$stock) {
-            return ResponseBuilder::error('Stock not found', 404);
+            if (!$stock) {
+                return ResponseBuilder::error('Stock not found', 404);
+            }
+
+            $request->validate([
+                'stock_name' => 'sometimes|required|string|max:255',
+                'stock_quantity' => 'sometimes|required|integer|min:0',
+                'stock_status' => 'sometimes|required|boolean',
+            ]);
+
+            $stock->update($request->only(['stock_name', 'stock_quantity', 'stock_status']));
+
+            return ResponseBuilder::success('Stock updated successfully');
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
-
-        $request->validate([
-            'stock_name' => 'sometimes|required|string|max:255',
-            'stock_quantity' => 'sometimes|required|integer|min:0',
-            'stock_status' => 'sometimes|required|boolean',
-        ]);
-
-        $stock->update($request->only(['stock_name', 'stock_quantity', 'stock_status']));
-
-        return ResponseBuilder::success($stock, 'Stock updated successfully');
     }
 
     public function destroy($id)
     {
-        $stock = Stock::find($id);
+        try {
+            $stock = Stock::find($id);
 
-        if (!$stock) {
-            return ResponseBuilder::error('Stock not found', 404);
+            if (!$stock) {
+                return ResponseBuilder::error('Stock not found', 404);
+            }
+
+            $stock->delete();
+
+            return ResponseBuilder::success('Stock deleted successfully');
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
-
-        $stock->delete();
-
-        return ResponseBuilder::success(null, 'Stock deleted successfully');
     }
 }

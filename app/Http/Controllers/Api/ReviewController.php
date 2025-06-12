@@ -15,7 +15,7 @@ class ReviewController extends Controller
             ->select('id', 'user_id', 'product_id', 'rating', 'comment')
             ->get();
 
-        return ResponseBuilder::success($reviews, 'Reviews fetched successfully');
+        return ResponseBuilder::success($reviews);
     }
 
     public function store(Request $request)
@@ -29,7 +29,7 @@ class ReviewController extends Controller
 
         $review = Review::create($request->all());
 
-        return ResponseBuilder::created($review, 'Review created successfully');
+        return ResponseBuilder::success('Review created successfully');
     }
 
     public function show($id)
@@ -40,7 +40,7 @@ class ReviewController extends Controller
             return ResponseBuilder::error('Review not found', 404);
         }
 
-        return ResponseBuilder::success($review, 'Review fetched successfully');
+        return ResponseBuilder::success($review);
     }
 
     public function update(Request $request, $id)
@@ -60,7 +60,7 @@ class ReviewController extends Controller
 
         $review->update($request->all());
 
-        return ResponseBuilder::success($review, 'Review updated successfully');
+        return ResponseBuilder::success('Review updated successfully');
     }
 
     public function destroy($id)
@@ -73,6 +73,6 @@ class ReviewController extends Controller
 
         $review->delete();
 
-        return ResponseBuilder::success(null, 'Review deleted successfully');
+        return ResponseBuilder::success('Review deleted successfully');
     }
 }

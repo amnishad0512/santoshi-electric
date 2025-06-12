@@ -91,7 +91,7 @@ class ProductController extends Controller
             'status' => $request->status,
         ]);
 
-        return ResponseBuilder::created(null, 'Product created successfully');
+        return ResponseBuilder::success('Product created successfully');
     }
 
     public function show($id)
@@ -173,7 +173,7 @@ class ProductController extends Controller
             'status' => $request->status,
         ]);
 
-        return ResponseBuilder::success($product, 'Product updated successfully');
+        return ResponseBuilder::success('Product updated successfully');
     }
 
     public function destroy($id)
@@ -193,7 +193,7 @@ class ProductController extends Controller
 
         $product->delete();
 
-        return ResponseBuilder::success(null, 'Product deleted successfully');
+        return ResponseBuilder::success('Product deleted successfully');
     }
 
     public function FeaturedProducts(Request $request)

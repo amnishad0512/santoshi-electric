@@ -42,7 +42,7 @@ class UserAddressController extends Controller
 
             $userAddress = UserAddress::create($request->all());
 
-            return ResponseBuilder::success($userAddress, 'User address created successfully', 201);
+            return ResponseBuilder::success('User address created successfully', 201);
         } catch (\Exception $e) {
             return ResponseBuilder::error('Failed to create user address.', 500, $e->getMessage());
         }
@@ -90,7 +90,7 @@ class UserAddressController extends Controller
 
             $userAddress->update($request->all());
 
-            return ResponseBuilder::success($userAddress, 'User address updated successfully');
+            return ResponseBuilder::success('User address updated successfully');
         } catch (\Exception $e) {
             return ResponseBuilder::error('Failed to update user address.', 500, $e->getMessage());
         }
@@ -110,7 +110,7 @@ class UserAddressController extends Controller
 
             $userAddress->delete();
 
-            return ResponseBuilder::success(null, 'User address deleted successfully');
+            return ResponseBuilder::success('User address deleted successfully');
         } catch (\Exception $e) {
             return ResponseBuilder::error('Failed to delete user address.', 500, $e->getMessage());
         }

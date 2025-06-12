@@ -32,7 +32,7 @@ class SubCategoryController extends Controller
             'subcategory_slug' => Str::slug($request->subcategory_name),
         ]);
 
-        return ResponseBuilder::created('Sub Category created successfully', $subCategory);
+        return ResponseBuilder::success('Sub Category created successfully');
     }
 
     public function show($id)
@@ -65,7 +65,7 @@ class SubCategoryController extends Controller
             'subcategory_slug' => Str::slug($request->subcategory_name),
         ]);
         
-        return ResponseBuilder::success($subCategory, 'Sub Category updated successfully');
+        return ResponseBuilder::success('Sub Category updated successfully');
     }
 
     public function destroy($id)
@@ -78,7 +78,7 @@ class SubCategoryController extends Controller
 
         $subCategory->delete();
 
-        return ResponseBuilder::success(null, 'Sub Category deleted successfully');
+        return ResponseBuilder::success('Sub Category deleted successfully');
     }
 
     // sub category dropdown list api craeted by Yogi (date: 08jun25)

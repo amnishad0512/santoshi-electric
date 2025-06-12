@@ -149,7 +149,7 @@ class BrandController extends Controller
 
         $brand->delete();
 
-        return ResponseBuilder::success(null, 'Brand deleted successfully');
+        return ResponseBuilder::success('Brand deleted successfully');
     }
 
     public function brandDropdown()
