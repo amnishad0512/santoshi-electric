@@ -73,7 +73,7 @@ class AuthController extends Controller
             $token = $user->createToken('LaravelAuthApp')->accessToken;
             $user->last_login = date('Y-m-d H:i:s');
             $user->save();
-            $data['token'] = $token;
+            $data = ['token' => $token];
             return ResponseBuilder::success($data);
         } catch (\Exception $e) {
             return ResponseBuilder::error($e->getMessage(), 401);
