@@ -17,7 +17,7 @@ class ResponseBuilder
 
         return response()->json([
             'status' => true,
-            'message' => $dataOrMessage,
+            'data' => $dataOrMessage,
         ], $code);
     }
 
