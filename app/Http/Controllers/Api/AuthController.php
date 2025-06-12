@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SendOtpMail;
 use Illuminate\Support\Facades\Auth;
@@ -30,6 +29,7 @@ class AuthController extends Controller
             return ResponseBuilder::error($validator->errors()->first(), 422);
         }
 
+        DB::beginTransaction();
         try {
             $user = User::create([
                 'name' => $request->name,
@@ -91,6 +91,7 @@ class AuthController extends Controller
         }
 
         try {
+            $user = null;
             if ($request->phone_number) {
                 $user = User::where('phone_number', $request->phone_number)->first();
             }
@@ -131,33 +132,41 @@ class AuthController extends Controller
             return ResponseBuilder::error($validator->errors()->first(), 422);
         }
 
-        $user = User::where('otp', $request->otp)
-            ->where('otp_expires_at', '>', now())
-            ->first();
+        try {
+            $user = User::where('otp', $request->otp)
+                ->where('otp_expires_at', '>', now())
+                ->first();
 
-        if (!$user) {
-            return ResponseBuilder::error('Invalid or expired OTP', 400);
+            if (!$user) {
+                return ResponseBuilder::error('Invalid or expired OTP', 400);
+            }
+
+            $user->password = Hash::make($request->password);
+            $user->password_salt = $request->password;
+            $user->otp = null;
+            $user->otp_expires_at = null;
+            $user->save();
+
+            return ResponseBuilder::success('Password has been reset successfully', 200);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
-
-        $user->password = Hash::make($request->password);
-        $user->password_salt = $request->password;
-        $user->otp = null;
-        $user->otp_expires_at = null;
-        $user->save();
-
-        return ResponseBuilder::success('Password has been reset successfully', 200);
     }
 
     public function logout(Request $request)
     {
-        $user = Auth::user();
+        try {
+            $user = Auth::user();
 
-        if (!$user) {
-            return ResponseBuilder::error('User not authenticated', 401);
+            if (!$user) {
+                return ResponseBuilder::error('User not authenticated', 401);
+            }
+
+            $user->token()->revoke();
+
+            return ResponseBuilder::success('Logged out successfully');
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
-
-        $user->token()->revoke();
-
-        return ResponseBuilder::success('Logged out successfully');
     }
 }

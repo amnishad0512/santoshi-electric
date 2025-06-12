@@ -11,70 +11,93 @@ class PaymentController extends Controller
 {
     public function index()
     {
-        $payments = Payment::with('order:id,order_number')->get(['id', 'order_id', 'payment_method', 'payment_status', 'amount', 'transaction_id', 'paid_at']);
-
-        return ResponseBuilder::success($payments);
+        try {
+            $payments = Payment::with('order:id,order_total')->get(['id', 'order_id', 'payment_method', 'payment_status', 'amount', 'transaction_id', 'paid_at']);
+            return ResponseBuilder::success($payments);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
+        }
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'order_id' => 'required|exists:orders,id',
-            'payment_method' => 'required|string|max:50',
-            'payment_status' => 'required|string|max:20',
-            'amount' => 'required|numeric|min:0',
-            'transaction_id' => 'nullable|string|max:100',
-            'paid_at' => 'nullable|date',
-        ]);
+        try {
+            $request->validate([
+                'order_id' => 'required|exists:orders,id',
+                'payment_method' => 'required|string|max:50',
+                'payment_status' => 'required|string|max:20',
+                'amount' => 'required|numeric|min:0',
+                'transaction_id' => 'nullable|string|max:100',
+                'paid_at' => 'nullable|date',
+            ]);
 
-        $payment = Payment::create($request->all());
+            $payment = Payment::create($request->all());
 
-        return ResponseBuilder::success('Payment created successfully');
+            return ResponseBuilder::success('Payment created successfully');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return ResponseBuilder::error($e->errors(), 422);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
+        }
     }
 
     public function show($id)
     {
-        $payment = Payment::with('order')->find($id);
+        try {
+            $payment = Payment::with('order')->find($id);
 
-        if (!$payment) {
-            return ResponseBuilder::error('Payment not found', 404);
+            if (!$payment) {
+                return ResponseBuilder::error('Payment not found', 404);
+            }
+
+            return ResponseBuilder::success($payment);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
-
-        return ResponseBuilder::success($payment);
     }
 
     public function update(Request $request, $id)
     {
-        $payment = Payment::find($id);
+        try {
+            $payment = Payment::find($id);
 
-        if (!$payment) {
-            return ResponseBuilder::error('Payment not found', 404);
+            if (!$payment) {
+                return ResponseBuilder::error('Payment not found', 404);
+            }
+
+            $request->validate([
+                'order_id'        => 'required|exists:orders,id',
+                'payment_method' => 'sometimes|required|string|max:50',
+                'payment_status' => 'sometimes|required|string|max:20',
+                'amount' => 'sometimes|required|numeric|min:0',
+                'transaction_id' => 'nullable|string|max:100',
+                'paid_at' => 'nullable|date',
+            ]);
+
+            $payment->update($request->all());
+
+            return ResponseBuilder::success('Payment updated successfully');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return ResponseBuilder::error($e->errors(), 422);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
-
-        $request->validate([
-            'order_id'        => 'required|exists:orders,id',
-            'payment_method' => 'sometimes|required|string|max:50',
-            'payment_status' => 'sometimes|required|string|max:20',
-            'amount' => 'sometimes|required|numeric|min:0',
-            'transaction_id' => 'nullable|string|max:100',
-            'paid_at' => 'nullable|date',
-        ]);
-
-        $payment->update($request->all());
-
-        return ResponseBuilder::success('Payment updated successfully');
     }
 
     public function destroy($id)
     {
-        $payment = Payment::find($id);
+        try {
+            $payment = Payment::find($id);
 
-        if (!$payment) {
-            return ResponseBuilder::error('Payment not found', 404);
+            if (!$payment) {
+                return ResponseBuilder::error('Payment not found', 404);
+            }
+
+            $payment->delete();
+
+            return ResponseBuilder::success('Payment deleted successfully');
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
-
-        $payment->delete();
-
-        return ResponseBuilder::success('Payment deleted successfully');
     }
 }

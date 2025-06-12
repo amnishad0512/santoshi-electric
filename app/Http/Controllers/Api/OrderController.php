@@ -12,77 +12,91 @@ class OrderController extends Controller
     public function index($limit = 5)
     {
         try {
-          
-            $orders = Order::with(['user', 'orderItems.product', 'payment', 'shippingAddress'])
-            ->select('id', 'user_id', 'order_status', 'order_total')
-            ->orderBy('id', 'desc')
-            ->limit($limit)
-            ->get();
-            
+            $orders = Order::select('id', 'user_id', 'order_status', 'order_total', 'created_at', 'updated_at')
+                ->with(['user:id,name,phone_number,email', 'orderItems.product', 'payment', 'shippingAddress'])
+                ->orderBy('id', 'desc')
+                ->limit($limit)
+                ->get();
+
             return ResponseBuilder::success($orders);
         } catch (\Exception $e) {
-            return ResponseBuilder::error('Invalid limit value', $e->getMessage());
+            return ResponseBuilder::error('Failed to fetch orders', $e->getMessage());
         }
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'order_status' => 'required|string',
-            'order_total' => 'required|numeric|min:0',
-        ]);
+        try {
+            $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'order_status' => 'required|string',
+                'order_total' => 'required|numeric|min:0',
+            ]);
 
-        $order = Order::create([
-            'user_id' => $request->user_id,
-            'order_status' => $request->order_status,
-            'order_total' => $request->order_total,
-        ]);
+            $order = Order::create([
+                'user_id' => $request->user_id,
+                'order_status' => $request->order_status,
+                'order_total' => $request->order_total,
+            ]);
 
-        return ResponseBuilder::success('Order created successfully', 201);
-        
+            return ResponseBuilder::success('Order created successfully', 201);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error('Failed to create order', $e->getMessage());
+        }
     }
 
     public function show($id)
     {
-        $order = Order::with(['user', 'orderItems.product', 'payment', 'shippingAddress'])->find($id);
+        try {
+            $order = Order::with(['user', 'orderItems.product', 'payment', 'shippingAddress'])->find($id);
 
-        if (!$order) {
-            return ResponseBuilder::error('Order not found', 404);
+            if (!$order) {
+                return ResponseBuilder::error('Order not found', 404);
+            }
+
+            return ResponseBuilder::success($order);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error('Failed to fetch order', $e->getMessage());
         }
-
-        return ResponseBuilder::success($order);
     }
 
     public function update(Request $request, $id)
     {
-        $order = Order::find($id);
+        try {
+            $order = Order::find($id);
 
-        if (!$order) {
-            return ResponseBuilder::error('Order not found', 404);
+            if (!$order) {
+                return ResponseBuilder::error('Order not found', 404);
+            }
+
+            $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'order_status' => 'required|string',
+                'order_total' => 'required|numeric|min:0',
+            ]);
+
+            $order->update($request->only(['user_id', 'order_status', 'order_total']));
+
+            return ResponseBuilder::success('Order updated successfully');
+        } catch (\Exception $e) {
+            return ResponseBuilder::error('Failed to update order', $e->getMessage());
         }
-
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'order_status' => 'required|string',
-            'order_total' => 'required|numeric|min:0',
-        ]);
-
-        $order->update($request->only(['user_id', 'order_status', 'order_total']));
-
-        return ResponseBuilder::success( 'Order updated successfully');
     }
 
     public function destroy($id)
     {
-        $order = Order::find($id);
+        try {
+            $order = Order::find($id);
 
-        if (!$order) {
-            return ResponseBuilder::error('Order not found', 404);
+            if (!$order) {
+                return ResponseBuilder::error('Order not found', 404);
+            }
+
+            $order->delete();
+
+            return ResponseBuilder::success('Order deleted successfully');
+        } catch (\Exception $e) {
+            return ResponseBuilder::error('Failed to delete order', $e->getMessage());
         }
-
-        $order->delete();
-
-        return ResponseBuilder::success( 'Order deleted successfully');
     }
 }

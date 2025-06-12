@@ -13,56 +13,76 @@ class CartController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
-        $cartItems = Cart::with('product')->where('user_id', $user->id)->get();
+        try {
+            $user = Auth::user();
+            $cartItems = Cart::with('product')->where('user_id', $user->id)->get();
 
-        return ResponseBuilder::success($cartItems);
+            return ResponseBuilder::success($cartItems);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
+        }
     }
 
     public function store(Request $request)
     {
-        $user = Auth::user();
+        try {
+            $user = Auth::user();
 
-        $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1',
-        ]);
+            $request->validate([
+                'product_id' => 'required|exists:products,id',
+                'quantity' => 'required|integer|min:1',
+            ]);
 
-        $product = Product::findOrFail($request->product_id);
+            $product = Product::findOrFail($request->product_id);
 
-        $cartItem = Cart::updateOrCreate(
-            ['user_id' => $user->id, 'product_id' => $product->id],
-            ['quantity' => \DB::raw('quantity + ' . $request->quantity), 'price' => $product->price]
-        );
+            $cartItem = Cart::updateOrCreate(
+                ['user_id' => $user->id, 'product_id' => $product->id],
+                ['quantity' => \DB::raw('quantity + ' . $request->quantity), 'price' => $product->price]
+            );
 
-        return ResponseBuilder::success('Product added to cart successfully');
+            return ResponseBuilder::success('Product added to cart successfully');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return ResponseBuilder::error($e->errors(), 422);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $request->validate(['quantity' => 'required|integer|min:1']);
+        try {
+            $request->validate(['quantity' => 'required|integer|min:1']);
 
-        $cartItem = Cart::findOrFail($id);
+            $cartItem = Cart::findOrFail($id);
 
-        if ($cartItem->user_id !== Auth::id()) {
-            return ResponseBuilder::error('Unauthorized', 403);
+            if ($cartItem->user_id !== Auth::id()) {
+                return ResponseBuilder::error('Unauthorized', 403);
+            }
+
+            $cartItem->update(['quantity' => $request->quantity]);
+
+            return ResponseBuilder::success('Cart item updated successfully');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return ResponseBuilder::error($e->errors(), 422);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
-
-        $cartItem->update(['quantity' => $request->quantity]);
-
-        return ResponseBuilder::success('Cart item updated successfully');
     }
 
     public function destroy($id)
     {
-        $cartItem = Cart::findOrFail($id);
+        try {
+            $cartItem = Cart::findOrFail($id);
 
-        if ($cartItem->user_id !== Auth::id()) {
-            return ResponseBuilder::error('Unauthorized', 403);
+            if ($cartItem->user_id !== Auth::id()) {
+                return ResponseBuilder::error('Unauthorized', 403);
+            }
+
+            $cartItem->delete();
+
+            return ResponseBuilder::success('Cart item removed successfully');
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
-
-        $cartItem->delete();
-
-        return ResponseBuilder::success('Cart item removed successfully');
     }
 }

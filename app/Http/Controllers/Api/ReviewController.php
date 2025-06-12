@@ -11,68 +11,93 @@ class ReviewController extends Controller
 {
     public function index()
     {
-        $reviews = Review::with(['user:id,name', 'product:id,product_name'])
-            ->select('id', 'user_id', 'product_id', 'rating', 'comment')
+        try {
+            $reviews = Review::select('id', 'user_id', 'product_id', 'rating', 'comment')
+            ->with(['user:id,name', 'product:id,product_name'])    
             ->get();
 
-        return ResponseBuilder::success($reviews);
+            return ResponseBuilder::success($reviews);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
+        }
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'product_id' => 'required|exists:products,id',
-            'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string',
-        ]);
+        try {
+            $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'product_id' => 'required|exists:products,id',
+                'rating' => 'required|integer|min:1|max:5',
+                'comment' => 'nullable|string',
+            ]);
 
-        $review = Review::create($request->all());
+            $review = Review::create($request->all());
 
-        return ResponseBuilder::success('Review created successfully');
+            return ResponseBuilder::success('Review created successfully');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return ResponseBuilder::error($e->errors(), 422);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
+        }
     }
 
     public function show($id)
-    {
-        $review = Review::with(['user', 'product'])->find($id);
+    {   
+        try {
+            $review = Review::select('id', 'user_id', 'product_id', 'rating', 'comment')
+            ->with(['user:id,name', 'product:id,product_name'])    
+            ->find($id);
+            if (!$review) {
+                return ResponseBuilder::error('Review not found', 404);
+            }
 
-        if (!$review) {
-            return ResponseBuilder::error('Review not found', 404);
+            return ResponseBuilder::success($review);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
-
-        return ResponseBuilder::success($review);
     }
 
     public function update(Request $request, $id)
     {
-        $review = Review::find($id);
+        try {
+            $review = Review::find($id);
 
-        if (!$review) {
-            return ResponseBuilder::error('Review not found', 404);
+            if (!$review) {
+                return ResponseBuilder::error('Review not found', 404);
+            }
+
+            $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'product_id' => 'required|exists:products,id',
+                'rating' => 'required|integer|min:1|max:5',
+                'comment' => 'nullable|string',
+            ]);
+
+            $review->update($request->all());
+
+            return ResponseBuilder::success('Review updated successfully');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return ResponseBuilder::error($e->errors(), 422);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
-
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'product_id' => 'required|exists:products,id',
-            'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string',
-        ]);
-
-        $review->update($request->all());
-
-        return ResponseBuilder::success('Review updated successfully');
     }
 
     public function destroy($id)
     {
-        $review = Review::find($id);
+        try {
+            $review = Review::find($id);
 
-        if (!$review) {
-            return ResponseBuilder::error('Review not found', 404);
+            if (!$review) {
+                return ResponseBuilder::error('Review not found', 404);
+            }
+
+            $review->delete();
+
+            return ResponseBuilder::success('Review deleted successfully');
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
-
-        $review->delete();
-
-        return ResponseBuilder::success('Review deleted successfully');
     }
 }

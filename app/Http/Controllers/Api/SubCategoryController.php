@@ -12,73 +12,95 @@ class SubCategoryController extends Controller
 {
     public function index()
     {   
-        $subcategories = SubCategory::select('id', 'subcategory_name')
-            ->with(['category:id,category_name', 'subSubCategories:id,sub_category_id,sub_sub_category_name'])
-            ->get();
-        
-        return ResponseBuilder::success($subcategories);
+        try {
+            $subcategories = SubCategory::select('id', 'category_id', 'subcategory_name', 'created_at', 'updated_at')
+                ->with(['category:id,category_name', 'subSubCategories:id,sub_category_id,sub_sub_category_name'])
+                ->get();
+            
+            return ResponseBuilder::success($subcategories);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
+        }
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'subcategory_name' => 'required|string|max:255',
-        ]);
+        try {
+            $request->validate([
+                'category_id' => 'required|exists:categories,id',
+                'subcategory_name' => 'required|string|max:255',
+            ]);
 
-        $subCategory = SubCategory::create([
-            'category_id' => $request->category_id,
-            'subcategory_name' => $request->subcategory_name,
-            'subcategory_slug' => Str::slug($request->subcategory_name),
-        ]);
+            $subCategory = SubCategory::create([
+                'category_id' => $request->category_id,
+                'subcategory_name' => $request->subcategory_name,
+                'subcategory_slug' => Str::slug($request->subcategory_name),
+            ]);
 
-        return ResponseBuilder::success('Sub Category created successfully');
+            return ResponseBuilder::success('Sub Category created successfully');
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
+        }
     }
 
     public function show($id)
     {
-        $subCategory = SubCategory::with(['category', 'subSubCategories'])->find($id);
+        try {
+            $subCategory = SubCategory::select('id', 'category_id', 'subcategory_name', 'created_at', 'updated_at')
+                ->with(['category:id,category_name', 'subSubCategories:id,sub_category_id,sub_sub_category_name'])
+                ->find($id);
 
-        if (!$subCategory) {
-            return ResponseBuilder::error('Sub Category not found', 404);
+            if (!$subCategory) {
+                return ResponseBuilder::error('Sub Category not found', 404);
+            }
+
+            return ResponseBuilder::success($subCategory);
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
-
-        return ResponseBuilder::success($subCategory);
     }
 
     public function update(Request $request, $id)
     {
-        $subCategory = SubCategory::find($id);
+        try {
+            $subCategory = SubCategory::find($id);
 
-        if (!$subCategory) {
-            return ResponseBuilder::error('Sub Category not found', 404);
+            if (!$subCategory) {
+                return ResponseBuilder::error('Sub Category not found', 404);
+            }
+
+            $request->validate([
+                'category_id'       => 'required|exists:categories,id',
+                'subcategory_name'  => 'required|string|max:255',
+            ]);
+
+            $subCategory->update([
+                'category_id' => $request->category_id,
+                'subcategory_name' => $request->subcategory_name,
+                'subcategory_slug' => Str::slug($request->subcategory_name),
+            ]);
+            
+            return ResponseBuilder::success('Sub Category updated successfully');
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
-
-        $request->validate([
-            'category_id'       => 'required|exists:categories,id',
-            'subcategory_name'  => 'required|string|max:255',
-        ]);
-
-        $subCategory->update([
-            'category_id' => $request->category_id,
-            'subcategory_name' => $request->subcategory_name,
-            'subcategory_slug' => Str::slug($request->subcategory_name),
-        ]);
-        
-        return ResponseBuilder::success('Sub Category updated successfully');
     }
 
     public function destroy($id)
     {
-        $subCategory = SubCategory::find($id);
+        try {
+            $subCategory = SubCategory::find($id);
 
-        if (!$subCategory) {
-            return ResponseBuilder::error('Sub Category not found', 404);
+            if (!$subCategory) {
+                return ResponseBuilder::error('Sub Category not found', 404);
+            }
+
+            $subCategory->delete();
+
+            return ResponseBuilder::success('Sub Category deleted successfully');
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
-
-        $subCategory->delete();
-
-        return ResponseBuilder::success('Sub Category deleted successfully');
     }
 
     // sub category dropdown list api craeted by Yogi (date: 08jun25)
@@ -86,17 +108,21 @@ class SubCategoryController extends Controller
     // If no ID is provided, it returns all subcategories.
     public function SubCategoryDropdown($id='')
     {
-        if ($id) {
-            $subCategories = SubCategory::where('category_id', $id)
-                ->select('id as value', 'subcategory_name as label')
-                ->get();
-        } else {
-            $subCategories = SubCategory::select('id as value', 'subcategory_name as label')->get();
-        }
-        if (!$subCategories) {
-            return ResponseBuilder::error('Sub Category not found', 404);
-        } else {
-            return ResponseBuilder::success($subCategories);
+        try {
+            if ($id) {
+                $subCategories = SubCategory::where('category_id', $id)
+                    ->select('id as value', 'subcategory_name as label')
+                    ->get();
+            } else {
+                $subCategories = SubCategory::select('id as value', 'subcategory_name as label')->get();
+            }
+            if (!$subCategories) {
+                return ResponseBuilder::error('Sub Category not found', 404);
+            } else {
+                return ResponseBuilder::success($subCategories);
+            }
+        } catch (\Exception $e) {
+            return ResponseBuilder::error($e->getMessage(), 500);
         }
     }
 }

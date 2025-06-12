@@ -13,7 +13,7 @@ class SubSubCategoryController extends Controller
     public function index()
     {
         try {
-            $subsubcategories = SubSubCategory::select('id', 'sub_sub_category_name')
+            $subsubcategories = SubSubCategory::select('id', 'category_id', 'sub_category_id', 'sub_sub_category_name', 'created_at', 'updated_at')
                 ->with(['category:id,category_name', 'subCategory:id,subcategory_name'])
                 ->get();
 
@@ -48,7 +48,9 @@ class SubSubCategoryController extends Controller
     public function show($id)
     {
         try {
-            $subSubCategory = SubSubCategory::with(['category', 'subCategory'])->find($id);
+            $subSubCategory = SubSubCategory::select('id', 'category_id', 'sub_category_id', 'sub_sub_category_name', 'created_at', 'updated_at')
+                ->with(['category:id,category_name', 'subCategory:id,subcategory_name'])
+                ->find($id);
 
             if (!$subSubCategory) {
                 return ResponseBuilder::error('Sub Sub Category not found', 404);
