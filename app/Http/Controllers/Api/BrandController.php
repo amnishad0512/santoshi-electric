@@ -56,7 +56,8 @@ class BrandController extends Controller
     {
         try {
             $brand = Brand::select('id', 'brand_name', 'brand_image','status', 'created_at', 'updated_at')
-                ->find($id);
+            ->withCount('products')
+            ->find($id);
 
             if (!$brand) {
                 return ResponseBuilder::error('Brand not found', 404);
