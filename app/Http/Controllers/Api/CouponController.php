@@ -12,7 +12,7 @@ class CouponController extends Controller
     public function index()
     {   
         try {
-            $coupons = Coupon::select('id', 'coupon_name', 'discount_type', 'coupon_discount', 'minimum_purchase', 'maximum_discount', 'usage_limit', 'coupon_start_date', 'coupon_validity', 'coupon_status', 'created_at')->get();
+            $coupons = Coupon::select('id', 'coupon_name', 'discount_type', 'coupon_discount', 'minimum_purchase', 'maximum_discount', 'usage_limit', 'coupon_start_date', 'coupon_validity', 'coupon_status', 'created_at', 'updated_at')->get();
             return ResponseBuilder::success($coupons);
         } catch (\Exception $e) {
             return ResponseBuilder::error($e->getMessage(), 500);
@@ -26,6 +26,10 @@ class CouponController extends Controller
                 'coupon_name' => 'required|string|max:255',
                 'discount_type' => 'required',
                 'coupon_discount' => 'required',
+                'minimum_purchase' => 'required',
+                'maximum_discount' => 'required',
+                'usage_limit' => 'required',
+                'coupon_start_date' => 'required|date',
                 'coupon_validity' => 'required|date',
                 'coupon_status' => 'boolean',
             ]);
