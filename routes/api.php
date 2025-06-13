@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\API\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CouponController;
+use App\Http\Controllers\Api\FooterController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\OrderItemController;
 use App\Http\Controllers\Api\PaymentController;
@@ -55,11 +56,11 @@ use App\Http\Controllers\Api\SubSubCategoryController;
 
     Route::apiResource('brands', BrandController::class);
     Route::get('brands/{id}/products', [BrandController::class, 'BrandProducts']);
-    Route::get('brand-dropdown', [BrandController::class, 'brandDropdown']); 
+    Route::get('brand-dropdown', [BrandController::class, 'brandDropdown']);
 
     Route::apiResource('categories', CategoryController::class);
     Route::get('category-dropdown/{id?}', [CategoryController::class, 'CategoryDropdown']); // id= brand id
-    
+
     Route::apiResource('sub-categories', SubCategoryController::class);
     Route::get('sub-category-dropdown/{id?}', [SubCategoryController::class, 'SubCategoryDropdown']); // id= category id
 
@@ -70,7 +71,7 @@ use App\Http\Controllers\Api\SubSubCategoryController;
     Route::apiResource('orders', OrderController::class);
     Route::apiResource('order-items', OrderItemController::class);
     Route::apiResource('payments', PaymentController::class);
-    
+
     Route::apiResource('products', ProductController::class);
     Route::apiResource('product-images', ProductImageController::class);
     Route::get('featured-products', [ProductController::class, 'FeaturedProducts']);
@@ -84,7 +85,13 @@ use App\Http\Controllers\Api\SubSubCategoryController;
     Route::apiResource('users', UserController::class);
     Route::apiResource('user-addresses', UserAddressController::class);
 
-    
+    Route::get('footer-details', [FooterController::class, 'index']);
+    Route::get('footer/{id}', [FooterController::class, 'show']);
+    Route::post('footer/', [FooterController::class, 'store']);
+    Route::put('footer/{id}', [FooterController::class, 'update']);
+    Route::delete('footer/{id}', [FooterController::class, 'destroy']);
+
+
 
 // Check status of various entities
 Route::get('/status', [App\Http\Controllers\Api\StatusController::class, 'index']);
