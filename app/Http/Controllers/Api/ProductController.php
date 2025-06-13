@@ -29,7 +29,7 @@ class ProductController extends Controller
             ->get();
 
             if ($products->isEmpty()) {
-                return ResponseBuilder::success([], 'No products found');
+                return ResponseBuilder::success('No products found');
             }
 
             return ResponseBuilder::success($products);
