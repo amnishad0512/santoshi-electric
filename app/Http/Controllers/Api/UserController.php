@@ -19,7 +19,7 @@ class UserController extends Controller
     public function index()
     {
         try {
-            $users = User::select('id', 'name', 'phone_number', 'profile_photo_path', 'email', 'role', 'status', 'created_at', 'updated_at')
+            $users = User::select('id', 'name', 'phone_number', 'email', 'role', 'status', 'profile_photo_path', 'created_at', 'updated_at')
                 ->get();
 
             if ($users->isEmpty()) {
@@ -46,7 +46,7 @@ class UserController extends Controller
                 'email' => 'required|email|unique:users,email',
                 'role' => 'required',
                 'status' => 'nullable|in:0,1',
-                'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Optional image validation
+                'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
             ]);
 
             $pass = rand(100000, 999999);
@@ -83,7 +83,7 @@ class UserController extends Controller
     public function show(string $id)
     {
         try {
-            $user = User::select('id', 'name', 'phone_number', 'email', 'role', 'status', 'created_at', 'updated_at')
+            $user = User::select('id', 'name', 'phone_number', 'email', 'role', 'status', 'profile_photo_path', 'created_at', 'updated_at')
                 ->find($id);
 
             if (!$user) {
@@ -114,6 +114,7 @@ class UserController extends Controller
                 'email' => 'required|email|unique:users,email,' . $id,
                 'role' => 'required',
                 'status' => 'nullable|in:0,1',
+                'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
             ]);
 
             $user->name = $request->name;
