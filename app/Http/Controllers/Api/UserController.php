@@ -107,7 +107,7 @@ class UserController extends Controller
             if (!$user) {
                 return ResponseBuilder::error('User not found', 404);
             }
-            if ($request->isMethod('post')) {
+            if ($request->isMethod('put')) {
                 $request->validate([
                     'name' => 'required|string|max:255',
                     'phone_number' => 'required|string|max:15|unique:users,phone_number,' . $id,
