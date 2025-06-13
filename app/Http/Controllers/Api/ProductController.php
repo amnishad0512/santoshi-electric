@@ -67,7 +67,7 @@ class ProductController extends Controller
             $save_url = null;
             if ($request->hasFile('product_thumbnail')) {
                 $imagePath = $request->file('product_thumbnail')->store('products', 'public');
-                $save_url = 'storage/' . $imagePath;
+                $save_url = $imagePath;
             }
 
             $product = Product::create([
@@ -170,7 +170,7 @@ class ProductController extends Controller
                 }
 
                 $imagePath = $request->file('product_thumbnail')->store('products', 'public');
-                $save_url = 'storage/' . $imagePath;
+                $save_url = $imagePath;
             }
 
             $product->update([

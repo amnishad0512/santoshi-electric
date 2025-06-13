@@ -47,4 +47,9 @@ class Product extends Model
     {
         return $this->hasMany(Review::class);
     }
+
+    public function getProductThumbnailAttribute($value)
+    {
+        return url('public/storage/' . $value);
+    }
 }
