@@ -45,7 +45,7 @@ class UserController extends Controller
                 'phone_number' => 'required|string|max:15|unique:users,phone_number',
                 'email' => 'required|email|unique:users,email',
                 'role' => 'required',
-                'status' => 'nullable|in:0,1',
+                'status' => 'nullable|in:0,1,2,3',
                 'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
             ]);
 
@@ -112,7 +112,7 @@ class UserController extends Controller
                 'phone_number' => 'required|string|max:15|unique:users,phone_number,' . $id,
                 'email' => 'required|email|unique:users,email,' . $id,
                 'role' => 'required',
-                'status' => 'nullable|in:0,1',
+                'status' => 'nullable|in:0,1,2,3',
                 'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
             ]);
 
