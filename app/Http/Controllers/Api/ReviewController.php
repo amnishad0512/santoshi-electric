@@ -12,7 +12,7 @@ class ReviewController extends Controller
     public function index()
     {
         try {
-            $reviews = Review::select('id', 'user_id', 'product_id', 'rating', 'comment')
+            $reviews = Review::select('id', 'user_id', 'product_id', 'rating', 'comment', 'created_at', 'updated_at')
             ->with(['user:id,name', 'product:id,product_name'])    
             ->get();
 
@@ -45,7 +45,7 @@ class ReviewController extends Controller
     public function show($id)
     {   
         try {
-            $review = Review::select('id', 'user_id', 'product_id', 'rating', 'comment')
+            $review = Review::select('id', 'user_id', 'product_id', 'rating', 'comment', 'created_at', 'updated_at')
             ->with(['user:id,name', 'product:id,product_name'])    
             ->find($id);
             if (!$review) {

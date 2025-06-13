@@ -29,7 +29,7 @@ class OrderController extends Controller
         try {
             $request->validate([
                 'user_id' => 'required|exists:users,id',
-                'order_status' => 'required|numeric|in:0,1,2,3,4,5,6,7,8', // Assuming order_status is an integer representing status
+                'order_status' => 'required|numeric|in:0,1,2,3,4,5,6,7,8',
                 'order_total' => 'required|numeric|min:0',
             ]);
 
@@ -71,7 +71,7 @@ class OrderController extends Controller
 
             $request->validate([
                 'user_id' => 'required|exists:users,id',
-                'order_status' => 'required|numeric|in:0,1,2,3,4,5,6,7,8', // Assuming order_status is an integer representing status
+                'order_status' => 'required|numeric|in:0,1,2,3,4,5,6,7,8',
                 'order_total' => 'required|numeric|min:0',
             ]);
 
