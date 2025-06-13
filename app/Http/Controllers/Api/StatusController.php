@@ -13,36 +13,36 @@ class StatusController extends Controller
         try {
             $data = [
                 'brandStatus' => [
-                    ['value' => 'active', 'label' => 'Active'],
-                    ['value' => 'inactive', 'label' => 'Inactive'],
-                    ['value' => 'comingSoon', 'label' => 'Coming Soon'],
+                    ['value' => 0, 'label' => 'Inactive'],
+                    ['value' => 1, 'label' => 'Active'],
+                    ['value' => 2, 'label' => 'Coming Soon'],
                 ],
                 'categoryStatus' => [
-                    ['value' => 'active', 'label' => 'Active'],
-                    ['value' => 'inactive', 'label' => 'Inactive'],
-                    ['value' => 'deleted', 'label' => 'Deleted'],
+                    ['value' => 0, 'label' => 'Inactive'],
+                    ['value' => 1, 'label' => 'Active'],
+                    ['value' => 2, 'label' => 'Deleted'],
                 ],
                 'userStatus' => [
-                    ['value' => 'active', 'label' => 'Active'],
-                    ['value' => 'inactive', 'label' => 'Inactive'],
-                    ['value' => 'pending', 'label' => 'Pending'],
-                    ['value' => 'banned', 'label' => 'Banned'],
+                    ['value' => 0, 'label' => 'Inactive'],
+                    ['value' => 1, 'label' => 'Active'],
+                    ['value' => 2, 'label' => 'Pending'],
+                    ['value' => 3, 'label' => 'Banned'],
                 ],
                 'orderStatus' => [
-                    ['value' => 'pending', 'label' => 'Pending'],
-                    ['value' => 'confirmed', 'label' => 'Confirmed'],
-                    ['value' => 'processing', 'label' => 'Processing'],
-                    ['value' => 'shipped', 'label' => 'Shipped'],
-                    ['value' => 'outForDelivery', 'label' => 'Out for Delivery'],
-                    ['value' => 'delivered', 'label' => 'Delivered'],
-                    ['value' => 'cancelled', 'label' => 'Cancelled'],
-                    ['value' => 'returned', 'label' => 'Returned'],
-                    ['value' => 'refunded', 'label' => 'Refunded'],
+                    ['value' => 0, 'label' => 'Pending'],
+                    ['value' => 1, 'label' => 'Confirmed'],
+                    ['value' => 2, 'label' => 'Processing'],
+                    ['value' => 3, 'label' => 'Shipped'],
+                    ['value' => 4, 'label' => 'Out for Delivery'],
+                    ['value' => 5, 'label' => 'Delivered'],
+                    ['value' => 6, 'label' => 'Cancelled'],
+                    ['value' => 7, 'label' => 'Returned'],
+                    ['value' => 8, 'label' => 'Refunded'],
                 ],
                 'couponStatus' => [
-                    ['value' => 'active', 'label' => 'Active'],
-                    ['value' => 'inactive', 'label' => 'Inactive'],
-                    ['value' => 'scheduled', 'label' => 'Scheduled'],
+                    ['value' => 0, 'label' => 'Inactive'],
+                    ['value' => 1, 'label' => 'Active'],
+                    ['value' => 2, 'label' => 'Scheduled'],
                 ]
             ];
 
