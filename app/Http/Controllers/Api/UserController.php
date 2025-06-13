@@ -107,38 +107,39 @@ class UserController extends Controller
             if (!$user) {
                 return ResponseBuilder::error('User not found', 404);
             }
+            if ($request->isMethod('post')) {
+                $request->validate([
+                    'name' => 'required|string|max:255',
+                    'phone_number' => 'required|string|max:15|unique:users,phone_number,' . $id,
+                    'email' => 'required|email|unique:users,email,' . $id,
+                    'role' => 'required',
+                    'status' => 'nullable|in:0,1',
+                    'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+                ]);
 
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'phone_number' => 'required|string|max:15|unique:users,phone_number,' . $id,
-                'email' => 'required|email|unique:users,email,' . $id,
-                'role' => 'required',
-                'status' => 'nullable|in:0,1',
-                'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
-            ]);
-
-            $user->name = $request->name;
-            $user->phone_number = $request->phone_number;
-            $user->email = $request->email;
-            $user->role = $request->role;
-            if ($request->has('status')) {
-                $user->status = $request->status;
-            }
-            // Handle profile photo update
-            if ($request->hasFile('profile_photo_path')) {
-                if ($user->profile_photo_path) {
-                    $oldImagePath = str_replace('storage/', '', $user->profile_photo_path);
-                    if (Storage::disk('public')->exists($oldImagePath)) {
-                        Storage::disk('public')->delete($oldImagePath);
-                    }
+                $user->name = $request->name;
+                $user->phone_number = $request->phone_number;
+                $user->email = $request->email;
+                $user->role = $request->role;
+                if ($request->has('status')) {
+                    $user->status = $request->status;
                 }
+                // Handle profile photo update
+                if ($request->hasFile('profile_photo_path')) {
+                    if ($user->profile_photo_path) {
+                        $oldImagePath = str_replace('storage/', '', $user->profile_photo_path);
+                        if (Storage::disk('public')->exists($oldImagePath)) {
+                            Storage::disk('public')->delete($oldImagePath);
+                        }
+                    }
 
-                $imagePath = $request->file('profile_photo_path')->store('profile_photos', 'public');
-                $user->profile_photo_path = $imagePath;
+                    $imagePath = $request->file('profile_photo_path')->store('profile_photos', 'public');
+                    $user->profile_photo_path = $imagePath;
+                }
+                $user->save();
+
+                return ResponseBuilder::success('User updated successfully');
             }
-            $user->save();
-
-            return ResponseBuilder::success('User updated successfully');
         } catch (\Exception $e) {
             return ResponseBuilder::error('Failed to update user', 500, $e->getMessage());
         }
