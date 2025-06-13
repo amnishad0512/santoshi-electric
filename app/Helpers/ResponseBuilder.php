@@ -8,6 +8,11 @@ class ResponseBuilder
     {
         $method = request()->method();
 
+        $code = (int) $code;
+        if ($code < 100 || $code > 599) {
+            $code = 200;
+        }
+
         if ($method === 'GET') {
             return response()->json([
                 'status' => true,
@@ -24,6 +29,11 @@ class ResponseBuilder
 
     public static function error($message = 'Something went wrong', $code = 400, $errorDetails = null)
     {
+        $code = (int) $code;
+        if ($code < 100 || $code > 599) {
+            $code = 400;
+        }
+
         $response = [
             'status' => false,
             'message' => $message,
