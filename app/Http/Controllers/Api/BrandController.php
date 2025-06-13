@@ -124,7 +124,6 @@ class BrandController extends Controller
 
             $request->validate([
                 'brand_name' => 'required|string|max:255',
-                'brand_image' => 'required',
             ]);
 
             $save_url = $brand->brand_image;

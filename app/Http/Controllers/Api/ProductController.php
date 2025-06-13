@@ -152,7 +152,6 @@ class ProductController extends Controller
                 'product_discount_price' => 'required|numeric|min:0',
                 'product_short_desc' => 'required|string',
                 'product_long_desc' => 'required|string',
-                'product_thumbnail' => 'required',
                 'hot_deal' => 'required',
                 'featured' => 'required',
                 'special_offer' => 'required',

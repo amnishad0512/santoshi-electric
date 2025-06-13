@@ -113,7 +113,6 @@ class UserController extends Controller
                 'email' => 'required|email|unique:users,email,' . $id,
                 'role' => 'required',
                 'status' => 'nullable|in:0,1,2,3',
-                // 'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
             ]);
 
             $user->name = $request->name;
