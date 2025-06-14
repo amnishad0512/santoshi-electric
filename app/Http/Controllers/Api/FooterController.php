@@ -6,6 +6,7 @@ use App\Helpers\ResponseBuilder;
 use App\Http\Controllers\Controller;
 use App\Models\Footer;
 use Illuminate\Http\Request;
+use Validator;
 
 class FooterController extends Controller
 {
@@ -30,7 +31,7 @@ class FooterController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $validator = Validator::make($request->all(), [
             'store' => 'nullable|string',
             'phone' => 'nullable|array',
             'email' => 'nullable|email',
@@ -41,7 +42,11 @@ class FooterController extends Controller
             'users' => 'nullable|integer',
         ]);
 
-        $footer = Footer::create($data);
+        if ($validator->fails()) {
+            return ResponseBuilder::error($validator->errors()->first(), 422);
+        }
+
+        $footer = Footer::create($validator->validated());
         return ResponseBuilder::success($footer, 201);
     }
 
@@ -52,7 +57,7 @@ class FooterController extends Controller
             return ResponseBuilder::error('Footer not found', 404);
         }
 
-        $data = $request->validate([
+        $validator = Validator::make($request->all(), [
             'store' => 'nullable|string',
             'phone' => 'nullable|array',
             'email' => 'nullable|email',
@@ -63,7 +68,11 @@ class FooterController extends Controller
             'users' => 'nullable|integer',
         ]);
 
-        $footer->update($data);
+        if ($validator->fails()) {
+            return ResponseBuilder::error($validator->errors()->first(), 422);
+        }
+
+        $footer->update($validator->validated());
         return ResponseBuilder::success($footer);
     }
 
@@ -75,6 +84,6 @@ class FooterController extends Controller
         }
 
         $footer->delete();
-        return ResponseBuilder::success('Deleted successfully');
+        return ResponseBuilder::success('Footer Deleted successfully');
     }
 }

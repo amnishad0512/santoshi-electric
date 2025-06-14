@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Stock;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseBuilder;
+use Validator;
 
 class StockController extends Controller
 {
@@ -25,13 +26,21 @@ class StockController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'stock_name' => 'required|string|max:255',
                 'stock_quantity' => 'nullable|integer|min:0',
-                'stock_status' => 'nullable|boolean',
+                'stock_status' => 'required|in:0,1,2', 
             ]);
 
-            $stock = Stock::create($request->all());
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
+
+            $stock = Stock::create([
+                'stock_name' => $request->stock_name,
+                'stock_quantity' => $request->stock_quantity ?? 0,
+                'stock_status' => $request->stock_status ?? 0,
+            ]);
 
             return ResponseBuilder::success('Stock created successfully');
         } catch (\Exception $e) {
@@ -63,13 +72,17 @@ class StockController extends Controller
                 return ResponseBuilder::error('Stock not found', 404);
             }
 
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'stock_name' => 'sometimes|required|string|max:255',
                 'stock_quantity' => 'sometimes|required|integer|min:0',
-                'stock_status' => 'sometimes|required|boolean',
+                'stock_status' => 'sometimes|nullable|in:0,1,2',
             ]);
 
-            $stock->update($request->only(['stock_name', 'stock_quantity', 'stock_status']));
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
+
+            $stock->update($validator->validated());
 
             return ResponseBuilder::success('Stock updated successfully');
         } catch (\Exception $e) {

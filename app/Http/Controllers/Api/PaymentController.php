@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseBuilder;
+use Validator;
 
 class PaymentController extends Controller
 {
@@ -22,7 +23,7 @@ class PaymentController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'order_id' => 'required|exists:orders,id',
                 'payment_method' => 'required|string|max:50',
                 'payment_status' => 'required|string|max:20',
@@ -31,7 +32,11 @@ class PaymentController extends Controller
                 'paid_at' => 'nullable|date',
             ]);
 
-            $payment = Payment::create($request->all());
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
+
+            $payment = Payment::create($validator->validated());
 
             return ResponseBuilder::success('Payment created successfully');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -65,7 +70,7 @@ class PaymentController extends Controller
                 return ResponseBuilder::error('Payment not found', 404);
             }
 
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'order_id'        => 'required|exists:orders,id',
                 'payment_method' => 'sometimes|required|string|max:50',
                 'payment_status' => 'sometimes|required|string|max:20',
@@ -74,7 +79,11 @@ class PaymentController extends Controller
                 'paid_at' => 'nullable|date',
             ]);
 
-            $payment->update($request->all());
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
+
+            $payment->update($validator->validated());
 
             return ResponseBuilder::success('Payment updated successfully');
         } catch (\Illuminate\Validation\ValidationException $e) {

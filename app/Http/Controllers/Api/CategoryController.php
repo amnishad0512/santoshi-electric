@@ -33,8 +33,8 @@ class CategoryController extends Controller
             ]);
 
             if ($validator->fails()) {
-            return ResponseBuilder::error($validator->errors()->first(), 422);
-        }
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
 
             $category = Category::create([
                 'category_name' => $request->category_name,
@@ -75,6 +75,7 @@ class CategoryController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'category_name' => 'required|string|max:255',
+                'category_slug' => 'nullable|string|max:255|unique:categories,category_slug,' . $id,
                 'status' => 'nullable|in:0,1,2',      
             ]);
 

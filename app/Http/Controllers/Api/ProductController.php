@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Helpers\ResponseBuilder;
+use Validator;
 
 class ProductController extends Controller
 {
@@ -41,7 +42,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'brand_id' => 'required|exists:brands,id',
                 'category_id' => 'required|exists:categories,id',
                 'sub_category_id' => 'required|exists:sub_categories,id',
@@ -61,8 +62,12 @@ class ProductController extends Controller
                 'featured' => 'required',
                 'special_offer' => 'required',
                 'special_deals' => 'required',
-                'status' => 'required',
+                'status' => 'required|in:0,1,2',
             ]);
+
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
 
             $save_url = null;
             if ($request->hasFile('product_thumbnail')) {
@@ -137,12 +142,13 @@ class ProductController extends Controller
                 return ResponseBuilder::error('Product not found', 404);
             }
 
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'brand_id' => 'required|exists:brands,id',
                 'category_id' => 'required|exists:categories,id',
                 'sub_category_id' => 'required|exists:sub_categories,id',
                 'sub_sub_category_id' => 'required|exists:sub_sub_categories,id',
                 'product_name' => 'required|string|max:255',
+                'product_slug' => 'nullable|string|max:255|unique:products,product_slug,' . $id,
                 'product_code' => 'required|string|max:255',
                 'product_quantity' => 'required|integer|min:0',
                 'product_tags' => 'required|string|max:255',
@@ -152,12 +158,17 @@ class ProductController extends Controller
                 'product_discount_price' => 'required|numeric|min:0',
                 'product_short_desc' => 'required|string',
                 'product_long_desc' => 'required|string',
+                'product_thumbnail' => 'nullable',
                 'hot_deal' => 'required',
                 'featured' => 'required',
                 'special_offer' => 'required',
                 'special_deals' => 'required',
-                'status' => 'required',
+                'status' => 'nullable|in:0,1,2',      
             ]);
+
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
 
             $save_url = $product->product_thumbnail;
             if ($request->hasFile('product_thumbnail')) {

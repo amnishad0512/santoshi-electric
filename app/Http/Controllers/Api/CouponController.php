@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Coupon;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseBuilder;
+use Validator;
 
 class CouponController extends Controller
 {
@@ -22,7 +23,7 @@ class CouponController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'coupon_name' => 'required|string|max:255',
                 'discount_type' => 'required',
                 'coupon_discount' => 'required',
@@ -31,8 +32,13 @@ class CouponController extends Controller
                 'usage_limit' => 'required',
                 'coupon_start_date' => 'required|date',
                 'coupon_validity' => 'required|date',
-                'coupon_status' => 'boolean',
+                'coupon_status' => 'required|in:0,1,2',      
+
             ]);
+
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
 
             $coupon = Coupon::create([
                 'coupon_name' => $request->coupon_name,
@@ -78,13 +84,21 @@ class CouponController extends Controller
                 return ResponseBuilder::error('Coupon not found', 404);
             }
 
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'coupon_name' => 'required|string|max:255',
                 'discount_type' => 'required',
                 'coupon_discount' => 'required',
+                'minimum_purchase' => 'required',
+                'maximum_discount' => 'required',
+                'usage_limit' => 'required',
+                'coupon_start_date' => 'required|date',
                 'coupon_validity' => 'required|date',
-                'coupon_status' => 'boolean',
+                'coupon_status' => 'nullable|in:0,1,2',      
             ]);
+
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
 
             $coupon->update([
                 'coupon_name' => $request->coupon_name,

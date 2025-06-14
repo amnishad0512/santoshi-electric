@@ -7,6 +7,7 @@ use App\Models\SubCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Helpers\ResponseBuilder;
+use Validator;
 
 class SubCategoryController extends Controller
 {
@@ -26,10 +27,15 @@ class SubCategoryController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'category_id' => 'required|exists:categories,id',
                 'subcategory_name' => 'required|string|max:255',
+                'status' => 'required|in:0,1,2',
             ]);
+
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
 
             $subCategory = SubCategory::create([
                 'category_id' => $request->category_id,
@@ -69,10 +75,16 @@ class SubCategoryController extends Controller
                 return ResponseBuilder::error('Sub Category not found', 404);
             }
 
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'category_id'       => 'required|exists:categories,id',
                 'subcategory_name'  => 'required|string|max:255',
+                'subcategory_slug' => 'nullable|string|max:255|unique:sub_categories,subcategory_slug,' . $id,
+                'status' => 'nullable|in:0,1,2',
             ]);
+
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
 
             $subCategory->update([
                 'category_id' => $request->category_id,
