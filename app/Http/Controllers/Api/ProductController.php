@@ -137,13 +137,10 @@ class ProductController extends Controller
     {
         try {
             $product = Product::find($id);
+            \Log::info($request->all());
 
             if (!$product) {
                 return ResponseBuilder::error('Product not found', 404);
-            }
-
-            if ($request->isMethod('put')) {
-                $request->merge($request->post());
             }
 
             $validator = Validator::make($request->all(), [
