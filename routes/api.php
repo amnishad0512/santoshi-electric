@@ -72,6 +72,7 @@ use App\Http\Controllers\Api\SubSubCategoryController;
     Route::apiResource('payments', PaymentController::class);
 
     Route::apiResource('products', ProductController::class);
+    Route::post('products/{id}/thumbnail', [ProductController::class, 'uploadThumbnail']);
     Route::apiResource('product-images', ProductImageController::class);
     Route::get('featured-products', [ProductController::class, 'FeaturedProducts']);
 
