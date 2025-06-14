@@ -222,13 +222,13 @@ class ProductController extends Controller
                 return ResponseBuilder::error('Product not found', 404);
             }
 
-            $validator = Validator::make($request->all(), [
-                'product_thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            ]);
+            // $validator = Validator::make($request->all(), [
+            //     'product_thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // ]);
 
-            if ($validator->fails()) {
-                return ResponseBuilder::error($validator->errors()->first(), 422);
-            }
+            // if ($validator->fails()) {
+            //     return ResponseBuilder::error($validator->errors()->first(), 422);
+            // }
 
             if ($product->product_thumbnail) {
                 $oldImagePath = str_replace('storage/', '', $product->product_thumbnail);
