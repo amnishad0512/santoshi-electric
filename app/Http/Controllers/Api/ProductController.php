@@ -143,7 +143,7 @@ class ProductController extends Controller
             }
 
             if ($request->isMethod('put')) {
-                $request->merge($request->request->all());
+                $request->merge($request->post());
             }
 
             $validator = Validator::make($request->all(), [
