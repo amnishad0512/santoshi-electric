@@ -27,8 +27,8 @@ class OrderItemController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'order_id' => 'required|exists:orders,id',
-                'product_id' => 'required|exists:products,id',
+                'order_id' => 'required',
+                'product_id' => 'required',
                 'item_quantity' => 'required|integer|min:1',
                 'item_price' => 'required|numeric|min:0',
                 'status' => 'required|in:0,1,2',
@@ -73,8 +73,8 @@ class OrderItemController extends Controller
             }
 
             $validator = Validator::make($request->all(), [
-                'order_id'     => 'required|exists:orders,id',
-                'product_id'   => 'required|exists:products,id',
+                'order_id'     => 'required',
+                'product_id'   => 'required',
                 'item_quantity'=> 'required|integer|min:1',
                 'item_price'   => 'required|numeric|min:0',
                 'status' => 'nullable|in:0,1,2',

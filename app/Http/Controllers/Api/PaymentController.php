@@ -24,7 +24,7 @@ class PaymentController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'order_id' => 'required|exists:orders,id',
+                'order_id' => 'required',
                 'payment_method' => 'required|string|max:50',
                 'payment_status' => 'required|string|max:20',
                 'amount' => 'required|numeric|min:0',
@@ -71,7 +71,7 @@ class PaymentController extends Controller
             }
 
             $validator = Validator::make($request->all(), [
-                'order_id'        => 'required|exists:orders,id',
+                'order_id'        => 'required',
                 'payment_method' => 'sometimes|required|string|max:50',
                 'payment_status' => 'sometimes|required|string|max:20',
                 'amount' => 'sometimes|required|numeric|min:0',

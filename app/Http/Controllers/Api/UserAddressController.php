@@ -32,7 +32,7 @@ class UserAddressController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'user_id' => 'required|exists:users,id',
+                'user_id' => 'required',
                 'full_name' => 'required|string|max:255',
                 'phone_number' => 'required|string|max:15',
                 'street_address' => 'required|string|max:255',
@@ -79,6 +79,7 @@ class UserAddressController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
+                'user_id' => 'required',
                 'full_name' => 'required|string|max:255',
                 'phone_number' => 'required|string|max:15',
                 'street_address' => 'nullable|string|max:255',

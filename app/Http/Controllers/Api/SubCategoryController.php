@@ -28,7 +28,7 @@ class SubCategoryController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'category_id' => 'required|exists:categories,id',
+                'category_id' => 'required',
                 'subcategory_name' => 'required|string|max:255',
                 'status' => 'required|in:0,1,2',
             ]);
@@ -76,7 +76,7 @@ class SubCategoryController extends Controller
             }
 
             $validator = Validator::make($request->all(), [
-                'category_id'       => 'required|exists:categories,id',
+                'category_id'       => 'required',
                 'subcategory_name'  => 'required|string|max:255',
                 'subcategory_slug' => 'nullable|string|max:255|unique:sub_categories,subcategory_slug,' . $id,
                 'status' => 'nullable|in:0,1,2',

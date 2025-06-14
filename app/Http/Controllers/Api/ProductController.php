@@ -43,10 +43,10 @@ class ProductController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'brand_id' => 'required|exists:brands,id',
-                'category_id' => 'required|exists:categories,id',
-                'sub_category_id' => 'required|exists:sub_categories,id',
-                'sub_sub_category_id' => 'required|exists:sub_sub_categories,id',
+                'brand_id' => 'required',
+                'category_id' => 'required',
+                'sub_category_id' => 'required',
+                'sub_sub_category_id' => 'required',
                 'product_name' => 'required|string|max:255',
                 'product_code' => 'required|string|max:255',
                 'product_quantity' => 'required|integer|min:0',
@@ -143,10 +143,10 @@ class ProductController extends Controller
             }
 
             $validator = Validator::make($request->all(), [
-                'brand_id' => 'required|exists:brands,id',
-                'category_id' => 'required|exists:categories,id',
-                'sub_category_id' => 'required|exists:sub_categories,id',
-                'sub_sub_category_id' => 'required|exists:sub_sub_categories,id',
+                'brand_id' => 'required',
+                'category_id' => 'required',
+                'sub_category_id' => 'required',
+                'sub_sub_category_id' => 'required',
                 'product_name' => 'required|string|max:255',
                 'product_slug' => 'nullable|string|max:255|unique:products,product_slug,' . $id,
                 'product_code' => 'required|string|max:255',

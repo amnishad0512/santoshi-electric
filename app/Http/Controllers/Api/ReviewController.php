@@ -26,8 +26,8 @@ class ReviewController extends Controller
     {
         try {
             $request->validate([
-                'user_id' => 'required|exists:users,id',
-                'product_id' => 'required|exists:products,id',
+                'user_id' => 'required',
+                'product_id' => 'required',
                 'rating' => 'required|integer|min:1|max:5',
                 'comment' => 'nullable|string',
             ]);
@@ -68,8 +68,8 @@ class ReviewController extends Controller
             }
 
             $request->validate([
-                'user_id' => 'required|exists:users,id',
-                'product_id' => 'required|exists:products,id',
+                'user_id' => 'required',
+                'product_id' => 'required',
                 'rating' => 'required|integer|min:1|max:5',
                 'comment' => 'nullable|string',
             ]);

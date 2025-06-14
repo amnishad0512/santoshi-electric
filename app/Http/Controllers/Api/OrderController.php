@@ -49,7 +49,7 @@ class OrderController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'user_id' => 'required|exists:users,id',
+                'user_id' => 'required',
                 'order_status' => 'required|numeric|in:0,1,2,3,4,5,6,7,8',
                 'order_total' => 'required|numeric|min:0',
             ]);
@@ -105,7 +105,7 @@ class OrderController extends Controller
             }
 
             $validator = Validator::make($request->all(), [
-                'user_id' => 'required|exists:users,id',
+                'user_id' => 'required',
                 'order_status' => 'required|numeric|in:0,1,2,3,4,5,6,7,8',
                 'order_total' => 'required|numeric|min:0',
             ]);
