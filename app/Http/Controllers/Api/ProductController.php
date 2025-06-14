@@ -142,8 +142,8 @@ class ProductController extends Controller
                 return ResponseBuilder::error('Product not found', 404);
             }
 
-            if ($request->isMethod('put') && $request->hasFile('product_thumbnail')) {
-                $request->files->set('product_thumbnail', $request->file('product_thumbnail'));
+            if ($request->isMethod('put')) {
+                $request->merge($request->request->all());
             }
 
             $validator = Validator::make($request->all(), [
