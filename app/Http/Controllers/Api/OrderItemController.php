@@ -13,7 +13,7 @@ class OrderItemController extends Controller
     public function index()
     {
         try {
-            $orderItems = OrderItem::select('id', 'order_id', 'product_id', 'item_quantity', 'item_price')
+            $orderItems = OrderItem::select('id', 'order_id', 'product_id', 'item_quantity', 'item_price',  'status', 'created_at', 'updated_at')
                 ->with(['order:id,order_total', 'product:id,product_name'])
                 ->get();
 
