@@ -213,39 +213,6 @@ class ProductController extends Controller
         }
     }
 
-    public function uploadThumbnail(Request $request, $id)
-    {
-        try {
-            $product = Product::find($id);
-
-            if (!$product) {
-                return ResponseBuilder::error('Product not found', 404);
-            }
-
-            // $validator = Validator::make($request->all(), [
-            //     'product_thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            // ]);
-
-            // if ($validator->fails()) {
-            //     return ResponseBuilder::error($validator->errors()->first(), 422);
-            // }
-
-            if ($product->product_thumbnail) {
-                $oldImagePath = str_replace('storage/', '', $product->product_thumbnail);
-                if (Storage::disk('public')->exists($oldImagePath)) {
-                    Storage::disk('public')->delete($oldImagePath);
-                }
-            }
-
-            $imagePath = $request->file('product_thumbnail')->store('products', 'public');
-            $product->update(['product_thumbnail' => $imagePath]);
-
-            return ResponseBuilder::success('Thumbnail uploaded successfully');
-        } catch (\Exception $e) {
-            return ResponseBuilder::error($e->getMessage(), 500);
-        }
-    }
-
     public function destroy($id)
     {
         try {
