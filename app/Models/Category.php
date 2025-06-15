@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Brand;
 use App\Models\Product;
 use App\Models\SubCategory;
 use App\Models\SubSubCategory;
@@ -15,6 +16,11 @@ class Category extends Model
     protected $guarded = [
         
     ];
+
+    public function brands()
+    {
+        return $this->belongsTo(Brand::class);
+    }
 
     public function products()
     {
