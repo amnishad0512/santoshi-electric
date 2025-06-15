@@ -28,6 +28,7 @@ class CategoryController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
+                'brand_id' => 'required|exists:brands,id',
                 'category_name' => 'required|string|max:255',
                 'status' => 'required|in:0,1,2',
             ]);
@@ -37,6 +38,7 @@ class CategoryController extends Controller
             }
 
             $category = Category::create([
+                'brand_id' => $request->brand_id,
                 'category_name' => $request->category_name,
                 'category_slug' => Str::slug($request->category_name),
                 'category_icon' => $request->category_icon,
@@ -74,6 +76,7 @@ class CategoryController extends Controller
             }
 
             $validator = Validator::make($request->all(), [
+                'brand_id' => 'required|exists:brands,id',
                 'category_name' => 'required|string|max:255',
                 'category_slug' => 'nullable|string|max:255|unique:categories,category_slug,' . $id,
                 'status' => 'nullable|in:0,1,2',      
@@ -84,6 +87,7 @@ class CategoryController extends Controller
             }
 
             $category->update([
+                'brand_id' => $request->brand_id,
                 'category_name' => $request->category_name,
                 'category_slug' => Str::slug($request->category_name),
                 'category_icon' => $request->category_icon,
