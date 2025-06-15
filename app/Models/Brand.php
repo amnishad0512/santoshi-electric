@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Support\Facades\Storage;
 class Brand extends Model
@@ -13,6 +14,10 @@ class Brand extends Model
     protected $guarded = [
     ];
 
+    public function brands()
+    {
+        return $this->hasMany(Category::class);
+    }
     public function products()
     {
         return $this->hasMany(Product::class);
