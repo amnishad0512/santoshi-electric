@@ -67,6 +67,6 @@ class User extends Authenticatable
         }
 
         // Return default image if no profile photo exists
-        return asset('storage/images/default_profile.jpg');
+        return asset('public/images/default_profile.jpg');
     }
 }
