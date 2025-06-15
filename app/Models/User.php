@@ -62,6 +62,11 @@ class User extends Authenticatable
 
     public function getProfilePhotoPathAttribute($value)
     {
-        return url('public/storage/' . $value);
+        if ($value) {
+            return url('storage/' . $value);
+        }
+
+        // Return default image if no profile photo exists
+        return asset('images/default_profile.jpg');
     }
 }

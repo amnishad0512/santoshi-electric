@@ -13,7 +13,7 @@ class SubCategoryController extends Controller
     public function index()
     {   
         try {
-            $subcategories = SubCategory::select('id', 'category_id', 'subcategory_name', 'created_at', 'updated_at')
+            $subcategories = SubCategory::select('id', 'category_id', 'subcategory_name', 'status','created_at', 'updated_at')
                 ->with(['category:id,category_name', 'subSubCategories:id,sub_category_id,sub_sub_category_name'])
                 ->get();
             
@@ -46,7 +46,7 @@ class SubCategoryController extends Controller
     public function show($id)
     {
         try {
-            $subCategory = SubCategory::select('id', 'category_id', 'subcategory_name', 'created_at', 'updated_at')
+            $subCategory = SubCategory::select('id', 'category_id', 'subcategory_name', 'status', 'created_at', 'updated_at')
                 ->with(['category:id,category_name', 'subSubCategories:id,sub_category_id,sub_sub_category_name'])
                 ->find($id);
 
