@@ -39,70 +39,148 @@ class ProductController extends Controller
         }
     }
 
+    // public function store(Request $request)
+    // {
+    //     try {
+    //         $validator = Validator::make($request->all(), [
+    //             'brand_id' => 'required',
+    //             'category_id' => 'required',
+    //             'sub_category_id' => 'required',
+    //             'sub_sub_category_id' => 'required',
+    //             'product_name' => 'required|string|max:255',
+    //             'product_code' => 'required|string|max:255',
+    //             'product_quantity' => 'required|integer|min:0',
+    //             'product_tags' => 'required|string|max:255',
+    //             'product_size' => 'required|string|max:255',
+    //             'product_colour' => 'required|string|max:255',
+    //             'product_selling_price' => 'required|numeric|min:0',
+    //             'product_discount_price' => 'required|numeric|min:0',
+    //             'product_short_desc' => 'required|string',
+    //             'product_long_desc' => 'required|string',
+    //             'product_thumbnail' => 'required',
+    //             'hot_deal' => 'required',
+    //             'featured' => 'required',
+    //             'special_offer' => 'required',
+    //             'special_deals' => 'required',
+    //             'status' => 'required|in:0,1,2',
+    //         ]);
+
+    //         if ($validator->fails()) {
+    //             return ResponseBuilder::error($validator->errors()->first(), 422);
+    //         }
+
+    //         $save_url = null;
+    //         if ($request->hasFile('product_thumbnail')) {
+    //             $imagePath = $request->file('product_thumbnail')->store('products', 'public');
+    //             $save_url = $imagePath;
+    //         }
+
+    //         $product = Product::create([
+    //             'brand_id' => $request->brand_id,
+    //             'category_id' => $request->category_id,
+    //             'sub_category_id' => $request->sub_category_id,
+    //             'sub_sub_category_id' => $request->sub_sub_category_id,
+    //             'product_name' => $request->product_name,
+    //             'product_slug' => Str::slug($request->product_name),
+    //             'product_code' => $request->product_code,
+    //             'product_quantity' => $request->product_quantity,
+    //             'product_tags' => $request->product_tags,
+    //             'product_size' => $request->product_size,
+    //             'product_colour' => $request->product_colour,
+    //             'product_selling_price' => $request->product_selling_price,
+    //             'product_discount_price' => $request->product_discount_price,
+    //             'product_short_desc' => $request->product_short_desc,
+    //             'product_long_desc' => $request->product_long_desc,
+    //             'product_thumbnail' => $save_url,
+    //             'hot_deal' => $request->hot_deal,
+    //             'featured' => $request->featured,
+    //             'special_offer' => $request->special_offer,
+    //             'special_deals' => $request->special_deals,
+    //             'status' => $request->status,
+    //         ]);
+
+    //         return ResponseBuilder::success('Product created successfully');
+    //     } catch (\Exception $e) {
+    //         return ResponseBuilder::error($e->getMessage(), 500);
+    //     }
+    // }
+
     public function store(Request $request)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'brand_id' => 'required',
-                'category_id' => 'required',
-                'sub_category_id' => 'required',
-                'sub_sub_category_id' => 'required',
-                'product_name' => 'required|string|max:255',
-                'product_code' => 'required|string|max:255',
-                'product_quantity' => 'required|integer|min:0',
-                'product_tags' => 'required|string|max:255',
-                'product_size' => 'required|string|max:255',
-                'product_colour' => 'required|string|max:255',
-                'product_selling_price' => 'required|numeric|min:0',
-                'product_discount_price' => 'required|numeric|min:0',
-                'product_short_desc' => 'required|string',
-                'product_long_desc' => 'required|string',
-                'product_thumbnail' => 'required',
-                'hot_deal' => 'required',
-                'featured' => 'required',
-                'special_offer' => 'required',
-                'special_deals' => 'required',
-                'status' => 'required|in:0,1,2',
-            ]);
+{
+    try {
+        $validator = Validator::make($request->all(), [
+            'brand_id' => 'required|exists:brands,id',
+            'category_id' => 'required|exists:categories,id',
+            'sub_category_id' => 'required|exists:categories,id',
+            'sub_sub_category_id' => 'required|exists:categories,id',
+            'product_name' => 'required|string|max:255',
+            'product_code' => 'required|string|max:255',
+            'product_quantity' => 'required|integer|min:0',
+            'product_tags' => 'required|string|max:255',
+            'product_size' => 'required|string|max:255',
+            'product_colour' => 'required|string|max:255',
+            'product_selling_price' => 'required|numeric|min:0',
+            'product_discount_price' => 'nullable|numeric|min:0',
+            'product_short_desc' => 'required|string',
+            'product_long_desc' => 'required|string',
+            'product_thumbnail' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'product_images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'hot_deal' => 'required|boolean',
+            'featured' => 'required|boolean',
+            'special_offer' => 'required|boolean',
+            'special_deals' => 'required|boolean',
+            'status' => 'required|in:0,1,2',
+        ]);
 
-            if ($validator->fails()) {
-                return ResponseBuilder::error($validator->errors()->first(), 422);
-            }
-
-            $save_url = null;
-            if ($request->hasFile('product_thumbnail')) {
-                $imagePath = $request->file('product_thumbnail')->store('products', 'public');
-                $save_url = $imagePath;
-            }
-
-            $product = Product::create([
-                'brand_id' => $request->brand_id,
-                'category_id' => $request->category_id,
-                'sub_category_id' => $request->sub_category_id,
-                'sub_sub_category_id' => $request->sub_sub_category_id,
-                'product_name' => $request->product_name,
-                'product_slug' => Str::slug($request->product_name),
-                'product_code' => $request->product_code,
-                'product_quantity' => $request->product_quantity,
-                'product_tags' => $request->product_tags,
-                'product_size' => $request->product_size,
-                'product_colour' => $request->product_colour,
-                'product_selling_price' => $request->product_selling_price,
-                'product_discount_price' => $request->product_discount_price,
-                'product_short_desc' => $request->product_short_desc,
-                'product_long_desc' => $request->product_long_desc,
-                'product_thumbnail' => $save_url,
-                'hot_deal' => $request->hot_deal,
-                'featured' => $request->featured,
-                'special_offer' => $request->special_offer,
-                'special_deals' => $request->special_deals,
-                'status' => $request->status,
-            ]);
-
-            return ResponseBuilder::success('Product created successfully');
-        } catch (\Exception $e) {
-            return ResponseBuilder::error($e->getMessage(), 500);
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first()], 422);
         }
+
+        // Upload thumbnail
+        $thumbnailPath = null;
+        if ($request->hasFile('product_thumbnail')) {
+            $thumbnailPath = $request->file('product_thumbnail')->store('products', 'public');
+        }
+
+        $product = Product::create([
+            'brand_id' => $request->brand_id,
+            'category_id' => $request->category_id,
+            'sub_category_id' => $request->sub_category_id,
+            'sub_sub_category_id' => $request->sub_sub_category_id,
+            'product_name' => $request->product_name,
+            'product_slug' => Str::slug($request->product_name),
+            'product_code' => $request->product_code,
+            'product_quantity' => $request->product_quantity,
+            'product_tags' => $request->product_tags,
+            'product_size' => $request->product_size,
+            'product_colour' => $request->product_colour,
+            'product_selling_price' => $request->product_selling_price,
+            'product_discount_price' => $request->product_discount_price,
+            'product_short_desc' => $request->product_short_desc,
+            'product_long_desc' => $request->product_long_desc,
+            'product_thumbnail' => $thumbnailPath,
+            'hot_deal' => $request->hot_deal,
+            'featured' => $request->featured,
+            'special_offer' => $request->special_offer,
+            'special_deals' => $request->special_deals,
+            'status' => $request->status,
+        ]);
+
+        // Upload additional images
+        if ($request->hasFile('product_images')) {
+            foreach ($request->file('product_images') as $image) {
+                $imagePath = $image->store('product_images', 'public');
+                $product->images()->create([
+                    'path_name' => $imagePath,
+                    'status' => 1
+                ]);
+            }
+        }
+
+        return response()->json(['status' => true, 'message' => 'Product created successfully']);
+
+    } catch (\Exception $e) {
+        return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
     }
 
     public function show($id)
