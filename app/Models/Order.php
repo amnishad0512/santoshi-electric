@@ -17,6 +17,10 @@ class Order extends Model
        
     ];
 
+    protected $casts = [
+        'order_status' => 'integer',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
