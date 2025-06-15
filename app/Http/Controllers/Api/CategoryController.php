@@ -7,6 +7,7 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Helpers\ResponseBuilder;
+use Validator;
 
 class CategoryController extends Controller
 {
@@ -26,9 +27,14 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'category_name' => 'required|string|max:255',
+                'status' => 'required|in:0,1,2',
             ]);
+
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
 
             $category = Category::create([
                 'category_name' => $request->category_name,
@@ -67,9 +73,15 @@ class CategoryController extends Controller
                 return ResponseBuilder::error('Category not found', 404);
             }
 
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'category_name' => 'required|string|max:255',
+                'category_slug' => 'nullable|string|max:255|unique:categories,category_slug,' . $id,
+                'status' => 'nullable|in:0,1,2',      
             ]);
+
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
 
             $category->update([
                 'category_name' => $request->category_name,

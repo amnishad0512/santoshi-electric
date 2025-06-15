@@ -26,8 +26,8 @@ class ShippingAddressController extends Controller
     {
         try {
             $request->validate([
-                'user_id' => 'required|exists:users,id',
-                'order_id' => 'required|exists:orders,id',
+                'user_id' => 'required',
+                'order_id' => 'required',
                 'address_line_1' => 'required|string|max:255',
                 'address_line_2' => 'nullable|string|max:255',
                 'city' => 'required|string|max:100',
@@ -71,8 +71,8 @@ class ShippingAddressController extends Controller
             }
 
             $request->validate([
-                'user_id'        => 'required|exists:users,id',
-                'order_id'       => 'required|exists:orders,id',
+                'user_id'        => 'required',
+                'order_id'       => 'required',
                 'address_line_1' => 'sometimes|required|string|max:255',
                 'address_line_2' => 'nullable|string|max:255',
                 'city' => 'sometimes|required|string|max:100',

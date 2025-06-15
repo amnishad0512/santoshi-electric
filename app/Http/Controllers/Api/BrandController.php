@@ -9,6 +9,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Helpers\ResponseBuilder;
+use Validator;
 
 class BrandController extends Controller
 {
@@ -28,10 +29,15 @@ class BrandController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'brand_name' => 'required|string|max:255',
                 'brand_image' => 'required',
+                'status' => 'required|in:0,1,2',
             ]);
+
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
 
             $save_url = null;
             if ($request->hasFile('brand_image')) {
@@ -122,10 +128,16 @@ class BrandController extends Controller
                 return ResponseBuilder::error('Brand not found', 404);
             }
 
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'brand_name' => 'required|string|max:255',
-                'brand_image' => 'required',
+                'brand_slug' => 'nullable|string|max:255|unique:brands,brand_slug,' . $id,
+                'brand_image' => 'nullable',
+                'status' => 'nullable|in:0,1,2',
             ]);
+
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
 
             $save_url = $brand->brand_image;
             if ($request->hasFile('brand_image')) {

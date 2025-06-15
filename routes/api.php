@@ -1,9 +1,9 @@
 <?php
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\StatusController;
 use App\Http\Controllers\Api\UserAddressController;
 use App\Http\Controllers\Api\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\API\CartController;
@@ -50,7 +50,6 @@ use App\Http\Controllers\Api\SubSubCategoryController;
         Route::post('/cart', [CartController::class, 'store']);
         Route::put('/cart/{id}', [CartController::class, 'update']);
         Route::delete('/cart/{id}', [CartController::class, 'destroy']);
-
     });
     Route::get('admin/dashboard', [DashboardController::class, 'adminDashboardStats']);
 
@@ -76,12 +75,9 @@ use App\Http\Controllers\Api\SubSubCategoryController;
     Route::apiResource('product-images', ProductImageController::class);
     Route::get('featured-products', [ProductController::class, 'FeaturedProducts']);
 
-
     Route::apiResource('reviews', ReviewController::class);
     Route::apiResource('shipping-addresses', ShippingAddressController::class);
     Route::apiResource('stocks', StockController::class);
-    Route::apiResource('sub-categories', SubCategoryController::class);
-    Route::apiResource('sub-sub-categories', SubSubCategoryController::class);
     Route::apiResource('users', UserController::class);
     Route::apiResource('user-addresses', UserAddressController::class);
 
@@ -90,8 +86,4 @@ use App\Http\Controllers\Api\SubSubCategoryController;
     Route::post('footer/', [FooterController::class, 'store']);
     Route::put('footer/{id}', [FooterController::class, 'update']);
     Route::delete('footer/{id}', [FooterController::class, 'destroy']);
-
-
-
-// Check status of various entities
-Route::get('/status', [App\Http\Controllers\Api\StatusController::class, 'index']);
+    Route::get('/status', [StatusController::class, 'index']);

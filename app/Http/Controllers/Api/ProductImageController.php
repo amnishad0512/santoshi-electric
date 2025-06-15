@@ -26,7 +26,7 @@ class ProductImageController extends Controller
     {
         try {
             $request->validate([
-                'product_id' => 'required|exists:products,id',
+                'product_id' => 'required',
                 'path_name' => 'required',
             ]);
 
@@ -66,11 +66,7 @@ class ProductImageController extends Controller
                 return ResponseBuilder::error('Product Image not found', 404);
             }
 
-            $request->validate([
-                'path_name' => 'sometimes|required|string|max:255',
-            ]);
-
-            $productImage->update($request->only(['path_name']));
+            $productImage->update($request->all());
 
             return ResponseBuilder::success('Product Image updated successfully');
         } catch (\Illuminate\Validation\ValidationException $e) {

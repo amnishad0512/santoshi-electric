@@ -40,14 +40,18 @@ class UserController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:255',
                 'phone_number' => 'required|string|max:15|unique:users,phone_number',
                 'email' => 'required|email|unique:users,email',
                 'role' => 'required',
-                'status' => 'nullable|in:0,1,2,3',
-                'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+                'status' => 'required|in:0,1,2,3',
+                'profile_photo_path' => 'required',
             ]);
+
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
 
             $pass = rand(100000, 999999);
 
@@ -107,14 +111,18 @@ class UserController extends Controller
             if (!$user) {
                 return ResponseBuilder::error('User not found', 404);
             }
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:255',
                 'phone_number' => 'required|string|max:15|unique:users,phone_number,' . $id,
                 'email' => 'required|email|unique:users,email,' . $id,
                 'role' => 'required',
                 'status' => 'nullable|in:0,1,2,3',
-                // 'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+                'profile_photo_path' => 'nullable',
             ]);
+
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
 
             $user->name = $request->name;
             $user->phone_number = $request->phone_number;

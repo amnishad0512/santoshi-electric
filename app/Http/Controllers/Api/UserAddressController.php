@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\UserAddress;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseBuilder;
+use Validator;
 
 class UserAddressController extends Controller
 {
@@ -30,17 +31,21 @@ class UserAddressController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
-                'user_id' => 'required|exists:users,id',
+            $validator = Validator::make($request->all(), [
+                'user_id' => 'required',
                 'full_name' => 'required|string|max:255',
                 'phone_number' => 'required|string|max:15',
-                'street_address' => 'nullable|string|max:255',
+                'street_address' => 'required|string|max:255',
                 'city' => 'required|string|max:100',
-                'state' => 'nullable|string|max:100',
-                'pincode' => 'nullable|string|max:10',
+                'state' => 'required|string|max:100',
+                'pincode' => 'required|string|max:6',
             ]);
 
-            $userAddress = UserAddress::create($request->all());
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
+
+            $userAddress = UserAddress::create($validator->validated());
 
             return ResponseBuilder::success('User address created successfully', 201);
         } catch (\Exception $e) {
@@ -73,14 +78,19 @@ class UserAddressController extends Controller
     public function update(Request $request, string $id)
     {
         try {
-            $request->validate([
+            $validator = Validator::make($request->all(), [
+                'user_id' => 'required',
                 'full_name' => 'required|string|max:255',
                 'phone_number' => 'required|string|max:15',
                 'street_address' => 'nullable|string|max:255',
                 'city' => 'required|string|max:100',
                 'state' => 'nullable|string|max:100',
-                'pincode' => 'nullable|string|max:10',
+                'pincode' => 'nullable|string|max:6',
             ]);
+
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
 
             $userAddress = UserAddress::find($id);
 
@@ -88,7 +98,7 @@ class UserAddressController extends Controller
                 return ResponseBuilder::error('User address not found', 404);
             }
 
-            $userAddress->update($request->all());
+            $userAddress->update($validator->validated());
 
             return ResponseBuilder::success('User address updated successfully');
         } catch (\Exception $e) {

@@ -7,6 +7,7 @@ use App\Models\SubSubCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Helpers\ResponseBuilder;
+use Validator;
 
 class SubSubCategoryController extends Controller
 {
@@ -26,11 +27,16 @@ class SubSubCategoryController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
-                'category_id'            => 'required|exists:categories,id',
-                'sub_category_id'        => 'required|exists:sub_categories,id',
+            $validator = Validator::make($request->all(), [
+                'category_id'            => 'required',
+                'sub_category_id'        => 'required',
                 'sub_sub_category_name'  => 'required|string|max:255',
+                'status' => 'required|in:0,1,2',
             ]);
+
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
 
             $subSubCategory = SubSubCategory::create([
                 'category_id' => $request->category_id,
@@ -71,11 +77,17 @@ class SubSubCategoryController extends Controller
                 return ResponseBuilder::error('Sub Sub Category not found', 404);
             }
 
-            $request->validate([
-                'category_id'            => 'required|exists:categories,id',
-                'sub_category_id'        => 'required|exists:sub_categories,id',
+            $validator = Validator::make($request->all(), [
+                'category_id'            => 'required',
+                'sub_category_id'        => 'required',
                 'sub_sub_category_name'  => 'required|string|max:255',
+                'sub_sub_category_slug'  => 'nullable|string|max:255|unique:sub_sub_categories,sub_sub_category_slug,' . $id,
+                'status' => 'nullable|in:0,1,2',
             ]);
+
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
 
             $subSubCategory->update([
                 'category_id' => $request->category_id,

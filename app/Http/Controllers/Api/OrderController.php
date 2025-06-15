@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseBuilder;
+use Validator;
 
 class OrderController extends Controller
 {
@@ -47,11 +48,15 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
-                'user_id' => 'required|exists:users,id',
+            $validator = Validator::make($request->all(), [
+                'user_id' => 'required',
                 'order_status' => 'required|numeric|in:0,1,2,3,4,5,6,7,8',
                 'order_total' => 'required|numeric|min:0',
             ]);
+
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
 
             $order = Order::create([
                 'user_id' => $request->user_id,
@@ -99,13 +104,17 @@ class OrderController extends Controller
                 return ResponseBuilder::error('Order not found', 404);
             }
 
-            $request->validate([
-                'user_id' => 'required|exists:users,id',
+            $validator = Validator::make($request->all(), [
+                'user_id' => 'required',
                 'order_status' => 'required|numeric|in:0,1,2,3,4,5,6,7,8',
                 'order_total' => 'required|numeric|min:0',
             ]);
 
-            $order->update($request->only(['user_id', 'order_status', 'order_total']));
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
+
+            $order->update($validator->validated());
 
             return ResponseBuilder::success('Order updated successfully');
         } catch (\Exception $e) {

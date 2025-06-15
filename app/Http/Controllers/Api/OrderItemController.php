@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseBuilder;
+use Validator;
 
 class OrderItemController extends Controller
 {
     public function index()
     {
         try {
-            $orderItems = OrderItem::select('id', 'order_id', 'product_id', 'item_quantity', 'item_price')
+            $orderItems = OrderItem::select('id', 'order_id', 'product_id', 'item_quantity', 'item_price',  'status', 'created_at', 'updated_at')
                 ->with(['order:id,order_total', 'product:id,product_name'])
                 ->get();
 
@@ -25,14 +26,19 @@ class OrderItemController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
-                'order_id' => 'required|exists:orders,id',
-                'product_id' => 'required|exists:products,id',
+            $validator = Validator::make($request->all(), [
+                'order_id' => 'required',
+                'product_id' => 'required',
                 'item_quantity' => 'required|integer|min:1',
                 'item_price' => 'required|numeric|min:0',
+                'status' => 'required|in:0,1,2',
             ]);
 
-            $orderItem = OrderItem::create($request->all());
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
+
+            $orderItem = OrderItem::create($validator->validated());
 
             return ResponseBuilder::success('OrderItem created successfully');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -66,14 +72,19 @@ class OrderItemController extends Controller
                 return ResponseBuilder::error('OrderItem not found', 404);
             }
 
-            $request->validate([
-                'order_id'     => 'required|exists:orders,id',
-                'product_id'   => 'required|exists:products,id',
+            $validator = Validator::make($request->all(), [
+                'order_id'     => 'required',
+                'product_id'   => 'required',
                 'item_quantity'=> 'required|integer|min:1',
                 'item_price'   => 'required|numeric|min:0',
+                'status' => 'nullable|in:0,1,2',
             ]);
 
-            $orderItem->update($request->all());
+            if ($validator->fails()) {
+                return ResponseBuilder::error($validator->errors()->first(), 422);
+            }
+
+            $orderItem->update($validator->validated());
 
             return ResponseBuilder::success('OrderItem updated successfully');
         } catch (\Illuminate\Validation\ValidationException $e) {
