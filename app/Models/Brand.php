@@ -44,6 +44,12 @@ class Brand extends Model
 
     public function getBrandImageAttribute($value)
     {
-        return url('public/storage/' . $value);
+        if ($value) {
+            return url('public/storage/' . $value); 
+        }
+
+        return asset('public/images/default_product.jpg'); 
+        // return url('public/storage/' . $value);
+        
     }
 }
