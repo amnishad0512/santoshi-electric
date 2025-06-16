@@ -54,7 +54,7 @@ use App\Http\Controllers\Api\SubSubCategoryController;
     Route::get('admin/dashboard', [DashboardController::class, 'adminDashboardStats']);
 
     Route::apiResource('brands', BrandController::class);
-    Route::post('update-brand', [BrandController::class, 'updateBrand']);
+    Route::post('update-brand/{id}', [BrandController::class, 'updateBrand']);
     Route::get('brands/{id}/products', [BrandController::class, 'BrandProducts']);
     Route::get('brand-dropdown', [BrandController::class, 'brandDropdown']);
 
