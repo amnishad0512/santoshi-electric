@@ -132,8 +132,6 @@ class ProductController extends Controller
                 'status' => 'required|in:0,1,2',
             ]);
 
-            dd($request->all());
-
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors()->first()], 422);
             }
