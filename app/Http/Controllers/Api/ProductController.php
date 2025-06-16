@@ -211,7 +211,7 @@ class ProductController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function updateProduct(Request $request, $id)
     {
         try {
             $product = Product::find($id);
