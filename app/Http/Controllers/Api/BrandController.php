@@ -119,7 +119,7 @@ class BrandController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function updateBrand(Request $request, $id)
     {
         try {
             $brand = Brand::find($id);
