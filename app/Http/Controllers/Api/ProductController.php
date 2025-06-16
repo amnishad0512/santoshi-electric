@@ -107,7 +107,6 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        dd($request->all());
         try {
             $validator = Validator::make($request->all(), [
                 'brand_id' => 'required|exists:brands,id',
@@ -132,6 +131,8 @@ class ProductController extends Controller
                 'special_deals' => 'required|boolean',
                 'status' => 'required|in:0,1,2',
             ]);
+
+            dd($request->all());
 
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors()->first()], 422);
