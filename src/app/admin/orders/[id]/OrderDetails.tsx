@@ -2,10 +2,24 @@
 
 import { ArrowLeft, Calendar } from 'lucide-react';
 import Link from 'next/link';
-import { Order } from '@/services/order.service';
-import OrderStatus from './OrderStatus';
+import orderService, { Order } from '@/services/order.service';
+import { useEffect, useState } from 'react';
 
-export default function OrderDetails({ order }: { order: Order }) {
+export default function OrderDetails({ id }: { id: string }) {
+  const [orders, setOrders] = useState<Order[]>([]);
+  useEffect(() => {
+    fetchOrder();
+  }, [id])
+  const fetchOrder = async () => {
+    try {
+      const response = await orderService.getOrderById(Number(id));
+      console.log(response);
+      setOrders(response);
+    } catch (error) {
+      console.error('Error fetching order:', error);
+    }
+  }
+  return 1;
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-6">
@@ -19,12 +33,11 @@ export default function OrderDetails({ order }: { order: Order }) {
         <div className="p-6 border-b border-gray-200">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Order #{order.id}</h1>
-              <OrderStatus order={order} />
+              <h1 className="text-2xl font-bold text-gray-900">Order #{orders.id}</h1>
             </div>
             <div className="text-right">
               <div className="text-sm text-gray-500">Total Amount</div>
-              <div className="text-2xl font-bold text-gray-900">${order.order_total}</div>
+              <div className="text-2xl font-bold text-gray-900">${orders.order_total}</div>
             </div>
           </div>
         </div>
@@ -36,15 +49,15 @@ export default function OrderDetails({ order }: { order: Order }) {
               <div className="space-y-3">
                 <div>
                   <div className="text-sm text-gray-500">Name</div>
-                  <div className="text-sm font-medium text-gray-900">{order.user.name}</div>
+                  <div className="text-sm font-medium text-gray-900">{orders.user.name}</div>
                 </div>
                 <div>
                   <div className="text-sm text-gray-500">Email</div>
-                  <div className="text-sm font-medium text-gray-900">{order.user.email}</div>
+                  <div className="text-sm font-medium text-gray-900">{orders.user.email}</div>
                 </div>
                 <div>
                   <div className="text-sm text-gray-500">Phone</div>
-                  <div className="text-sm font-medium text-gray-900">{order.user.phone_number}</div>
+                  <div className="text-sm font-medium text-gray-900">{orders.user.phone_number}</div>
                 </div>
                 <div>
                   <div className="text-sm text-gray-500">Account Status</div>

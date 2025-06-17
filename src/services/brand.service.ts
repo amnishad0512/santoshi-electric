@@ -1,30 +1,37 @@
 import api from '@/lib/axios';
 
 export interface Brand {
-  id: number;
+  id: string;
   brand_name: string;
-  brand_image: string;
+  description?: string;
+  brand_image?: string;
   status: number;
   created_at: string;
   updated_at: string;
-  products_count: number;
+}
+
+export interface DropdownOption {
+  label: string;
+  value: string;
+}
+
+export interface ApiResponse<T> {
+  status: string;
+  data: T;
 }
 
 export interface CreateBrandData {
   brand_name: string;
-  brand_image: string;
+  description?: string;
   status: number;
+  brand_image?: string;
 }
 
 export interface UpdateBrandData {
   brand_name?: string;
-  brand_image?: string;
+  description?: string;
   status?: number;
-}
-
-interface ApiResponse<T> {
-  status: string;
-  data: T;
+  brand_image?: string;
 }
 
 class BrandService {
@@ -40,33 +47,54 @@ class BrandService {
   }
 
   async getAllBrands() {
-    const response = await api.get<ApiResponse<Brand[]>>('/brands');
-    return response.data;
-  }
-
-  async getBrandById(id: string) {
-    const response = await api.get<ApiResponse<Brand>>(`/brands/${id}`);
+    const response = await api.get<Brand[]>('/brands');
     return response;
   }
 
-  async createBrand(data: CreateBrandData) {
-    const response = await api.post<ApiResponse<Brand>>('/brands', data);
+  async getBrandById(id: string) {
+    const response = await api.get<Brand>(`/brands/${id}`);
     return response.data;
   }
 
-  async updateBrand(id: number, data: UpdateBrandData | FormData) {
-    const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
-    const response = await api.post<ApiResponse<Brand>>(`/brands/${id}`, data, { headers });
-    return response.data;
+  async createBrand(data: CreateBrandData | FormData) {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : {};
+    
+    const response = await api.post<Brand>('/brands', data, config);
+    return response;
   }
 
-  async deleteBrand(id: number) {
-    const response = await api.delete<ApiResponse<null>>(`/brands/${id}`);
-    return response.data;
+  async updateBrand(id: string, data: UpdateBrandData | FormData) {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : {};
+    
+    const response = await api.post<Brand>(`/brands/${id}`, data, config);
+    return response;
   }
 
-  async updateBrandStatus(id: number, status: number) {
-    const response = await api.patch<ApiResponse<Brand>>(`/brands/${id}/status`, { status });
+  async updateBrandPUT(id: string, data: UpdateBrandData | FormData) {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'application/json' } }
+      : {};
+    
+    const response = await api.put<Brand>(`/brands/${id}`, data, config);
+    return response;
+  }
+
+  async deleteBrand(id: string) {
+    const response = await api.delete(`/brands/${id}`);
+    return response;
+  }
+
+  async updateBrandStatus(id: string, status: number) {
+    const response = await api.patch<Brand>(`/brands/${id}/status`, { status });
+    return response;
+  }
+
+  async getDropdown() {
+    const response = await api.get<DropdownOption[]>('/brand-dropdown');
     return response.data;
   }
 

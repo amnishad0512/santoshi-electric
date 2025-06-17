@@ -1,4 +1,5 @@
 import api from '@/lib/axios';
+import { DropdownOption } from './brand.service';
 
 export interface Category {
   id: string;
@@ -16,6 +17,7 @@ export interface CreateCategoryData {
   category_name: string;
   category_icon?: File;
   status: number;
+  brand_id: number;
 }
 
 export interface UpdateCategoryData {
@@ -38,9 +40,22 @@ class CategoryService {
 
   async getAllCategories() {
     try {
-      console.log('Fetching categories from API...');
       const response = await api.get('/categories');
-      console.log('Categories API raw response:', response);
+      return response;
+    } catch (error) {
+      console.error('Error in getAllCategories:', error);
+      throw error;
+    }
+  }
+
+  async getDropdown(brand_id?: string) {
+    try {
+      let response;
+      if(brand_id){
+        response = await api.get<DropdownOption[]>(`/category-dropdown/${brand_id}`);
+      }else{
+        response = await api.get<DropdownOption[]>(`/category-dropdown`);
+      }
       return response.data;
     } catch (error) {
       console.error('Error in getAllCategories:', error);
@@ -67,6 +82,7 @@ class CategoryService {
       const formData = new FormData();
       formData.append('category_name', data.category_name);
       formData.append('status', data.status.toString());
+      formData.append('brand_id', data.brand_id.toString());
       if (data.category_icon) {
         formData.append('category_icon', data.category_icon);
       }

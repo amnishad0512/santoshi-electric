@@ -31,14 +31,24 @@ export interface UpdateUserData {
 
 class UserService {
   private static instance: UserService;
+  private apiUrl: string;
 
-  private constructor() {}
+  private constructor() {
+    this.apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+  }
 
   static getInstance() {
     if (!UserService.instance) {
       UserService.instance = new UserService();
     }
     return UserService.instance;
+  }
+
+  private async authHeader() {
+    // Add your authentication logic here
+    return {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    };
   }
 
   async getAllUsers() {
@@ -48,8 +58,9 @@ class UserService {
 
   async getUserById(id: string) {
     console.log(id)
-    const {data} = await api.get<User>(`/users/${id}`);
-    return data.data;
+    const response = await api.get<User>(`/users/${id}`);
+    console.log(response)
+    return response.data;
   }
 
   async createUser(data: CreateUserData | FormData) {
@@ -64,6 +75,15 @@ class UserService {
   async updateUser(id: string, data: UpdateUserData | FormData) {
     const config = data instanceof FormData 
       ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : {};
+    
+    const response = await api.post<User>(`/users/${id}`, data, config);
+    return response;
+  }
+
+  async updateUserPUT(id: string, data: UpdateUserData | FormData) {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'application/json' } }
       : {};
     
     const response = await api.put<User>(`/users/${id}`, data, config);

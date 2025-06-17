@@ -1,82 +1,77 @@
 'use client';
 
-import { useState, useRef, FormEvent } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
 import brandService from '@/services/brand.service';
+import { useStatus } from '@/contexts/StatusContext';
 
-export default function AddBrandPage() {
+export default function AddUserPage() {
   const router = useRouter();
+  const {brandStatus} = useStatus();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    name: '',
+    brand_name: '',
     status: 1,
-    image: null as File | null
   });
 
-  const handleImageClick = () => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select an image file');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
+
+      // Store the actual file for form submission
+      setImageFile(file);
+      
+      // Create a preview URL for immediate display
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    }
+  };
+
+  const triggerImageUpload = () => {
     fileInputRef.current?.click();
   };
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size should be less than 5MB');
-      return;
-    }
-
-    setFormData(prev => ({ ...prev, image: file }));
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.image) {
+    
+    if (!imageFile) {
       toast.error('Please select a brand image');
       return;
     }
 
+    setSaving(true);
+
     try {
-      setLoading(true);
-      // First upload the image and get the URL
-      const formDataToSend = new FormData();
-      formDataToSend.append('image', formData.image);
-      const imageResponse = await fetch('/api/upload', {
-        method: 'POST',
-        body: formDataToSend
-      });
-      const { imageUrl } = await imageResponse.json();
+      const brandData = new FormData();
+      brandData.append('brand_name', formData.brand_name);
+      brandData.append('status', formData.status.toString());
+      brandData.append('brand_image', imageFile);
 
-      // Then create the brand with the image URL
-      await brandService.createBrand({
-        brand_name: formData.name,
-        brand_image: imageUrl,
-        status: formData.status
-      });
-
+      await brandService.createBrand(brandData);
       toast.success('Brand created successfully');
       router.push('/admin/brands');
     } catch (error) {
       console.error('Error creating brand:', error);
       toast.error('Failed to create brand');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
@@ -84,88 +79,111 @@ export default function AddBrandPage() {
     <div className="max-w-4xl mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Add New Brand</h1>
+        <div className="space-x-3">
+          <Link
+            href="/admin/brands"
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+          >
+            Back to List
+          </Link>
+        </div>
       </div>
 
-      <div className="bg-white shadow rounded-lg p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Brand Image
-            </label>
-            <div 
-              className="relative w-40 h-40 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
-              onClick={handleImageClick}
-            >
-              {imagePreview ? (
+      <form onSubmit={handleSubmit}>
+        <div className="bg-white shadow rounded-lg overflow-hidden">
+          <div className="p-6">
+            <div className="flex justify-center mb-8">
+              <div className="relative">
                 <Image
-                  src={imagePreview}
+                  src={imagePreview || '/images/placeholder.jpg'}
                   alt="Brand preview"
-                  fill
-                  className="rounded-lg object-cover"
+                  width={150}
+                  height={150}
+                  className="rounded-lg shadow-lg object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = '/images/placeholder.jpg';
+                  }}
                 />
-              ) : (
-                <div className="text-center">
-                  <div className="text-gray-500">Click to upload</div>
-                  <div className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB</div>
-                </div>
-              )}
+                <button
+                  type="button"
+                  onClick={triggerImageUpload}
+                  className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg border border-gray-200 hover:bg-gray-50"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-5 h-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"
+                    />
+                  </svg>
+                </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+              </div>
             </div>
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
-          </div>
 
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-              Brand Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              required
-            />
-          </div>
+            <div className="grid grid-cols-1 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">Brand Name</label>
+                <input
+                  type="text"
+                  value={formData.brand_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, brand_name: e.target.value }))}
+                  className="w-full px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
 
-          <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
-              Status
-            </label>
-            <select
-              id="status"
-              value={formData.status}
-              onChange={(e) => setFormData(prev => ({ ...prev, status: Number(e.target.value) }))}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-            >
-              <option value={1}>Active</option>
-              <option value={0}>Inactive</option>
-            </select>
-          </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">Status</label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData(prev => ({ ...prev, status: Number(e.target.value) }))}
+                  className="w-full px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                >
+                  {brandStatus.map((status) => (
+                    <option key={status.label} value={status.value}>{status.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
-          <div className="flex justify-end space-x-3">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-            >
-              {loading ? 'Creating...' : 'Create Brand'}
-            </button>
+            <div className="mt-6 flex justify-end space-x-3">
+              <Link
+                href="/admin/brands"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Cancel
+              </Link>
+              <button
+                type="submit"
+                disabled={saving}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+              >
+                {saving ? 'Creating...' : 'Create Brand'}
+              </button>
+            </div>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 } 

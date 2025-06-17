@@ -1,4 +1,5 @@
 import api from '@/lib/axios';
+import { DropdownOption } from './brand.service';
 
 export interface SubCategory {
   id: string;
@@ -38,29 +39,28 @@ class SubCategoryService {
   async getAllSubCategories() {
     try {
       const response = await api.get('/sub-categories');
-      console.log('All SubCategories Response:', response);
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Error fetching subcategories:', error);
       throw error;
     }
   }
 
-  // async getSubcategoriesByCategory(categoryId: string) {
-  //   if (!categoryId) {
-  //     throw new Error('Category ID is required');
-  //   }
+  async getSubcategoriesByCategory(categoryId: string) {
+    if (!categoryId) {
+      throw new Error('Category ID is required');
+    }
 
-  //   try {
-  //     console.log('Fetching subcategories for category:', categoryId);
-  //     const response = await api.get(`/sub-categories/by-category/${categoryId}`);
-  //     console.log('Subcategories by category response:', response);
-  //     return response;
-  //   } catch (error) {
-  //     console.error(`Error fetching subcategories for category ${categoryId}:`, error);
-  //     throw error;
-  //   }
-  // }
+    try {
+      console.log('Fetching subcategories for category:', categoryId);
+      const response = await api.get(`/sub-categories/by-category/${categoryId}`);
+      console.log('Subcategories by category response:', response);
+      return response;
+    } catch (error) {
+      console.error(`Error fetching subcategories for category ${categoryId}:`, error);
+      throw error;
+    }
+  }
 
   async getSubCategoryById(id: string) {
     if (!id) {
@@ -110,6 +110,16 @@ class SubCategoryService {
       return response;
     } catch (error) {
       console.error(`Error deleting subcategory ${id}:`, error);
+      throw error;
+    }
+  }
+
+  async getDropdown(category_id: string) {
+    try {
+      const response = await api.get<DropdownOption[]>(`/sub-category-dropdown/${category_id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error in getAllCategories:', error);
       throw error;
     }
   }

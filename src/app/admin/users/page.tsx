@@ -147,13 +147,13 @@ export default function UsersPage() {
     
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                       <Link
-                        href={`/admin/users/${user.id}/view`}
+                        href={`/admin/users/${user.id}`}
                         className="text-blue-600 hover:text-blue-900"
                       >
                         View
                       </Link>
                       <Link
-                        href={`/admin/users/${user.id}/edit`}
+                        href={`/admin/users/${user.id}?mode=edit`}
                         className="text-indigo-600 hover:text-indigo-900"
                       >
                         Edit

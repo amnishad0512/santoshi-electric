@@ -65,7 +65,6 @@ export default function AdminProfilePage() {
 
       await authService.updateProfile(updateData, selectedImage || undefined);
       alert('Profile updated successfully');
-      window.location.reload();
     } catch (error: any) {
       console.error('Error updating profile:', error);
       alert(error.response?.data?.message || 'Failed to update profile');
@@ -143,10 +142,14 @@ export default function AdminProfilePage() {
                   onClick={handleImageClick}
                 >
                   <Image
-                    src={selectedImage ? URL.createObjectURL(selectedImage) : (user?.profile_photo_path || '/default-avatar.png')}
+                    src={selectedImage ? URL.createObjectURL(selectedImage) : (user?.profile_photo_path || '/images/user.jpg')}
                     alt="Profile"
                     fill
                     className="object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/images/user.jpg';
+                    }}
                   />
                 </div>
                 <input

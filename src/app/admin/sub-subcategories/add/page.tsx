@@ -8,30 +8,26 @@ import { ArrowLeft } from 'lucide-react';
 import subSubCategoryService from '@/services/sub-subcategory.service';
 import categoryService from '@/services/category.service';
 import subcategoryService from '@/services/subcategory.service';
+import { useStatus } from '@/contexts/StatusContext';
+import { DropdownOption } from '@/services/brand.service';
 
-interface Category {
-  id: string;
-  category_name: string;
-}
-
-interface Subcategory {
-  id: string;
-  subcategory_name: string;
-  category_id: string;
-}
+interface Category extends DropdownOption {}
+interface Subcategory extends DropdownOption {}
 
 export default function AddSubSubCategoryPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [loadingSubcategories, setLoadingSubcategories] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+  const [categories, setCategories] = useState<DropdownOption[]>([]);
+  const [subcategories, setSubcategories] = useState<DropdownOption[]>([]);
+  const { categoryStatus } = useStatus();
   const [formData, setFormData] = useState({
     sub_sub_category_name: '',
     category_id: '',
     sub_category_id: '',
-    status: 1
+    status: 1,
+    image: null as File | null
   });
 
   useEffect(() => {
@@ -39,30 +35,24 @@ export default function AddSubSubCategoryPage() {
   }, []);
 
   useEffect(() => {
-    if (formData.category_id) {
-      fetchSubcategories(formData.category_id);
-    } else {
-      setSubcategories([]);
-      setFormData(prev => ({ ...prev, sub_category_id: '' }));
-    }
+    const fetchSubcategories = async () => {
+      if (formData.category_id) {
+        const response = await subcategoryService.getDropdown(formData.category_id);
+        setSubcategories(response);
+      } else {
+        setSubcategories([]);
+        setFormData(prev => ({ ...prev, sub_category_id: '' }));
+      }
+    };
+    
+    fetchSubcategories();
   }, [formData.category_id]);
 
   const fetchCategories = async () => {
     try {
-      const response = await categoryService.getAllCategories();
+      const response = await categoryService.getDropdown();
       console.log('Categories response:', response);
-      
-      let categoriesData: Category[] = [];
-      if (response?.data?.categories) {
-        categoriesData = response.data.categories;
-      } else if (Array.isArray(response?.data)) {
-        categoriesData = response.data;
-      } else if (response?.data) {
-        categoriesData = [response.data];
-      }
-      
-      console.log('Processed categories:', categoriesData);
-      setCategories(categoriesData);
+      setCategories(response);
     } catch (error) {
       console.error('Error fetching categories:', error);
       toast.error('Failed to fetch categories');
@@ -79,7 +69,7 @@ export default function AddSubSubCategoryPage() {
       const response = await subcategoryService.getSubCategoryById(categoryId);
       console.log('Subcategories response:', response);
       
-      let subcategoriesData: Subcategory[] = [];
+      let subcategoriesData: DropdownOption[] = [];
       if (response?.data?.subcategories) {
         subcategoriesData = response.data.subcategories;
       } else if (Array.isArray(response?.data)) {
@@ -103,6 +93,15 @@ export default function AddSubSubCategoryPage() {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData(prev => ({
+        ...prev,
+        image: e.target.files![0]
+      }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.sub_sub_category_name || !formData.category_id || !formData.sub_category_id) {
@@ -112,11 +111,26 @@ export default function AddSubSubCategoryPage() {
 
     setLoading(true);
     try {
-      await subSubCategoryService.createSubSubCategory({
-        name: formData.sub_sub_category_name,
-        category_id: formData.category_id,
-        subcategory_id: formData.sub_category_id,
-      });
+      const data = new FormData();
+      data.append('sub_sub_category_name', formData.sub_sub_category_name);
+      data.append('category_id', formData.category_id);
+      data.append('sub_category_id', formData.sub_category_id);
+      data.append('status', formData.status.toString());
+      
+      if (formData.image) {
+        // Read the file as binary data
+        const reader = new FileReader();
+        const binaryData = await new Promise<ArrayBuffer>((resolve) => {
+          reader.onload = () => resolve(reader.result as ArrayBuffer);
+          reader.readAsArrayBuffer(formData.image);
+        });
+        
+        // Create a Blob from the binary data and append to FormData
+        const blob = new Blob([await binaryData], { type: formData.image.type });
+        data.append('image', blob, formData.image.name);
+      }
+
+      await subSubCategoryService.createSubSubCategory(data);
       toast.success('Sub-subcategory created successfully');
       router.push('/admin/sub-subcategories');
     } catch (error) {
@@ -167,9 +181,9 @@ export default function AddSubSubCategoryPage() {
               className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
             >
               <option value="">Select a category</option>
-              {Array.isArray(categories) && categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.category_name}
+              {categories.map((category) => (
+                <option key={category.label} value={category.value}>
+                  {category.label}
                 </option>
               ))}
             </select>
@@ -197,8 +211,8 @@ export default function AddSubSubCategoryPage() {
                 }
               </option>
               {Array.isArray(subcategories) && subcategories.map((subcategory) => (
-                <option key={subcategory.id} value={subcategory.id}>
-                  {subcategory.subcategory_name}
+                <option key={subcategory.value} value={subcategory.value}>
+                  {subcategory.label}
                 </option>
               ))}
             </select>
@@ -237,9 +251,26 @@ export default function AddSubSubCategoryPage() {
               required
               className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
             >
-              <option value={1}>Active</option>
-              <option value={0}>Inactive</option>
+              {categoryStatus.map((status) => (
+                <option key={status.label} value={status.value}>
+                  {status.label}
+                </option>
+              ))}
             </select>
+          </div>
+
+          <div>
+            <label htmlFor="image" className="block text-sm font-medium text-gray-700">
+              Image
+            </label>
+            <input
+              type="file"
+              id="image"
+              name="image"
+              onChange={handleFileChange}
+              accept="image/*"
+              className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
           </div>
 
           <div className="flex justify-end space-x-3">

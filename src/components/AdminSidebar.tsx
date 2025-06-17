@@ -14,10 +14,14 @@ const AdminSidebar = () => {
             className="relative w-16 h-16 rounded-full overflow-hidden cursor-pointer hover:opacity-90 transition-opacity mb-3" 
           >
             <Image
-              src={user?.profile_photo_path || '/default-avatar.png'}
+              src={user?.profile_photo_path || '/images/user.jpg'}
               alt="Profile"
               fill
               className="object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = '/images/user.jpg';
+              }}
             />
             <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs text-center py-1 opacity-0 group-hover:opacity-100 transition-opacity">
               Edit Profile

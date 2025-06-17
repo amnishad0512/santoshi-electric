@@ -205,6 +205,9 @@ export default function AdminDashboard() {
                                     alt={product.product_name}
                                     fill
                                     className="rounded-lg object-cover"
+                                    onError={(e) => {
+                                      e.currentTarget.src = '/images/user.jpg';
+                                    }}
                                   />
                                 </div>
                               </td>

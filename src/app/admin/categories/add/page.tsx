@@ -8,6 +8,7 @@ import Link from 'next/link';
 import categoryService from '@/services/category.service';
 import brandService from '@/services/brand.service';
 import type { Brand } from '@/services/brand.service';
+import { useStatus } from '@/contexts/StatusContext';
 
 // Add dynamic configuration
 export const dynamic = 'force-dynamic';
@@ -18,6 +19,7 @@ const AddCategoryPage = () => {
   const [loading, setLoading] = useState(false);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loadingBrands, setLoadingBrands] = useState(true);
+  const {categoryStatus} = useStatus()
   
   const [formData, setFormData] = useState({
     category_name: '',
@@ -92,6 +94,7 @@ const AddCategoryPage = () => {
         category_name: formData.category_name,
         category_icon: categoryImage,
         status: formData.status,
+        brand_id: parseInt(formData.brand_id),
       });
       
       toast.success('Category created successfully');
@@ -191,8 +194,11 @@ const AddCategoryPage = () => {
               onChange={handleInputChange}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
-              <option value={1}>Active</option>
-              <option value={0}>Inactive</option>
+              {categoryStatus.map((status) => (
+                <option key={status.label} value={status.value}>
+                  {status.label}
+                </option>
+              ))}
             </select>
           </div>
         </div>

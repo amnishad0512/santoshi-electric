@@ -1,66 +1,73 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import categoryService, { Category } from '@/services/category.service';
 import subcategoryService from '@/services/subcategory.service';
+import categoryService from '@/services/category.service';
+import { useStatus } from '@/contexts/StatusContext';
 
-const AddSubcategoryPage = () => {
+interface Category {
+  id: string;
+  category_name: string;
+}
+
+export default function SubCategoryCreate() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
+  const { categoryStatus } = useStatus();
+
+
   const [formData, setFormData] = useState({
-    category_id: searchParams.get('category_id') || '',
     subcategory_name: '',
+    category_id: '',
+    status: 1
   });
 
   useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await categoryService.getAllCategories();
+        setCategories(response.data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        toast.error('Failed to fetch categories');
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
     fetchCategories();
   }, []);
 
-  const fetchCategories = async () => {
-    try {
-      const data = await categoryService.getAllCategories();
-      setCategories(data);
-    } catch (error) {
-      toast.error('Failed to fetch categories');
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
+    setLoading(true);
 
     try {
-      await subcategoryService.createSubCategory({
-        ...formData,
-        status: 1,
-      });
+      await subcategoryService.createSubCategory(formData);
       toast.success('Subcategory created successfully');
-      router.push('/admin/categories/' + formData.category_id + '/view');
+      router.push('/admin/subcategories');
+      router.refresh();
     } catch (error) {
+      console.error('Error creating subcategory:', error);
       toast.error('Failed to create subcategory');
-      console.error(error);
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
 
-  if (loading) {
+  if (loadingCategories) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -68,48 +75,75 @@ const AddSubcategoryPage = () => {
     );
   }
 
+  console.log('Current categories state1:', categories);
+  console.log(5,categoryStatus);
+
+
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Add New Subcategory</h1>
+    <div className="max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Create Subcategory</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label htmlFor="category_id" className="block text-sm font-medium text-gray-700">
-            Category
-          </label>
-          <select
-            id="category_id"
-            name="category_id"
-            value={formData.category_id}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-          >
-            <option value="">Select a category</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.category_name}
-              </option>
-            ))}
-          </select>
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="category_id" className="block text-sm font-medium text-gray-700">
+              Category
+            </label>
+            <select
+              id="category_id"
+              name="category_id"
+              value={formData.category_id}
+              onChange={handleInputChange}
+              required
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="">Select a category</option>
+              {Array.isArray(categories) && categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.category_name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="subcategory_name" className="block text-sm font-medium text-gray-700">
+              Subcategory Name
+            </label>
+            <input
+              type="text"
+              id="subcategory_name"
+              name="subcategory_name"
+              value={formData.subcategory_name}
+              onChange={handleInputChange}
+              required
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+              Status
+            </label>
+            <select
+              id="status"
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              {
+                categoryStatus.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))
+              }
+            </select>
+          </div>
         </div>
 
-        <div>
-          <label htmlFor="subcategory_name" className="block text-sm font-medium text-gray-700">
-            Subcategory Name
-          </label>
-          <input
-            type="text"
-            id="subcategory_name"
-            name="subcategory_name"
-            value={formData.subcategory_name}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-          />
-        </div>
-
-        <div className="flex justify-end space-x-3">
+        <div className="flex justify-end space-x-4">
           <button
             type="button"
             onClick={() => router.back()}
@@ -119,15 +153,13 @@ const AddSubcategoryPage = () => {
           </button>
           <button
             type="submit"
-            disabled={saving}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-300"
+            disabled={loading}
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? 'Creating...' : 'Create Subcategory'}
+            {loading ? 'Creating...' : 'Create Subcategory'}
           </button>
         </div>
       </form>
     </div>
   );
-};
-
-export default AddSubcategoryPage; 
+} 

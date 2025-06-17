@@ -1,15 +1,15 @@
 export const getUserStatusName = (status: number) => {
     const statusNumber = Number(status);
     switch (statusNumber) {
+      case 0:
+        return 'Inactive';
       case 1:
-        return 'active';
+        return 'Active';
       case 2:
-        return 'inactive';
+        return 'Pending';
       case 3:
-        return 'pending';
-      case 4:
-        return 'banned';
+        return 'Banned';
       default:
-        return 'inactive';
+        return 'Inactive';
     }
   };

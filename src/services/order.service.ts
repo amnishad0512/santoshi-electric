@@ -128,7 +128,7 @@ class OrderService {
   async getOrderById(id: number): Promise<Order | null> {
     try {
       const response = await api.get<SingleOrderResponse>(`/orders/${id}`);
-      return response.data.data;
+      return response.data;
     } catch (error) {
       console.error('Error fetching order:', error);
       return null;

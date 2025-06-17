@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { Eye } from 'lucide-react';
 import orderService, { Order } from '@/services/order.service';
+import { getOrderStatusName } from '@/lib/utils/order';
 
 const OrderStatusBadge = ({ status }: { status: Order['order_status'] }) => {
   const getStatusColor = () => {
@@ -134,14 +135,14 @@ const OrdersPage = () => {
                     <div className="text-sm text-gray-500">{order.user.email}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <OrderStatusBadge status={order.order_status} />
+                    {getOrderStatusName(Number(order.order_status))}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{order.order_total}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 capitalize">{order.payment.payment_method}</div>
-                    <div className="text-sm text-gray-500 capitalize">{order.payment.payment_status}</div>
+                    <div className="text-sm text-gray-900 capitalize">{order?.payment?.payment_method ? order?.payment?.payment_method:'-'}</div>
+                    <div className="text-sm text-gray-500 capitalize">{order?.payment?.payment_status ? order?.payment?.payment_status:'-'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button

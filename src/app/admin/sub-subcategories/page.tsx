@@ -6,6 +6,7 @@ import { toast } from 'react-hot-toast';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import subSubCategoryService, { SubSubCategory } from '@/services/sub-subcategory.service';
+import { formatDate } from '@/lib/utils/date';
 
 export default function SubSubCategoriesPage() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function SubSubCategoriesPage() {
   const fetchSubSubCategories = async () => {
     try {
       const data = await subSubCategoryService.getAllSubSubCategories();
+      console.log(9,data);
       setSubSubCategories(data);
     } catch (error) {
       toast.error('Failed to fetch sub-subcategories');
@@ -29,7 +31,6 @@ export default function SubSubCategoriesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this sub-subcategory?')) return;
 
     try {
       await subSubCategoryService.deleteSubSubCategory(id);
@@ -58,7 +59,7 @@ export default function SubSubCategoriesPage() {
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
         >
           <Plus className="h-5 w-5" />
-          Add New
+          Add New Sub Sub Category
         </Link>
       </div>
 
@@ -76,6 +77,9 @@ export default function SubSubCategoriesPage() {
                 Subcategory
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Created At
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -87,38 +91,45 @@ export default function SubSubCategoriesPage() {
             {subSubCategories.map((subSubCategory) => (
               <tr key={subSubCategory.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{subSubCategory.name}</div>
+                  <div className="text-sm font-medium text-gray-900">{subSubCategory.sub_sub_category_name}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
-                    {subSubCategory.category?.name || 'Unknown Category'}
+                    {subSubCategory.category?.category_name }
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
-                    {subSubCategory.subcategory?.name || 'Unknown Subcategory'}
+                    {subSubCategory.sub_category.subcategory_name}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {subSubCategory.createdAt
-                    ? new Date(subSubCategory.createdAt).toLocaleDateString()
-                    : '-'}
+                  {subSubCategory.status === 0 ? 'Inactive' : subSubCategory.status === 1 ? 'Active' : "Deleted"}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {subSubCategory.created_at ? formatDate(subSubCategory.created_at) : '-'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                   <Link
-                    href={`/admin/sub-subcategories/edit/${subSubCategory.id}`}
+                    href={`/admin/sub-subcategories/${subSubCategory.id}`}
                     className="text-blue-600 hover:text-blue-900 inline-block"
                   >
-                    <Pencil className="h-5 w-5" />
+                    View
+                  </Link>
+                  <Link
+                    href={`/admin/sub-subcategories/${subSubCategory.id}`}
+                    className="text-blue-600 hover:text-blue-900 inline-block"
+                  >
+                    Edit
                   </Link>
                   <button
                     onClick={() => handleDelete(subSubCategory.id)}
                     className="text-red-600 hover:text-red-900 inline-block"
                   >
-                    <Trash2 className="h-5 w-5" />
+                    Delete
                   </button>
                 </td>
-              </tr>
+              </tr> 
             ))}
             {subSubCategories.length === 0 && (
               <tr>

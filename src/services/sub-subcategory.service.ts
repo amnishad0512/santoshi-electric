@@ -1,4 +1,5 @@
 import api from '@/lib/axios';
+import { DropdownOption } from './brand.service';
 
 export interface SubSubCategory {
   id: string;
@@ -18,9 +19,10 @@ export interface SubSubCategory {
 }
 
 export interface CreateSubSubCategoryData {
-  name: string;
+  sub_category_id: string;
   category_id: string;
-  subcategory_id: string;
+  sub_sub_category_name: string;
+  status: number;
 }
 
 export interface UpdateSubSubCategoryData {
@@ -47,7 +49,7 @@ class SubSubCategoryService {
   }
 
   async getSubSubCategoryById(id: string) {
-    const response = await api.get<SubSubCategory>(`/sub-subcategories/${id}`);
+    const response = await api.get<SubSubCategory>(`/sub-sub-categories/${id}`);
     return response.data;
   }
 
@@ -61,18 +63,27 @@ class SubSubCategoryService {
     return response.data;
   }
 
-  async createSubSubCategory(data: CreateSubSubCategoryData) {
-    const response = await api.post<SubSubCategory>('/sub-subcategories', data);
+  async createSubSubCategory(data: CreateSubSubCategoryData | FormData) {
+    const response = await api.post<SubSubCategory>('/sub-sub-categories', data, {
+      headers: {
+        'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json',
+      },
+    });
     return response.data;
   }
 
   async updateSubSubCategory(id: string, data: UpdateSubSubCategoryData) {
-    const response = await api.put<SubSubCategory>(`/sub-subcategories/${id}`, data);
+    const response = await api.put<SubSubCategory>(`/sub-sub-categories/${id}`, data);
     return response.data;
   }
 
   async deleteSubSubCategory(id: string) {
-    const response = await api.delete(`/sub-subcategories/${id}`);
+    const response = await api.delete(`/sub-sub-categories/${id}`);
+    return response.data;
+  }
+
+  async getDropdown(subcategory_id: string) {
+    const response = await api.get<DropdownOption[]>(`/sub-sub-category-dropdown/${subcategory_id}`);
     return response.data;
   }
 }

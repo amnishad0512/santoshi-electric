@@ -6,6 +6,7 @@ import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import Image from 'next/image';
 import brandService from '@/services/brand.service';
+import { formatDate } from '@/lib/utils/date';
 
 interface Brand {
   id: number;
@@ -27,8 +28,8 @@ export default function BrandsPage() {
 
   const fetchBrands = async () => {
     try {
-      const response = await brandService.getAllBrands();
-      setBrands(Array.isArray(response) ? response : []);
+      const {data} = await brandService.getAllBrands();
+      setBrands(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching brands:', error);
       toast.error('Failed to fetch brands');
@@ -100,10 +101,13 @@ export default function BrandsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex-shrink-0 h-12 w-12 relative">
                           <Image
-                            src={brand.brand_image || '/default-brand.png'}
+                            src={brand.brand_image || '/images/dummy.jpg'}
                             alt={brand.brand_name}
                             fill
                             className="rounded-lg object-cover"
+                            onError={(e) => {
+                              e.currentTarget.src = '/images/dummy.jpg';
+                            }}
                           />
                       </div>
                     </td>
@@ -114,30 +118,22 @@ export default function BrandsPage() {
                       <div className="text-sm text-gray-900">{brand.products_count}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          brand.status === 1
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
-                      >
-                        {brand.status === 1 ? 'Active' : 'Inactive'}
-                      </span>
+                        {brand.status === 0 ? 'Inctive' : brand.status === 1 ? 'Active' : 'Coming Soon'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
-                        {new Date(brand.created_at).toLocaleDateString()}
+                        {brand.created_at ? formatDate(brand.created_at) : '-'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                       <Link
-                        href={`/admin/brands/${brand.id}/view`}
+                        href={`/admin/brands/${brand.id}`}
                         className="text-blue-600 hover:text-blue-900"
                       >
                         View
                       </Link>
                       <Link
-                        href={`/admin/brands/${brand.id}/edit`}
+                        href={`/admin/brands/${brand.id}?mode=edit`}
                         className="text-indigo-600 hover:text-indigo-900"
                       >
                         Edit

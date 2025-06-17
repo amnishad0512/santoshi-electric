@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import userService from '@/services/user.service';
+import { useStatus } from '@/contexts/StatusContext';
 
 export default function AddUserPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
+  const {userStatus} =useStatus();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -218,11 +220,9 @@ export default function AddUserPage() {
                 onChange={handleChange}
                 className="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">Select status</option>
-                <option value="1">Active</option>
-                <option value="2">Inactive</option>
-                <option value="3">Pending</option>
-                <option value="4">Banned</option>
+                 {userStatus.map((status:any)=>(
+                  <option key={status.label} value={status.value}>{status.label}</option>
+                 ))}
               </select>
             </div>
           </div>

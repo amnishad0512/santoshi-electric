@@ -153,6 +153,10 @@ export default function AdminSidebar() {
                 alt="Profile"
                 fill
                 className="object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/images/user.jpg';
+                }}
               />
             </div>
           </div>
